@@ -38,9 +38,7 @@ export default function Header() {
           {/* Logo Section */}
           <div className="logo-sect mb-3 md:mb-0">
             <Link href="/">
-              <a>
-                <RPMLogo className="h-16" />
-              </a>
+              <RPMLogo className="h-16" />
             </Link>
           </div>
 
@@ -50,24 +48,24 @@ export default function Header() {
               <ul className="contact-list flex flex-col md:flex-row items-center md:items-start">
                 <li className="address mb-2 md:mb-0 md:mr-4">
                   <a 
-                    href="https://maps.google.com/maps?ll=43.775688,-79.62554&z=13&t=m&hl=en&gl=CA&mapclient=embed&cid=4836009631269035094" 
+                    href="#" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-contact-icons-08 mr-2"></i>
-                    <span className="hidden md:inline">6260 Hwy 7 Unit 6,<br />Woodbridge ON, L4H 4G3</span>
+                    <span className="hidden md:inline">123 Main Street,<br />Toronto ON, M1M 1M1</span>
                     <span className="md:hidden">Visit Us</span>
                   </a>
                 </li>
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
                 <li className="phone mb-2 md:mb-0 md:mr-4">
                   <a 
-                    href="tel:+1-905-264-1969" 
+                    href="tel:+1-123-456-7890" 
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-phone-dark mr-2"></i>
-                    <span>(905) 264-1969</span>
+                    <span>(123) 456-7890</span>
                   </a>
                 </li>
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
@@ -124,38 +122,38 @@ export default function Header() {
             <nav className="flex justify-center">
               <ul className="flex font-['Poppins'] font-semibold text-sm uppercase tracking-wide">
                 <li>
-                  <Link href="/">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>Home</a>
+                  <Link href="/" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>
+                    Home
                   </Link>
                 </li>
                 <li>
-                  <Link href="/inventory">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/inventory') ? 'text-[#E31837]' : ''}`}>Inventory</a>
+                  <Link href="/inventory" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/inventory') ? 'text-[#E31837]' : ''}`}>
+                    Inventory
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>Services</a>
+                  <Link href="/services" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>
+                    Services
                   </Link>
                 </li>
                 <li>
-                  <Link href="/financing">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>Financing</a>
+                  <Link href="/financing" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
+                    Financing
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gallery">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/gallery') ? 'text-[#E31837]' : ''}`}>Gallery</a>
+                  <Link href="/gallery" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/gallery') ? 'text-[#E31837]' : ''}`}>
+                    Gallery
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/about') ? 'text-[#E31837]' : ''}`}>About Us</a>
+                  <Link href="/about" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/about') ? 'text-[#E31837]' : ''}`}>
+                    About Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact">
-                    <a className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>Contact Us</a>
+                  <Link href="/contact" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>
+                    Contact Us
                   </Link>
                 </li>
               </ul>
@@ -167,38 +165,38 @@ export default function Header() {
             <nav>
               <ul className="flex flex-col space-y-4 font-['Poppins'] font-semibold text-sm uppercase tracking-wide">
                 <li>
-                  <Link href="/">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>Home</a>
+                  <Link href="/" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>
+                    Home
                   </Link>
                 </li>
                 <li>
-                  <Link href="/inventory">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/inventory') ? 'text-[#E31837]' : ''}`}>Inventory</a>
+                  <Link href="/inventory" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/inventory') ? 'text-[#E31837]' : ''}`}>
+                    Inventory
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>Services</a>
+                  <Link href="/services" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>
+                    Services
                   </Link>
                 </li>
                 <li>
-                  <Link href="/financing">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>Financing</a>
+                  <Link href="/financing" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
+                    Financing
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gallery">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/gallery') ? 'text-[#E31837]' : ''}`}>Gallery</a>
+                  <Link href="/gallery" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/gallery') ? 'text-[#E31837]' : ''}`}>
+                    Gallery
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/about') ? 'text-[#E31837]' : ''}`}>About Us</a>
+                  <Link href="/about" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/about') ? 'text-[#E31837]' : ''}`}>
+                    About Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact">
-                    <a className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>Contact Us</a>
+                  <Link href="/contact" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>
+                    Contact Us
                   </Link>
                 </li>
               </ul>
