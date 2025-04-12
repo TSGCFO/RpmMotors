@@ -5,7 +5,7 @@ interface LogoProps {
 export function RPMLogo({ className = "h-10" }: LogoProps) {
   return (
     <img
-      src="/rpm-auto-logo.svg"
+      src="/client/RPM Auto.png"
       alt="RPM Auto Logo"
       className={className}
     />
