@@ -15,8 +15,11 @@ export function ServiceCard({ icon, title, description, link }: ServiceCardProps
       </div>
       <h3 className="font-['Poppins'] font-bold text-xl mb-3">{title}</h3>
       <p className="text-gray-600 mb-4">{description}</p>
-      <Link href={link}>
-        <a className="text-[#E31837] font-semibold hover:text-black transition-colors">Learn More</a>
+      <Link 
+        href={link} 
+        className="text-[#E31837] font-semibold hover:text-black transition-colors"
+      >
+        Learn More
       </Link>
     </div>
   );

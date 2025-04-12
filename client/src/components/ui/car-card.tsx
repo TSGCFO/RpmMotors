@@ -77,10 +77,11 @@ export function CarCard({ vehicle }: CarCardProps) {
             </div>
           </div>
         </div>
-        <Link href={`/inventory/${id}`}>
-          <a className="block w-full text-center py-3 bg-black text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-            View Details
-          </a>
+        <Link 
+          href={`/inventory/${id}`}
+          className="block w-full text-center py-3 bg-black text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
+        >
+          View Details
         </Link>
       </CardContent>
     </Card>

@@ -18,10 +18,11 @@ export function CategoryCard({ title, image, link }: CategoryCardProps) {
       <div className="absolute inset-0 z-20 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-xl font-['Poppins'] font-bold text-white mb-2">{title}</h3>
-          <Link href={link}>
-            <a className="inline-block text-white text-sm border-b border-white hover:border-[#E31837] hover:text-[#E31837] transition-colors">
-              View Collection
-            </a>
+          <Link 
+            href={link}
+            className="inline-block text-white text-sm border-b border-white hover:border-[#E31837] hover:text-[#E31837] transition-colors"
+          >
+            View Collection
           </Link>
         </div>
       </div>

@@ -87,15 +87,17 @@ export function HeroSlider() {
                   {slide.subtitle}
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                  <Link href={slide.primaryButtonLink}>
-                    <a className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                      {slide.primaryButtonText}
-                    </a>
+                  <Link 
+                    href={slide.primaryButtonLink} 
+                    className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
+                  >
+                    {slide.primaryButtonText}
                   </Link>
-                  <Link href={slide.secondaryButtonLink}>
-                    <a className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
-                      {slide.secondaryButtonText}
-                    </a>
+                  <Link 
+                    href={slide.secondaryButtonLink} 
+                    className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition"
+                  >
+                    {slide.secondaryButtonText}
                   </Link>
                 </div>
               </div>
