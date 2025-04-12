@@ -62,11 +62,11 @@ export default function Header() {
       
       {/* Main Navigation */}
       <div className="border-t border-gray-800">
-        <div className="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center">
+        <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center">
           <div className="logo mb-4 md:mb-0">
             <Link href="/">
               <a className="flex items-center">
-                <RPMLogo className="h-16" />
+                <RPMLogo className="h-28" />
               </a>
             </Link>
           </div>
