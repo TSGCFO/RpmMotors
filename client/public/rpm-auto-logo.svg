@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <g transform="translate(0, 0)">
+    <!-- Background (transparent) -->
+    <rect width="800" height="600" fill="none"/>
+    
+    <!-- Semi-circular speedometer/gauge -->
+    <g transform="translate(400, 250)">
+      <path
+        d="M-90,-50 L-80,-65 L-70,-80 L-60,-85 L-50,-90 L-40,-93 L-30,-95 L-20,-97 L-10,-98 L0,-99 L10,-98 L20,-97 L30,-95 L40,-93 L50,-90 L60,-85 L70,-80 L80,-65 L90,-50"
+        stroke="#888888"
+        stroke-width="12"
+        fill="none"
+        stroke-dasharray="15 8"
+      />
+      <!-- Needle -->
+      <circle cx="0" cy="0" r="10" fill="#333333" />
+      <line x1="0" y1="0" x2="0" y2="-75" stroke="#444444" stroke-width="4" stroke-linecap="round" />
+    </g>
+    
+    <!-- Sports car silhouette -->
+    <path 
+      d="M250,400 C300,380 320,360 340,345 C360,330 390,320 420,320 C450,320 480,325 500,340 L550,340 C580,340 610,335 640,320 C670,305 700,300 730,320 C760,340 790,360 800,380 C820,410 830,440 800,450 C760,460 700,450 650,440 C600,430 550,425 500,425 C450,425 400,430 350,440 C300,450 240,460 200,450 C170,440 180,410 200,380 C210,360 220,350 250,400 Z" 
+      fill="none" 
+      stroke="#555555" 
+      stroke-width="2"
+    />
+    
+    <!-- Windows/details -->
+    <path
+      d="M390,340 L420,320 L480,325 L520,340"
+      fill="none"
+      stroke="#555555"
+      stroke-width="1.5"
+    />
+    <circle cx="350" cy="390" r="8" fill="none" stroke="#555555" stroke-width="1.5" />
+    <circle cx="650" cy="390" r="8" fill="none" stroke="#555555" stroke-width="1.5" />
+    
+    <!-- Rear wing/spoiler -->
+    <path
+      d="M710,320 L740,290 L770,320"
+      fill="none"
+      stroke="#555555"
+      stroke-width="2"
+    />
+    
+    <!-- Text -->
+    <text x="230" y="500" font-family="Arial" font-weight="bold" font-size="70" fill="#e31837">RPM</text>
+    <text x="450" y="500" font-family="Arial" font-weight="bold" font-size="70" fill="#ffffff">AUTO</text>
+  </g>
+</svg>
