@@ -1,0 +1,30 @@
+import { Link } from "wouter";
+
+interface CategoryCardProps {
+  title: string;
+  image: string;
+  link: string;
+}
+
+export function CategoryCard({ title, image, link }: CategoryCardProps) {
+  return (
+    <div className="relative group overflow-hidden rounded-lg shadow-md">
+      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all duration-300 z-10"></div>
+      <img 
+        src={image} 
+        alt={title} 
+        className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
+      />
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-xl font-['Poppins'] font-bold text-white mb-2">{title}</h3>
+          <Link href={link}>
+            <a className="inline-block text-white text-sm border-b border-white hover:border-[#E31837] hover:text-[#E31837] transition-colors">
+              View Collection
+            </a>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

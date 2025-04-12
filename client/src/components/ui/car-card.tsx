@@ -1,0 +1,88 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "wouter";
+import { Vehicle } from "@shared/schema";
+import { formatCurrency } from "@/lib/utils";
+
+interface CarCardProps {
+  vehicle: Vehicle;
+}
+
+export function CarCard({ vehicle }: CarCardProps) {
+  const {
+    id,
+    make,
+    model,
+    year,
+    price,
+    mileage,
+    fuelType,
+    transmission,
+    exteriorColor,
+    drivetrain,
+    thumbnail,
+    photos
+  } = vehicle;
+
+  return (
+    <Card className="bg-white rounded-lg overflow-hidden shadow-md group transition-all hover:shadow-xl">
+      <div className="relative overflow-hidden">
+        {vehicle.featured && (
+          <span className="absolute top-4 left-4 z-10 bg-[#E31837] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
+            Featured
+          </span>
+        )}
+        <img 
+          src={thumbnail} 
+          alt={`${year} ${make} ${model}`} 
+          className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="flex justify-center space-x-2 pt-2 pb-3 bg-white">
+          <span className="text-xs text-gray-600">{photos.length} Photos</span>
+          <span className="text-gray-300">|</span>
+          <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
+        </div>
+      </div>
+      <CardContent className="p-6">
+        <h3 className="font-['Poppins'] font-bold text-xl mb-2">
+          {year} {make} {model}
+        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-gray-600 space-y-1">
+            <div className="flex items-center">
+              <i className="fas fa-tachometer-alt w-5 text-gray-400"></i>
+              <span>{mileage.toLocaleString()} km</span>
+            </div>
+            <div className="flex items-center">
+              <i className="fas fa-gas-pump w-5 text-gray-400"></i>
+              <span>{fuelType}</span>
+            </div>
+            <div className="flex items-center">
+              <i className="fas fa-cog w-5 text-gray-400"></i>
+              <span>{transmission}</span>
+            </div>
+          </div>
+          
+          <div className="text-sm text-gray-600 space-y-1">
+            <div className="flex items-center">
+              <i className="fas fa-calendar-alt w-5 text-gray-400"></i>
+              <span>{year}</span>
+            </div>
+            <div className="flex items-center">
+              <i className="fas fa-paint-brush w-5 text-gray-400"></i>
+              <span>{exteriorColor}</span>
+            </div>
+            <div className="flex items-center">
+              <i className="fas fa-car w-5 text-gray-400"></i>
+              <span>{drivetrain}</span>
+            </div>
+          </div>
+        </div>
+        <Link href={`/inventory/${id}`}>
+          <a className="block w-full text-center py-3 bg-black text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
+            View Details
+          </a>
+        </Link>
+      </CardContent>
+    </Card>
+  );
+}

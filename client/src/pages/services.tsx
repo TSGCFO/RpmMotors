@@ -1,0 +1,154 @@
+import { useEffect } from "react";
+import { Link } from "wouter";
+import { ServiceCard } from "@/components/ui/service-card";
+
+export default function Services() {
+  useEffect(() => {
+    document.title = "Services | RPM Auto";
+  }, []);
+
+  const services = [
+    {
+      id: "vehicle-sourcing",
+      icon: "fas fa-car",
+      title: "Vehicle Sourcing",
+      description: "We can source specific makes and models tailored to your preferences and requirements.",
+      details: "Our extensive network of suppliers and dealers allows us to find virtually any vehicle you desire. Whether you're looking for a rare exotic car, a specific luxury model, or a unique configuration, our team will work tirelessly to locate and secure your dream car. We handle all the logistics, from initial search to delivery, ensuring a seamless experience."
+    },
+    {
+      id: "trade-in",
+      icon: "fas fa-exchange-alt",
+      title: "Trade-In Options",
+      description: "Get the best value for your current vehicle with our competitive trade-in program.",
+      details: "Our professional appraisers will evaluate your vehicle based on its condition, market value, and demand. We pride ourselves on offering fair and competitive trade-in values. Trade-ins can be applied directly toward your new purchase, simplifying the transaction and potentially reducing sales tax implications. We handle all paperwork and make the process as efficient as possible."
+    },
+    {
+      id: "financing",
+      icon: "fas fa-money-check-alt",
+      title: "Financing Solutions",
+      description: "Customize your payment plan with our flexible financing options for all credit situations.",
+      details: "We work with multiple financial institutions to provide competitive rates and flexible terms. Our finance specialists will guide you through the available options and help you select the plan that best fits your budget and needs. We offer lease and purchase financing, extended term options, and financing for international clients."
+    },
+    {
+      id: "inspection",
+      icon: "fas fa-clipboard-check",
+      title: "Vehicle Inspection",
+      description: "Each vehicle undergoes a comprehensive inspection to ensure premium quality and performance.",
+      details: "Our multi-point inspection process is conducted by factory-trained technicians who examine every aspect of the vehicle. This includes mechanical components, electrical systems, cosmetic condition, and road testing. We provide a detailed report outlining the condition of the vehicle, any repairs performed, and service history. All vehicles must meet our stringent quality standards before being offered for sale."
+    },
+    {
+      id: "warranty",
+      icon: "fas fa-file-contract",
+      title: "Extended Warranty",
+      description: "Protect your investment with our tailored extended warranty packages for peace of mind.",
+      details: "We offer several warranty options to protect your investment beyond the manufacturer's coverage. Our plans cover mechanical breakdown, electrical issues, and can include roadside assistance. Options range from basic powertrain coverage to comprehensive bumper-to-bumper protection. Our team will help you select the warranty that provides the right level of protection for your driving habits and intended ownership period."
+    },
+    {
+      id: "consignment",
+      icon: "fas fa-handshake",
+      title: "Consignment Service",
+      description: "Let us handle the sale of your luxury vehicle with our professional consignment service.",
+      details: "Our consignment service offers a hassle-free alternative to private selling. We handle all aspects of the sale, from professional photography and detailed listings to managing inquiries and negotiations. Your vehicle will be displayed in our showroom and marketed through our extensive network. We handle all paperwork and financial transactions, providing you with security and peace of mind."
+    }
+  ];
+
+  return (
+    <main className="bg-[#F5F5F5] min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-black text-white py-16 relative">
+        <div className="absolute inset-0 bg-black/60 z-10"></div>
+        <div className="container mx-auto px-6 relative z-20">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-['Poppins'] font-bold mb-6">Our Services</h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Discover our comprehensive range of services designed to enhance your luxury car buying experience
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Overview */}
+      <section className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {services.map((service) => (
+              <ServiceCard
+                key={service.id}
+                icon={service.icon}
+                title={service.title}
+                description={service.description}
+                link={`#${service.id}`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Individual Service Sections */}
+      {services.map((service, index) => (
+        <section 
+          key={service.id} 
+          id={service.id} 
+          className={`py-16 ${index % 2 === 0 ? 'bg-white' : 'bg-[#F5F5F5]'}`}
+        >
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className={`${index % 2 === 1 ? 'lg:order-2' : ''}`}>
+                <div className="text-center p-6 lg:p-0 lg:text-left">
+                  <div className="w-16 h-16 bg-[#F5F5F5] rounded-full flex items-center justify-center mx-auto lg:mx-0 mb-4">
+                    <i className={`${service.icon} text-2xl text-[#E31837]`}></i>
+                  </div>
+                  <h2 className="text-3xl font-['Poppins'] font-bold mb-6">{service.title}</h2>
+                  <p className="text-gray-600 mb-6 max-w-xl mx-auto lg:mx-0">
+                    {service.details}
+                  </p>
+                  <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center lg:justify-start">
+                    <Link href="/contact">
+                      <a className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
+                        Inquire About This Service
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                <div className="rounded-lg overflow-hidden shadow-xl">
+                  <img 
+                    src={`https://source.unsplash.com/featured/600x400?luxury,${service.title.toLowerCase().replace(/\s+/g, ',')},cars`} 
+                    alt={service.title} 
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ))}
+
+      {/* Call to Action */}
+      <section className="py-16 bg-black text-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-['Poppins'] font-bold mb-6">Ready to Experience Our Premium Services?</h2>
+            <p className="text-gray-300 mb-8">
+              Contact our team of automotive experts today to learn more about how we can assist you with your luxury vehicle needs.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+              <Link href="/contact">
+                <a className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
+                  Contact Us
+                </a>
+              </Link>
+              <Link href="/inventory">
+                <a className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
+                  Browse Inventory
+                </a>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
