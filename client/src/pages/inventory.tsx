@@ -5,7 +5,10 @@ import { Vehicle } from "@shared/schema";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import { 
   Select,
   SelectContent,
@@ -163,6 +166,52 @@ export default function Inventory() {
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical={categoryName ? `https://rpmauto.com/inventory?category=${filters.category}` : "https://rpmauto.com/inventory"}
+      />
+      <CanonicalUrl path={categoryName ? `/inventory?category=${filters.category}` : "/inventory"} />
+      
+      {/* Breadcrumb structured data */}
+      <JsonLdSchema
+        schema={createBreadcrumbSchema(
+          categoryName 
+            ? [
+                { name: "Home", item: "https://rpmauto.com/" },
+                { name: "Inventory", item: "https://rpmauto.com/inventory" },
+                { name: categoryName, item: `https://rpmauto.com/inventory?category=${filters.category}` }
+              ]
+            : [
+                { name: "Home", item: "https://rpmauto.com/" },
+                { name: "Inventory", item: "https://rpmauto.com/inventory" }
+              ]
+        )}
+      />
+      
+      {/* CollectionPage schema for inventory listing */}
+      <JsonLdSchema
+        schema={{
+          "@type": "CollectionPage",
+          "name": pageTitle,
+          "description": pageDescription,
+          "url": categoryName 
+            ? `https://rpmauto.com/inventory?category=${filters.category}` 
+            : "https://rpmauto.com/inventory",
+          "numberOfItems": filteredVehicles?.length || 0,
+          "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Product",
+              "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+              "url": `https://rpmauto.com/inventory/${vehicle.id}`,
+              "image": vehicle.photos[0],
+              "offers": {
+                "@type": "Offer",
+                "price": vehicle.price,
+                "priceCurrency": "CAD",
+                "availability": "https://schema.org/InStock"
+              }
+            }
+          }))
+        }}
       />
       
       <div className="container mx-auto px-6">

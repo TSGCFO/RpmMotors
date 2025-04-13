@@ -159,7 +159,7 @@ export default function VehicleDetails() {
           },
           vehicleTransmission: vehicle.transmission,
           driveWheelConfiguration: vehicle.drivetrain,
-          vehicleInteriorColor: vehicle.interiorColor || "Not specified",
+          vehicleInteriorColor: "Not specified",
           vehicleExteriorColor: vehicle.exteriorColor,
           image: vehicle.photos[0],
           offers: {
