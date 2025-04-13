@@ -35,33 +35,33 @@ export default function Footer() {
             <h4 className="font-['Poppins'] font-bold text-xl mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Home</a>
+                <Link href="/" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/inventory">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Inventory</a>
+                <Link href="/inventory" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Inventory
                 </Link>
               </li>
               <li>
-                <Link href="/services">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Services</a>
+                <Link href="/services" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Services
                 </Link>
               </li>
               <li>
-                <Link href="/financing">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Financing</a>
+                <Link href="/financing" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Financing
                 </Link>
               </li>
               <li>
-                <Link href="/about">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">About Us</a>
+                <Link href="/about" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Contact Us</a>
+                <Link href="/contact" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -72,33 +72,33 @@ export default function Footer() {
             <h4 className="font-['Poppins'] font-bold text-xl mb-6">Vehicle Categories</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/inventory?category=sports-cars">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Sports Cars</a>
+                <Link href="/inventory?category=sports-cars" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Sports Cars
                 </Link>
               </li>
               <li>
-                <Link href="/inventory?category=luxury-sedans">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Luxury Sedans</a>
+                <Link href="/inventory?category=luxury-sedans" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Luxury Sedans
                 </Link>
               </li>
               <li>
-                <Link href="/inventory?category=suvs-crossovers">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">SUVs & Crossovers</a>
+                <Link href="/inventory?category=suvs-crossovers" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  SUVs & Crossovers
                 </Link>
               </li>
               <li>
-                <Link href="/inventory?category=exotic-collection">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Exotic Collection</a>
+                <Link href="/inventory?category=exotic-collection" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Exotic Collection
                 </Link>
               </li>
               <li>
-                <Link href="/inventory?category=convertibles">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">Convertibles</a>
+                <Link href="/inventory?category=convertibles" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Convertibles
                 </Link>
               </li>
               <li>
-                <Link href="/inventory?filter=new-arrivals">
-                  <a className="text-gray-400 hover:text-[#E31837] transition-colors">New Arrivals</a>
+                <Link href="/inventory?filter=new-arrivals" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  New Arrivals
                 </Link>
               </li>
             </ul>
@@ -135,16 +135,16 @@ export default function Footer() {
         <div className="pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-500">© {new Date().getFullYear()} RPM Auto. All rights reserved.</p>
           <div className="mt-4 space-x-4 text-sm">
-            <Link href="/privacy-policy">
-              <a className="text-gray-500 hover:text-[#E31837] transition-colors">Privacy Policy</a>
+            <Link href="/privacy-policy" className="text-gray-500 hover:text-[#E31837] transition-colors">
+              Privacy Policy
             </Link>
             <span className="text-gray-700">|</span>
-            <Link href="/terms">
-              <a className="text-gray-500 hover:text-[#E31837] transition-colors">Terms & Conditions</a>
+            <Link href="/terms" className="text-gray-500 hover:text-[#E31837] transition-colors">
+              Terms & Conditions
             </Link>
             <span className="text-gray-700">|</span>
-            <Link href="/sitemap">
-              <a className="text-gray-500 hover:text-[#E31837] transition-colors">Sitemap</a>
+            <Link href="/sitemap" className="text-gray-500 hover:text-[#E31837] transition-colors">
+              Sitemap
             </Link>
           </div>
         </div>
