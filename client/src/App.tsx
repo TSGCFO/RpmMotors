@@ -11,6 +11,9 @@ import Financing from "@/pages/financing";
 import Gallery from "@/pages/gallery";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
+import Sitemap from "@/pages/sitemap";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import Terms from "@/pages/terms";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -28,6 +31,9 @@ function Router() {
         <Route path="/gallery" component={Gallery} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
+        <Route path="/sitemap" component={Sitemap} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/terms" component={Terms} />
         <Route component={NotFound} />
       </Switch>
       <Footer />
