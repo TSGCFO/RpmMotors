@@ -10,6 +10,8 @@ import { TestimonialCard } from "@/components/ui/testimonial-card";
 import { ContactForm } from "@/components/ui/contact-form";
 import { MapSection } from "@/components/ui/map-section";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import CTABanner from "@/components/ui/cta-banner";
+import PersonalizedRecommendations from "@/components/ui/personalized-recommendations";
 import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
@@ -346,6 +348,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Personalized Recommendations */}
+      <PersonalizedRecommendations />
       
       {/* Testimonials */}
       <section className="py-16 bg-[#F5F5F5]">
