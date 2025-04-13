@@ -27,14 +27,13 @@ export const vehicles = pgTable("vehicles", {
   mileage: integer("mileage").notNull(),
   fuelType: text("fuel_type").notNull(),
   transmission: text("transmission").notNull(),
-  exteriorColor: text("exterior_color").notNull(),
-  drivetrain: text("drivetrain").notNull(),
+  color: text("color").notNull(), // Same as exteriorColor but renamed to match admin panel
   description: text("description").notNull(),
   category: text("category").notNull(), // e.g., "Sports Cars", "Luxury Sedans", etc.
-  status: text("status").default("available"), // available, sold, reserved
-  featured: boolean("featured").default(false),
-  photos: json("photos").$type<string[]>().notNull(),
-  thumbnail: text("thumbnail").notNull(),
+  condition: text("condition").notNull().default("Used"), // New, Used, Certified Pre-Owned
+  isFeatured: boolean("is_featured").default(false), // Renamed from featured to match admin panel
+  features: json("features").$type<string[]>().notNull().default([]),
+  images: json("images").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   vin: text("vin").notNull().unique(),
 });
@@ -76,7 +75,7 @@ export const testimonials = pgTable("testimonials", {
   vehicle: text("vehicle").notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
-  approved: boolean("approved").default(false),
+  isApproved: boolean("is_approved").default(false), // Renamed from approved to match admin panel
   createdAt: timestamp("created_at").defaultNow(),
 });
 

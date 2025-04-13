@@ -18,6 +18,7 @@ import Terms from "@/pages/terms";
 import AdminDashboard from "@/pages/admin";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminMarketing from "@/pages/admin/marketing";
+import AdminInventory from "@/pages/admin/inventory";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -42,9 +43,13 @@ function Router() {
     }
   }, [location]);
   
+  // Check if we're on an admin page
+  const isAdminPage = location.startsWith('/admin');
+  
   return (
     <>
-      <Header />
+      {/* Only show header and footer on non-admin pages */}
+      {!isAdminPage && <Header />}
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/inventory" component={Inventory} />
@@ -58,12 +63,13 @@ function Router() {
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms" component={Terms} />
         <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
         <Route path="/admin/marketing" component={AdminMarketing} />
         <Route component={NotFound} />
       </Switch>
-      <Footer />
-      <BackToTop />
+      {!isAdminPage && <Footer />}
+      {!isAdminPage && <BackToTop />}
     </>
   );
 }

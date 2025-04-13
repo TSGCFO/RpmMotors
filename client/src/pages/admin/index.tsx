@@ -1,233 +1,256 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'wouter';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
-import PageMeta from '@/components/seo/page-meta';
-import CanonicalUrl from '@/components/seo/canonical-url';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import DashboardLayout from '@/components/admin/dashboard-layout';
+import { Vehicle, Inquiry, Testimonial } from '@shared/schema';
+import { Car, MessageSquare, FileEdit, TrendingUp, DollarSign } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export default function AdminDashboard() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [, setLocation] = useLocation();
-  const [showLogin, setShowLogin] = useState(true);
+  // Fetch all vehicles
+  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
+    queryKey: ['/api/vehicles'],
+  });
   
-  // Simple admin password
-  const ADMIN_PASSWORD = 'rpmauto2025';
+  // Fetch all inquiries
+  const { data: inquiries, isLoading: isLoadingInquiries } = useQuery<Inquiry[]>({
+    queryKey: ['/api/inquiries'],
+  });
   
-  // Check if user is logged in
-  useEffect(() => {
-    const adminAuth = localStorage.getItem('admin_auth');
-    if (adminAuth === 'true') {
-      setIsAuthorized(true);
-      setShowLogin(false);
-    }
-  }, []);
+  // Fetch all testimonials
+  const { data: testimonials, isLoading: isLoadingTestimonials } = useQuery<Testimonial[]>({
+    queryKey: ['/api/testimonials'],
+  });
   
-  // Handle login
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const password = (e.currentTarget.elements.namedItem('password') as HTMLInputElement).value;
-    
-    if (password === ADMIN_PASSWORD) {
-      localStorage.setItem('admin_auth', 'true');
-      setIsAuthorized(true);
-      setShowLogin(false);
-    } else {
-      alert('Invalid password');
-    }
-  };
+  // Check if all data is loading
+  const isLoading = isLoadingVehicles || isLoadingInquiries || isLoadingTestimonials;
   
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('admin_auth');
-    setIsAuthorized(false);
-    setLocation('/');
-  };
+  // Calculate statistics
+  const totalVehicles = vehicles?.length || 0;
+  const featuredVehicles = vehicles?.filter(v => v.isFeatured).length || 0;
+  const totalInquiries = inquiries?.length || 0;
+  const pendingInquiries = inquiries?.filter(i => i.status === 'pending').length || 0;
+  const totalTestimonials = testimonials?.length || 0;
+  const approvedTestimonials = testimonials?.filter(t => t.isApproved).length || 0;
   
-  // Prepare breadcrumb items
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Admin", href: "/admin", current: true }
-  ];
+  // Calculate inventory value
+  const inventoryValue = vehicles?.reduce((total, vehicle) => total + vehicle.price, 0) || 0;
   
-  if (showLogin && !isAuthorized) {
-    return (
-      <main className="py-12 bg-[#F5F5F5] min-h-screen">
-        <PageMeta
-          title="Admin Dashboard | RPM Auto"
-          description="Admin dashboard for RPM Auto administrators."
-          keywords="admin, dashboard"
-        />
-        <CanonicalUrl path="/admin" />
-        
-        <div className="container mx-auto px-6">
-          <div className="mb-6">
-            <Breadcrumb items={breadcrumbItems} />
-          </div>
-          
-          <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-            <h1 className="text-2xl font-['Poppins'] font-bold mb-6 text-center">Admin Login</h1>
-            
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2">
-                  Admin Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E31837]"
-                  placeholder="Enter admin password"
-                  required
-                />
-              </div>
-              
-              <button
-                type="submit"
-                className="w-full py-3 px-4 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
-              >
-                Login
-              </button>
-            </form>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  // Get recent inquiries and vehicles
+  const recentInquiries = inquiries?.slice(0, 5) || [];
+  const recentVehicles = vehicles?.slice(0, 5) || [];
   
   return (
-    <main className="py-12 bg-[#F5F5F5] min-h-screen">
-      <PageMeta
-        title="Admin Dashboard | RPM Auto"
-        description="Admin dashboard for RPM Auto administrators."
-        keywords="admin, dashboard"
-      />
-      <CanonicalUrl path="/admin" />
-      
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center mb-6">
-          <Breadcrumb items={breadcrumbItems} />
-          
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition"
-          >
-            Logout
-          </button>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Welcome to your RPM Auto admin dashboard</p>
         </div>
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-['Poppins'] font-bold">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Manage your website and view analytics.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Analytics Card */}
-          <Link href="/admin/analytics">
-            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-['Poppins'] font-semibold">Analytics</h2>
-                <span className="text-[#E31837] text-2xl">
-                  <i className="fas fa-chart-bar"></i>
-                </span>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Inventory</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{totalVehicles}</p>
               </div>
-              <p className="text-gray-600 mb-6">
-                View user analytics, vehicle interest data, and marketing campaign effectiveness.
-              </p>
-              <div className="flex justify-end">
-                <span className="text-[#E31837] flex items-center">
-                  View Analytics <i className="fas fa-arrow-right ml-2"></i>
-                </span>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Car className="h-6 w-6 text-blue-600" />
               </div>
             </div>
-          </Link>
-          
-          {/* A/B Testing Card */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-['Poppins'] font-semibold">A/B Testing</h2>
-              <span className="text-[#E31837] text-2xl">
-                <i className="fas fa-vial"></i>
-              </span>
-            </div>
-            <p className="text-gray-600 mb-6">
-              Configure A/B tests to optimize page layouts and conversion rates.
+            <p className="text-xs text-gray-500 mt-2">
+              {featuredVehicles} featured vehicles
             </p>
-            <div className="flex justify-end">
-              <span className="text-gray-400 flex items-center">
-                Coming Soon <i className="fas fa-lock ml-2"></i>
-              </span>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Inquiries</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{totalInquiries}</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <MessageSquare className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {pendingInquiries} pending responses
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Testimonials</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{totalTestimonials}</p>
+              </div>
+              <div className="p-3 bg-purple-100 rounded-full">
+                <FileEdit className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {approvedTestimonials} approved testimonials
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Inventory Value</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(inventoryValue)}</p>
+              </div>
+              <div className="p-3 bg-[#ffe4e4] rounded-full">
+                <DollarSign className="h-6 w-6 text-[#E31837]" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Total value of all vehicles
+            </p>
+          </div>
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <Link href="/admin/inventory">
+              <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                <Car className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">Manage Inventory</span>
+              </a>
+            </Link>
+            
+            <Link href="/admin/inquiries">
+              <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                <MessageSquare className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">View Inquiries</span>
+              </a>
+            </Link>
+            
+            <Link href="/admin/testimonials">
+              <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                <FileEdit className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">Manage Testimonials</span>
+              </a>
+            </Link>
+            
+            <Link href="/admin/analytics">
+              <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                <TrendingUp className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">View Analytics</span>
+              </a>
+            </Link>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Inquiries */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Recent Inquiries</h2>
+            </div>
+            <div className="divide-y">
+              {isLoading ? (
+                <div className="p-8 flex justify-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#E31837]"></div>
+                </div>
+              ) : recentInquiries.length > 0 ? (
+                recentInquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex justify-between">
+                      <p className="font-medium text-gray-900">{inquiry.name}</p>
+                      <span className={`px-2 text-xs font-semibold rounded-full ${
+                        inquiry.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : inquiry.status === 'responded'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm truncate mt-1">{inquiry.message}</p>
+                    <div className="flex items-center text-gray-500 text-xs mt-2">
+                      <span>{new Date(inquiry.createdAt).toLocaleDateString()}</span>
+                      <span className="mx-2">•</span>
+                      <span>{inquiry.email}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  No inquiries found.
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-3 bg-gray-50">
+              <Link href="/admin/inquiries">
+                <a className="text-sm text-[#E31837] font-medium hover:underline">
+                  View All Inquiries
+                </a>
+              </Link>
             </div>
           </div>
           
-          {/* Marketing Card */}
-          <Link href="/admin/marketing">
-            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-['Poppins'] font-semibold">Marketing</h2>
-                <span className="text-[#E31837] text-2xl">
-                  <i className="fas fa-bullhorn"></i>
-                </span>
-              </div>
-              <p className="text-gray-600 mb-6">
-                Generate UTM-tagged links and track effectiveness of marketing campaigns.
-              </p>
-              <div className="flex justify-end">
-                <span className="text-[#E31837] flex items-center">
-                  View Marketing Tools <i className="fas fa-arrow-right ml-2"></i>
-                </span>
-              </div>
+          {/* Recent Vehicle Listings */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Recent Vehicles</h2>
             </div>
-          </Link>
-        </div>
-        
-        <div className="mt-12 bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-['Poppins'] font-semibold mb-6">Business Benefits of Cookie Analytics</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-['Poppins'] font-semibold mb-3">Analytics & Insights</h3>
-              <ul className="list-disc pl-5 text-gray-600 space-y-2">
-                <li>Understand which vehicles generate the most interest</li>
-                <li>Track user navigation patterns through the site</li>
-                <li>Identify the most effective entry points and exit pages</li>
-                <li>Measure user engagement with different sections</li>
-              </ul>
+            <div className="divide-y">
+              {isLoading ? (
+                <div className="p-8 flex justify-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#E31837]"></div>
+                </div>
+              ) : recentVehicles.length > 0 ? (
+                recentVehicles.map((vehicle) => (
+                  <div key={vehicle.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex">
+                      <div className="flex-shrink-0 h-12 w-12">
+                        <img
+                          className="h-12 w-12 rounded-md object-cover"
+                          src={vehicle.images[0] || 'https://via.placeholder.com/150'}
+                          alt={`${vehicle.make} ${vehicle.model}`}
+                        />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="flex justify-between">
+                          <p className="font-medium text-gray-900">
+                            {vehicle.year} {vehicle.make} {vehicle.model}
+                          </p>
+                          <p className="font-semibold text-[#E31837]">
+                            {formatCurrency(vehicle.price)}
+                          </p>
+                        </div>
+                        <div className="flex items-center text-gray-500 text-xs mt-2">
+                          <span>{vehicle.condition}</span>
+                          <span className="mx-2">•</span>
+                          <span>{vehicle.category}</span>
+                          <span className="mx-2">•</span>
+                          <span>{vehicle.mileage.toLocaleString()} miles</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  No vehicles found.
+                </div>
+              )}
             </div>
-            
-            <div>
-              <h3 className="text-lg font-['Poppins'] font-semibold mb-3">Targeted Content</h3>
-              <ul className="list-disc pl-5 text-gray-600 space-y-2">
-                <li>Personalize recommendations based on browsing history</li>
-                <li>Display vehicles similar to those previously viewed</li>
-                <li>Adapt content based on user preferences and interests</li>
-                <li>Highlight popular vehicles to new visitors</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-['Poppins'] font-semibold mb-3">Marketing Effectiveness</h3>
-              <ul className="list-disc pl-5 text-gray-600 space-y-2">
-                <li>Track which marketing campaigns drive conversions</li>
-                <li>Identify the most valuable traffic sources</li>
-                <li>Measure ROI on different advertising channels</li>
-                <li>Optimize ad spend based on performance data</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-['Poppins'] font-semibold mb-3">A/B Testing</h3>
-              <ul className="list-disc pl-5 text-gray-600 space-y-2">
-                <li>Test different layouts to see which performs better</li>
-                <li>Compare conversion rates between variants</li>
-                <li>Optimize calls-to-action and key user flows</li>
-                <li>Make data-driven decisions for website improvements</li>
-              </ul>
+            <div className="px-6 py-3 bg-gray-50">
+              <Link href="/admin/inventory">
+                <a className="text-sm text-[#E31837] font-medium hover:underline">
+                  View All Vehicles
+                </a>
+              </Link>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </DashboardLayout>
   );
 }
