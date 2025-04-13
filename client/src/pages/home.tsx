@@ -9,8 +9,11 @@ import { ServiceCard } from "@/components/ui/service-card";
 import { TestimonialCard } from "@/components/ui/testimonial-card";
 import { ContactForm } from "@/components/ui/contact-form";
 import { MapSection } from "@/components/ui/map-section";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import JsonLdSchema, { createBusinessSchema, createFaqSchema } from "@/components/seo/json-ld-schema";
 
 export default function Home() {
   // Fetch featured vehicles
@@ -126,9 +129,67 @@ export default function Home() {
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/"
       />
+      <CanonicalUrl path="/" />
       <StructuredData 
         type="localBusiness"
         businessData={businessData}
+      />
+      {/* JSON-LD Schema for more detailed structured data */}
+      <JsonLdSchema
+        schema={createBusinessSchema({
+          name: "RPM Auto",
+          description: "Premium luxury and exotic car dealership in Woodbridge, Ontario offering a curated selection of high-end vehicles.",
+          url: "https://rpmauto.com",
+          telephone: "(905) 264-1969",
+          address: {
+            streetAddress: "6260 Hwy 7 Unit 6",
+            addressLocality: "Woodbridge",
+            addressRegion: "ON",
+            postalCode: "L4H 4G3",
+            addressCountry: "CA"
+          },
+          geo: {
+            latitude: 43.7856,
+            longitude: -79.5857
+          },
+          openingHours: [
+            "Monday 9:00-19:00",
+            "Tuesday 9:00-19:00",
+            "Wednesday 9:00-19:00",
+            "Thursday 9:00-19:00",
+            "Friday 9:00-19:00",
+            "Saturday 10:00-17:00",
+            "Sunday 11:00-16:00"
+          ],
+          image: "https://rpmauto.com/RPM Auto.png",
+          priceRange: "$$$$",
+          sameAs: [
+            "https://www.facebook.com/rpmauto",
+            "https://www.instagram.com/rpmauto",
+            "https://twitter.com/rpmauto"
+          ]
+        })}
+      />
+      {/* FAQ schema for common questions */}
+      <JsonLdSchema
+        schema={createFaqSchema([
+          {
+            question: "What types of vehicles does RPM Auto offer?",
+            answer: "RPM Auto specializes in premium and exotic vehicles, including luxury sedans, sports cars, SUVs, and collectible exotic cars from top manufacturers."
+          },
+          {
+            question: "Does RPM Auto offer financing options?",
+            answer: "Yes, we offer customized financing solutions for all credit situations. Our finance experts work with multiple lenders to find the best rates and terms."
+          },
+          {
+            question: "Can RPM Auto help me find a specific vehicle?",
+            answer: "Absolutely! Our vehicle sourcing service can help you locate specific makes and models tailored to your preferences and requirements."
+          },
+          {
+            question: "Does RPM Auto accept trade-ins?",
+            answer: "Yes, we offer competitive trade-in evaluations. Get the best value for your current vehicle with our trade-in program."
+          }
+        ])}
       />
       {/* Hero Slider */}
       <HeroSlider />
@@ -241,10 +302,14 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="lg:order-2">
               <div className="relative">
-                <img 
+                <OptimizedImage 
                   src="https://images.unsplash.com/photo-1547038577-da80abbc4f19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1752&q=80" 
-                  alt="RPM Auto Dealership" 
+                  alt="RPM Auto Dealership Interior View" 
                   className="w-full h-[400px] object-cover rounded-lg shadow-xl"
+                  width={1752}
+                  height={1168}
+                  priority={true}
+                  loading="eager"
                 />
                 <div className="absolute -bottom-6 -left-6 bg-[#E31837] text-white p-6 rounded shadow-lg hidden md:block">
                   <p className="text-3xl font-['Poppins'] font-bold">10+</p>

@@ -3,53 +3,51 @@ import React from 'react';
 interface OptimizedImageProps {
   src: string;
   alt: string;
+  className?: string;
   width?: number;
   height?: number;
-  className?: string;
+  priority?: boolean;
   loading?: 'lazy' | 'eager';
-  onClick?: () => void;
+  sizes?: string;
+  decoding?: 'async' | 'auto' | 'sync';
 }
 
 /**
- * OptimizedImage component for better SEO and performance
+ * OptimizedImage component for improved image loading and SEO
  * 
- * This component enhances images with:
- * - Proper alt text (required for accessibility and SEO)
- * - Width and height attributes (prevents layout shifts)
- * - Lazy loading (improves page load performance)
- * - Descriptive structured data attributes
+ * This component enhances regular image tags with:
+ * - Proper width and height attributes to prevent layout shifts
+ * - Loading attributes for performance optimization
+ * - Proper alt text for accessibility and SEO
+ * - Optional priority flag for LCP images
+ * - Decoding attribute for browser optimization
  */
 export function OptimizedImage({
   src,
   alt,
+  className = '',
   width,
   height,
-  className = '',
+  priority = false,
   loading = 'lazy',
-  onClick
+  sizes,
+  decoding = 'async'
 }: OptimizedImageProps) {
-  // Extract filename from src for better accessibility when alt text is generic
-  const getFilename = (src: string) => {
-    const parts = src.split('/');
-    const filename = parts[parts.length - 1].split('.')[0];
-    return filename.replace(/[-_]/g, ' ');
-  };
-
-  // Get enhanced alt text if the provided one is too generic
-  const enhancedAlt = alt.length < 5 ? `${alt} - ${getFilename(src)}` : alt;
+  // Force eager loading if priority is true
+  const loadingAttribute = priority ? 'eager' : loading;
   
   return (
     <img
       src={src}
-      alt={enhancedAlt}
+      alt={alt}
+      className={className}
       width={width}
       height={height}
-      loading={loading}
-      className={className}
-      onClick={onClick}
-      itemProp="image"
-      itemScope
-      itemType="https://schema.org/ImageObject"
+      loading={loadingAttribute}
+      sizes={sizes}
+      decoding={decoding}
+      // Add fetchpriority attribute for browsers that support it
+      {...(priority ? { fetchpriority: 'high' } : {})}
     />
   );
 }

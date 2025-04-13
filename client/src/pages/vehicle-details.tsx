@@ -9,8 +9,11 @@ import { ContactForm } from "@/components/ui/contact-form";
 import { VehicleGallery } from "@/components/ui/vehicle-gallery";
 import { FinancingCalculator } from "@/components/ui/financing-calculator";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import JsonLdSchema, { createVehicleSchema, createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 
 export default function VehicleDetails() {
   const [, params] = useRoute<{ id: string }>("/inventory/:id");
@@ -132,9 +135,48 @@ export default function VehicleDetails() {
         ogImage={vehicle.photos[0]}
         canonical={`https://rpmauto.com/inventory/${vehicle.id}`}
       />
+      <CanonicalUrl path={`/inventory/${vehicle.id}`} />
       <StructuredData
         type="vehicle"
         vehicleData={vehicleData}
+      />
+      {/* Enhanced vehicle structured data with JSON-LD */}
+      <JsonLdSchema
+        schema={createVehicleSchema({
+          name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+          description: vehicle.description || `${vehicle.year} ${vehicle.make} ${vehicle.model} available at RPM Auto in Woodbridge, Ontario. This ${vehicle.exteriorColor} ${vehicle.category.toLowerCase()} features ${vehicle.transmission} transmission and ${formatNumber(vehicle.mileage)} kilometers.`,
+          brand: vehicle.make,
+          model: vehicle.model,
+          modelDate: vehicle.year.toString(),
+          vehicleEngine: {
+            engineType: "Internal combustion",
+            fuelType: vehicle.fuelType
+          },
+          url: `https://rpmauto.com/inventory/${vehicle.id}`,
+          mileageFromOdometer: {
+            value: vehicle.mileage,
+            unitCode: "KMT"
+          },
+          vehicleTransmission: vehicle.transmission,
+          driveWheelConfiguration: vehicle.drivetrain,
+          vehicleInteriorColor: vehicle.interiorColor || "Not specified",
+          vehicleExteriorColor: vehicle.exteriorColor,
+          image: vehicle.photos[0],
+          offers: {
+            price: vehicle.price,
+            priceCurrency: "CAD",
+            availability: "https://schema.org/InStock",
+            url: `https://rpmauto.com/inventory/${vehicle.id}`
+          }
+        })}
+      />
+      {/* Breadcrumb structured data */}
+      <JsonLdSchema
+        schema={createBreadcrumbSchema([
+          { name: "Home", item: "https://rpmauto.com/" },
+          { name: "Inventory", item: "https://rpmauto.com/inventory" },
+          { name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`, item: `https://rpmauto.com/inventory/${vehicle.id}` }
+        ])}
       />
       
       {/* Breadcrumb Navigation */}
