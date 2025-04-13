@@ -407,7 +407,7 @@ export default function Inventory() {
                           <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="all-categories">All Categories</SelectItem>
                           <SelectItem value="sports-cars">Sports Cars</SelectItem>
                           <SelectItem value="luxury-sedans">Luxury Sedans</SelectItem>
                           <SelectItem value="suvs-crossovers">SUVs & Crossovers</SelectItem>

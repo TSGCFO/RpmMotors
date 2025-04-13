@@ -1,60 +1,30 @@
-# Main robots.txt file for RPM Auto (https://rpmauto.com)
-# Updated: April 13, 2025
-
-# For all search engines and crawlers
+# robots.txt for RPM Auto
 User-agent: *
 Allow: /
 
-# Sitemap location (primary sitemap)
+# Allow all search engines to crawl everything
 Sitemap: https://rpmauto.com/sitemap.xml
 
-# Primary content pages - allow explicit crawling
-Allow: /inventory$
-Allow: /inventory/$
-Allow: /inventory/vehicle/
-Allow: /services$
-Allow: /services/$
-Allow: /financing$
-Allow: /financing/$
-Allow: /about$
-Allow: /about/$
-Allow: /contact$
-Allow: /contact/$
-Allow: /gallery$
-Allow: /gallery/$
+# Optimize crawling
+Crawl-delay: 10
 
-# Prevent crawling of API endpoints, admin areas, and authentication pages
+# Disallow certain directories that don't need indexing
 Disallow: /api/
 Disallow: /admin/
-Disallow: /dashboard/
-Disallow: /login$
-Disallow: /logout$
-Disallow: /register$
-Disallow: /reset-password
-Disallow: /callback
 
-# Prevent crawling search result pages and filters to avoid duplicate content
-Disallow: /*?*query=
-Disallow: /*?*filter=
-Disallow: /*?*sort=
-
-# Special instructions for Google
+# Define specific crawling instructions for major search engines
 User-agent: Googlebot
 Allow: /
-# Additional Google-specific disallow directives could be added here
+Disallow: /api/
 
-# Special instructions for Bing
 User-agent: Bingbot
 Allow: /
-# Additional Bing-specific disallow directives could be added here
+Disallow: /api/
 
-# Image-specific crawlers - allow image folders
-User-agent: Googlebot-Image
-Allow: /images/
-Allow: /assets/
-Allow: /photos/
+User-agent: Slurp
+Allow: /
+Disallow: /api/
 
-# Additional notes:
-# - Crawl delay is managed via server configuration headers (not specified here)
-# - URL parameters are managed via Google Search Console
-# - This file should be checked and updated on a quarterly basis
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /api/

@@ -4,6 +4,9 @@ import { ServiceCard } from "@/components/ui/service-card";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import ServicesSchema from "@/components/seo/services-schema";
+import { JsonLdSchema, createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 
 export default function Services() {
   useEffect(() => {
