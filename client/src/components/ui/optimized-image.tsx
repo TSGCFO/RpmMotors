@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface OptimizedImageProps {
+export interface OptimizedImageProps {
   src: string;
   alt: string;
   width?: number;
@@ -8,6 +8,7 @@ interface OptimizedImageProps {
   className?: string;
   priority?: boolean;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  loading?: never; // Prevent direct use of loading attribute
 }
 
 /**
@@ -36,6 +37,9 @@ export function OptimizedImage({
   priority = false,
   objectFit = 'cover'
 }: OptimizedImageProps) {
+  // Construct object-fit class
+  const objectFitClass = objectFit ? `object-${objectFit}` : '';
+  
   return (
     <img
       src={src}
@@ -43,7 +47,7 @@ export function OptimizedImage({
       width={width}
       height={height}
       loading={priority ? 'eager' : 'lazy'}
-      className={`${className} ${objectFit ? `object-${objectFit}` : ''}`}
+      className={`${className} ${objectFitClass}`.trim()}
       style={{
         // If width/height are provided, set them as style props too for older browsers
         ...(width && { width: `${width}px` }),

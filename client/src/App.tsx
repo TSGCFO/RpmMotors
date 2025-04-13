@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { useState, useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -18,8 +19,26 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
 import CookieConsent from "@/components/ui/cookie-consent";
+import { 
+  trackPageView, 
+  trackUtmParameters,
+  hasConsentedToCookies 
+} from "@/lib/cookieUtils";
 
 function Router() {
+  const [location] = useLocation();
+  
+  // Track page views for analytics
+  useEffect(() => {
+    // Track UTM parameters when user first lands on the site
+    trackUtmParameters();
+    
+    // Track page view for this path
+    if (hasConsentedToCookies()) {
+      trackPageView(location);
+    }
+  }, [location]);
+  
   return (
     <>
       <Header />

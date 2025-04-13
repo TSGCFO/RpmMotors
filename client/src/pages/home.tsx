@@ -309,7 +309,6 @@ export default function Home() {
                   width={1752}
                   height={1168}
                   priority={true}
-                  loading="eager"
                 />
                 <div className="absolute -bottom-6 -left-6 bg-[#E31837] text-white p-6 rounded shadow-lg hidden md:block">
                   <p className="text-3xl font-['Poppins'] font-bold">10+</p>
