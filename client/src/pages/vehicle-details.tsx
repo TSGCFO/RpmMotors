@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Link } from "wouter";
@@ -14,6 +14,11 @@ import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createVehicleSchema, createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
+import { 
+  saveRecentlyViewedVehicle, 
+  getRecentlyViewedVehicles,
+  incrementViewedVehiclesCount
+} from "@/lib/cookieUtils";
 
 export default function VehicleDetails() {
   const [, params] = useRoute<{ id: string }>("/inventory/:id");

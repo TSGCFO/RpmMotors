@@ -47,6 +47,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
+      <CookieConsent />
       <Toaster />
     </QueryClientProvider>
   );

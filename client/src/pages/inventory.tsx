@@ -10,6 +10,11 @@ import PageMeta from "@/components/seo/page-meta";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import { 
+  hasConsentedToCookies,
+  getFilterPreferences,
+  saveFilterPreferences
+} from '@/lib/cookieUtils';
+import { 
   Select,
   SelectContent,
   SelectItem,
@@ -38,13 +43,14 @@ export default function Inventory() {
   // State to track category name for breadcrumb
   const [categoryName, setCategoryName] = useState<string>("");
   
-  // Parse query parameters
+  // Parse query parameters and load saved preferences
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1]);
     
     const category = params.get("category");
     const search = params.get("search");
     
+    // First check if we have URL parameters (these take priority)
     if (category) {
       setFilters(prev => ({ ...prev, category }));
       
@@ -60,6 +66,36 @@ export default function Inventory() {
     
     if (search) {
       setFilters(prev => ({ ...prev, search }));
+    }
+    
+    // If no URL parameters and user has consented to cookies, load saved preferences
+    if (!category && !search && hasConsentedToCookies()) {
+      const savedFilters = getFilterPreferences();
+      if (savedFilters) {
+        // Only update if we have saved filters
+        setFilters(prev => {
+          const updatedFilters = { ...prev };
+          
+          // Apply each saved filter
+          Object.entries(savedFilters).forEach(([key, value]) => {
+            // Make sure the key is valid for our filter state
+            if (key in updatedFilters) {
+              updatedFilters[key as keyof typeof updatedFilters] = value;
+              
+              // If category was restored, also update the category name for breadcrumb
+              if (key === 'category' && value) {
+                const formattedCategory = value.replace(/-/g, " ")
+                  .split(" ")
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ");
+                setCategoryName(formattedCategory);
+              }
+            }
+          });
+          
+          return updatedFilters;
+        });
+      }
     }
   }, [location]);
 
@@ -117,7 +153,23 @@ export default function Inventory() {
 
   // Handle filter changes
   const handleFilterChange = (name: string, value: string) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    const updatedFilters = { ...filters, [name]: value };
+    setFilters(updatedFilters);
+    
+    // Save filter preferences to cookies if user has consented
+    if (hasConsentedToCookies()) {
+      // Convert to a simple record of string values for storage
+      const filterRecord = Object.entries(updatedFilters).reduce((acc, [key, val]) => {
+        // Only save non-empty values
+        if (val) acc[key] = val;
+        return acc;
+      }, {} as Record<string, string>);
+      
+      // Save to cookies if there are active filters
+      if (Object.keys(filterRecord).length > 0) {
+        saveFilterPreferences(filterRecord);
+      }
+    }
   };
 
   // Clear all filters
@@ -131,6 +183,11 @@ export default function Inventory() {
       category: "",
       search: ""
     });
+    
+    // Clear saved filter preferences from cookies
+    if (hasConsentedToCookies()) {
+      saveFilterPreferences({});
+    }
   };
 
   // Prepare page title and description based on filters
