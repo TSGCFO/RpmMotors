@@ -1,14 +1,73 @@
 import { useEffect } from "react";
 import { ContactForm } from "@/components/ui/contact-form";
 import { MapSection } from "@/components/ui/map-section";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import PageMeta from "@/components/seo/page-meta";
+import StructuredData from "@/components/seo/structured-data";
 
 export default function Contact() {
   useEffect(() => {
     document.title = "Contact Us | RPM Auto";
   }, []);
 
+  // Prepare SEO metadata
+  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Woodbridge";
+  const pageDescription = "Contact RPM Auto's sales, financing, or service departments. Visit our luxury car dealership in Woodbridge, call us at (905) 264-1969, or send us a message online.";
+  
+  // Prepare breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Contact", href: "/contact", current: true }
+  ];
+  
+  // Prepare business structured data
+  const businessData = {
+    name: "RPM Auto",
+    description: "Premium automotive dealership specializing in luxury and exotic vehicles in the Greater Toronto Area.",
+    url: "https://rpmauto.com",
+    telephone: "+1-905-264-1969",
+    address: {
+      streetAddress: "6260 Hwy 7 Unit 6",
+      addressLocality: "Woodbridge",
+      addressRegion: "ON",
+      postalCode: "L4H 4G3",
+      addressCountry: "CA"
+    },
+    geo: {
+      latitude: 43.7810,
+      longitude: -79.5988
+    },
+    openingHours: [
+      "Mo-Fr 09:00-19:00",
+      "Sa 10:00-17:00"
+    ],
+    image: "https://rpmauto.com/RPM Auto.png",
+    priceRange: "$$$$"
+  };
+  
   return (
     <main className="bg-[#F5F5F5] min-h-screen">
+      {/* SEO Components */}
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        keywords="contact RPM Auto, luxury car dealership, Woodbridge dealership, car sales, auto financing, vehicle service, Toronto luxury cars"
+        ogType="website"
+        ogImage="/RPM Auto.png"
+        canonical="https://rpmauto.com/contact"
+      />
+      <StructuredData
+        type="localBusiness"
+        businessData={businessData}
+      />
+      
+      {/* Breadcrumb */}
+      <div className="bg-white py-4 border-b border-gray-200">
+        <div className="container mx-auto px-6">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+      </div>
+      
       {/* Hero Section */}
       <section className="relative py-20 bg-black text-white">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
