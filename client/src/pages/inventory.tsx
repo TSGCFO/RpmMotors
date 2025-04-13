@@ -260,7 +260,7 @@ export default function Inventory() {
               "@type": "Product",
               "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
               "url": `https://rpmauto.com/inventory/${vehicle.id}`,
-              "image": vehicle.photos[0],
+              "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
               "offers": {
                 "@type": "Offer",
                 "price": vehicle.price,

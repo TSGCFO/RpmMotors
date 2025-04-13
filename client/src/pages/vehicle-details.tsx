@@ -126,7 +126,7 @@ export default function VehicleDetails() {
 
   // Prepare SEO data
   const pageTitle = `${vehicle.year} ${vehicle.make} ${vehicle.model} | RPM Auto`;
-  const pageDescription = `${vehicle.year} ${vehicle.make} ${vehicle.model} with ${formatNumber(vehicle.mileage)} km, ${vehicle.transmission}, ${vehicle.exteriorColor}. Available at RPM Auto in Woodbridge.`;
+  const pageDescription = `${vehicle.year} ${vehicle.make} ${vehicle.model} with ${formatNumber(vehicle.mileage)} km, ${vehicle.transmission}, ${vehicle.color}. Available at RPM Auto in Woodbridge.`;
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -156,10 +156,10 @@ export default function VehicleDetails() {
       unitCode: "KMT"
     },
     vehicleTransmission: vehicle.transmission,
-    driveWheelConfiguration: vehicle.drivetrain,
+    driveWheelConfiguration: vehicle.features && vehicle.features.length > 0 ? vehicle.features[0] : "Standard",
     vehicleInteriorColor: "Not specified",
-    vehicleExteriorColor: vehicle.exteriorColor,
-    image: vehicle.photos[0],
+    vehicleExteriorColor: vehicle.color,
+    image: vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : "",
     offers: {
       price: vehicle.price,
       priceCurrency: "CAD",
@@ -176,7 +176,7 @@ export default function VehicleDetails() {
         description={pageDescription}
         keywords={`${vehicle.make}, ${vehicle.model}, used cars, luxury cars, ${vehicle.category}, Woodbridge, Toronto, Ontario`}
         ogType="product"
-        ogImage={vehicle.photos[0]}
+        ogImage={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ''}
         canonical={`https://rpmauto.com/inventory/${vehicle.id}`}
       />
       <CanonicalUrl path={`/inventory/${vehicle.id}`} />
@@ -188,7 +188,7 @@ export default function VehicleDetails() {
       <JsonLdSchema
         schema={createVehicleSchema({
           name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-          description: vehicle.description || `${vehicle.year} ${vehicle.make} ${vehicle.model} available at RPM Auto in Woodbridge, Ontario. This ${vehicle.exteriorColor} ${vehicle.category.toLowerCase()} features ${vehicle.transmission} transmission and ${formatNumber(vehicle.mileage)} kilometers.`,
+          description: vehicle.description || `${vehicle.year} ${vehicle.make} ${vehicle.model} available at RPM Auto in Woodbridge, Ontario. This ${vehicle.color} ${vehicle.category.toLowerCase()} features ${vehicle.transmission} transmission and ${formatNumber(vehicle.mileage)} kilometers.`,
           brand: vehicle.make,
           model: vehicle.model,
           modelDate: vehicle.year.toString(),
@@ -202,10 +202,10 @@ export default function VehicleDetails() {
             unitCode: "KMT"
           },
           vehicleTransmission: vehicle.transmission,
-          driveWheelConfiguration: vehicle.drivetrain,
+          driveWheelConfiguration: vehicle.features && vehicle.features.length > 0 ? vehicle.features[0] : "Standard",
           vehicleInteriorColor: "Not specified",
-          vehicleExteriorColor: vehicle.exteriorColor,
-          image: vehicle.photos[0],
+          vehicleExteriorColor: vehicle.color,
+          image: vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : "",
           offers: {
             price: vehicle.price,
             priceCurrency: "CAD",
@@ -243,7 +243,7 @@ export default function VehicleDetails() {
                 <span className="mx-2">|</span>
                 <span>{formatNumber(vehicle.mileage)} km</span>
                 <span className="mx-2">|</span>
-                <span>{vehicle.exteriorColor}</span>
+                <span>{vehicle.color}</span>
               </p>
             </div>
             <div className="mt-4 md:mt-0">
@@ -283,7 +283,7 @@ export default function VehicleDetails() {
                     <i className="fas fa-palette w-8 text-[#E31837]"></i>
                     <div>
                       <p className="text-sm text-gray-500">Exterior Color</p>
-                      <p className="font-semibold">{vehicle.exteriorColor}</p>
+                      <p className="font-semibold">{vehicle.color}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
