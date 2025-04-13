@@ -1,30 +1,31 @@
-# robots.txt for RPM Auto
+# www.robotstxt.org/
+# Allow crawling of all content
 User-agent: *
 Allow: /
 
-# Allow all search engines to crawl everything
-Sitemap: https://rpmauto.com/sitemap.xml
-
-# Optimize crawling
-Crawl-delay: 10
-
-# Disallow certain directories that don't need indexing
-Disallow: /api/
+# Block specific areas
 Disallow: /admin/
+Disallow: /*?category=*
+Disallow: /*?make=*
+Disallow: /*?model=*
+Disallow: /*?year=*
+Disallow: /*?price=*
+Disallow: /*?sort=*
 
-# Define specific crawling instructions for major search engines
+# Block specific bots from heavy resources
+User-agent: Googlebot-Image
+Allow: /public/images/
+Allow: /inventory/
+Allow: /gallery/
+Disallow: /public/documents/
+
+# Allow Google to crawl everything
 User-agent: Googlebot
 Allow: /
-Disallow: /api/
 
+# Allow Bing to crawl everything
 User-agent: Bingbot
 Allow: /
-Disallow: /api/
 
-User-agent: Slurp
-Allow: /
-Disallow: /api/
-
-User-agent: DuckDuckBot
-Allow: /
-Disallow: /api/
+# Sitemap location
+Sitemap: https://rpmauto.com/sitemap.xml
