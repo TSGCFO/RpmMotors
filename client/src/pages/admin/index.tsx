@@ -173,7 +173,7 @@ export default function AdminDashboard() {
                     </div>
                     <p className="text-gray-600 text-sm truncate mt-1">{inquiry.message}</p>
                     <div className="flex items-center text-gray-500 text-xs mt-2">
-                      <span>{new Date(inquiry.createdAt).toLocaleDateString()}</span>
+                      <span>{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString() : 'N/A'}</span>
                       <span className="mx-2">•</span>
                       <span>{inquiry.email}</span>
                     </div>
