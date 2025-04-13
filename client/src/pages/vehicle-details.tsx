@@ -29,13 +29,52 @@ export default function VehicleDetails() {
     enabled: !!params?.id,
   });
 
+  // State for recently viewed vehicles
+  const [recentlyViewed, setRecentlyViewed] = useState<Vehicle[]>([]);
+  
   useEffect(() => {
     // Set page title when vehicle data is available
     if (vehicle) {
       document.title = `${vehicle.year} ${vehicle.make} ${vehicle.model} | RPM Auto`;
+      
+      // Save this vehicle to recently viewed cookies
+      saveRecentlyViewedVehicle(vehicle.id);
+      
+      // Increment the count of viewed vehicles for analytics
+      incrementViewedVehiclesCount();
     } else {
       document.title = "Vehicle Details | RPM Auto";
     }
+  }, [vehicle]);
+  
+  // Fetch recently viewed vehicles when the page loads
+  useEffect(() => {
+    if (!vehicle) return;
+    
+    // Get IDs of recently viewed vehicles (excluding current one)
+    const recentIds = getRecentlyViewedVehicles()
+      .filter(id => id !== vehicle.id)
+      .slice(0, 3); // Limit to 3 vehicles
+    
+    if (recentIds.length === 0) return;
+    
+    // Fetch vehicle data for each ID
+    const fetchRecentVehicles = async () => {
+      try {
+        const vehicles = await Promise.all(
+          recentIds.map(async (id) => {
+            const response = await fetch(`/api/vehicles/${id}`);
+            if (!response.ok) throw new Error(`Failed to fetch vehicle ${id}`);
+            return response.json();
+          })
+        );
+        setRecentlyViewed(vehicles);
+      } catch (error) {
+        console.error("Error fetching recently viewed vehicles:", error);
+      }
+    };
+    
+    fetchRecentVehicles();
   }, [vehicle]);
 
   if (isLoading) {
@@ -313,6 +352,48 @@ export default function VehicleDetails() {
           </div>
         </div>
       </section>
+
+      {/* Recently Viewed Vehicles Section */}
+      {recentlyViewed.length > 0 && (
+        <section className="py-8">
+          <div className="container mx-auto px-6">
+            <div className="mb-8">
+              <h2 className="text-2xl font-['Poppins'] font-semibold mb-4">Recently Viewed Vehicles</h2>
+              <p className="text-gray-600">
+                Here are some other vehicles you've recently viewed.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {recentlyViewed.map((vehicle) => (
+                <Link href={`/inventory/${vehicle.id}`} key={vehicle.id}>
+                  <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                    <div className="relative h-52">
+                      <OptimizedImage 
+                        src={vehicle.photos[0]} 
+                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-['Poppins'] font-semibold mb-1">
+                        {vehicle.year} {vehicle.make} {vehicle.model}
+                      </h3>
+                      <p className="text-[#E31837] font-bold mb-2">
+                        {formatCurrency(vehicle.price)}
+                      </p>
+                      <div className="text-sm text-gray-600">
+                        <span>{formatNumber(vehicle.mileage)} km</span>
+                        <span className="mx-2">•</span>
+                        <span>{vehicle.transmission}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Inquiry Form */}
       <section id="inquiry-form" className="py-8">

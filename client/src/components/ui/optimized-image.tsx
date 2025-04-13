@@ -3,51 +3,52 @@ import React from 'react';
 interface OptimizedImageProps {
   src: string;
   alt: string;
-  className?: string;
   width?: number;
   height?: number;
+  className?: string;
   priority?: boolean;
-  loading?: 'lazy' | 'eager';
-  sizes?: string;
-  decoding?: 'async' | 'auto' | 'sync';
+  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 }
 
 /**
- * OptimizedImage component for improved image loading and SEO
+ * OptimizedImage component for SEO-friendly images
  * 
- * This component enhances regular image tags with:
- * - Proper width and height attributes to prevent layout shifts
- * - Loading attributes for performance optimization
- * - Proper alt text for accessibility and SEO
- * - Optional priority flag for LCP images
- * - Decoding attribute for browser optimization
+ * This component provides:
+ * - Proper width and height attributes to reduce layout shift
+ * - Alt text for accessibility and SEO
+ * - Loading strategy (lazy by default, eager for priority images)
+ * - Controlled aspect ratio via width/height props
+ * 
+ * @param {string} src - The image source URL
+ * @param {string} alt - Descriptive alt text for the image 
+ * @param {number} width - The width of the image (optional)
+ * @param {number} height - The height of the image (optional)
+ * @param {string} className - Additional CSS classes
+ * @param {boolean} priority - If true, loads as high priority (non-lazy)
+ * @param {string} objectFit - CSS object-fit property
  */
 export function OptimizedImage({
   src,
   alt,
-  className = '',
   width,
   height,
+  className = '',
   priority = false,
-  loading = 'lazy',
-  sizes,
-  decoding = 'async'
+  objectFit = 'cover'
 }: OptimizedImageProps) {
-  // Force eager loading if priority is true
-  const loadingAttribute = priority ? 'eager' : loading;
-  
   return (
     <img
       src={src}
       alt={alt}
-      className={className}
       width={width}
       height={height}
-      loading={loadingAttribute}
-      sizes={sizes}
-      decoding={decoding}
-      // Add fetchpriority attribute for browsers that support it
-      {...(priority ? { fetchpriority: 'high' } : {})}
+      loading={priority ? 'eager' : 'lazy'}
+      className={`${className} ${objectFit ? `object-${objectFit}` : ''}`}
+      style={{
+        // If width/height are provided, set them as style props too for older browsers
+        ...(width && { width: `${width}px` }),
+        ...(height && { height: `${height}px` }),
+      }}
     />
   );
 }
