@@ -1,64 +1,103 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { getABTestVariant, trackABTestConversion } from '@/lib/cookieUtils';
 
 interface ABTestProps {
   testName: string;
   variants: {
-    [key: string]: ReactNode;
+    A: ReactNode;
+    B: ReactNode;
   };
-  defaultVariant: string;
-  conversionAction?: string;
+  onConversion?: (action: string, variant: string) => void;
 }
 
 /**
- * ABTest component that renders different content variants based on A/B test assignment
+ * A/B Test component for testing different UI variations
  * 
- * This component will randomly assign users to different test variants and track
- * which variant they see. When combined with conversion tracking, this allows
- * measuring which design or content performs better.
+ * This component allows you to implement A/B testing throughout the application
+ * by showing different variants to different users and tracking their interactions.
  * 
- * @param {string} testName - Unique identifier for this test
- * @param {Object} variants - Object with variant keys and their corresponding React elements
- * @param {string} defaultVariant - Default variant to use if cookies are not available
- * @param {string} conversionAction - Optional action to track when user interacts with component
+ * @param {string} testName - Unique name for this test to track results
+ * @param {Object} variants - Object with variants A and B as React nodes
+ * @param {function} onConversion - Optional callback when a conversion is tracked
  */
-export default function ABTest({
-  testName,
-  variants,
-  defaultVariant,
-  conversionAction
-}: ABTestProps) {
-  const [variant, setVariant] = useState<string>(defaultVariant);
-  const [hasRendered, setHasRendered] = useState(false);
+export default function ABTest({ testName, variants, onConversion }: ABTestProps) {
+  const [variant, setVariant] = useState<'A' | 'B'>('A');
+  const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
-    // Get the assigned variant for this user (or assign one if it's their first visit)
-    const assignedVariant = getABTestVariant(testName);
+    // Get or assign A/B test variant
+    const testVariant = getABTestVariant(testName);
+    setVariant(testVariant as 'A' | 'B');
+    setIsLoaded(true);
     
-    // If we have a valid assigned variant that exists in our variants object, use it
-    if (assignedVariant && variants[assignedVariant]) {
-      setVariant(assignedVariant);
-    } else {
-      // Otherwise use the default
-      setVariant(defaultVariant);
-    }
-    
-    setHasRendered(true);
-  }, [testName, variants, defaultVariant]);
+    // Track impression
+    trackABTestConversion(testName, 'impression');
+  }, [testName]);
   
-  // Track conversion if conversionAction is provided
-  const trackConversion = () => {
-    if (conversionAction) {
-      trackABTestConversion(testName, conversionAction);
+  // Don't render anything until we know which variant to show
+  // This prevents content flashing
+  if (!isLoaded) return null;
+  
+  // Helper function to track conversions for this test
+  const trackConversion = (action: string) => {
+    trackABTestConversion(testName, action);
+    if (onConversion) {
+      onConversion(action, variant);
     }
   };
   
-  // Wrap the variant content in a div that tracks clicks if conversion tracking is enabled
-  const content = hasRendered ? (
-    <div onClick={conversionAction ? trackConversion : undefined}>
-      {variants[variant]}
-    </div>
-  ) : null;
+  // Wrap the chosen variant with an event handler
+  const content = variant === 'A' ? variants.A : variants.B;
+  
+  // Recursively add onClick to all interactive elements
+  const addClickTracking = (node: ReactNode): ReactNode => {
+    if (!node || typeof node !== 'object' || !('type' in node)) {
+      return node;
+    }
+    
+    // If it's a component, just return it as is
+    if (typeof node.type === 'function') {
+      return node;
+    }
+    
+    // If it's an interactive element, add onClick handler
+    if (
+      node.type === 'button' || 
+      node.type === 'a' || 
+      node.type === 'input' ||
+      node.props?.role === 'button'
+    ) {
+      const originalOnClick = node.props?.onClick;
+      
+      return {
+        ...node,
+        props: {
+          ...node.props,
+          onClick: (e: React.MouseEvent) => {
+            trackConversion('click');
+            if (originalOnClick) {
+              originalOnClick(e);
+            }
+          }
+        }
+      };
+    }
+    
+    // If it has children, process them recursively
+    if (node.props?.children) {
+      return {
+        ...node,
+        props: {
+          ...node.props,
+          children: Array.isArray(node.props.children) 
+            ? node.props.children.map(addClickTracking) 
+            : addClickTracking(node.props.children)
+        }
+      };
+    }
+    
+    return node;
+  };
   
   return content;
 }
