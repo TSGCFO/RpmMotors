@@ -1,6 +1,19 @@
 User-agent: *
-Disallow: /api/
-Disallow: /admin/
 Allow: /
 
+# Sitemap
 Sitemap: https://rpmauto.com/sitemap.xml
+
+# Priority pages
+Allow: /inventory
+Allow: /services
+Allow: /financing
+Allow: /about
+Allow: /contact
+Allow: /gallery
+
+# Block potentially sensitive pages
+Disallow: /admin/
+Disallow: /login
+Disallow: /logout
+Disallow: /api/
