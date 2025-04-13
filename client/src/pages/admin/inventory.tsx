@@ -187,7 +187,7 @@ export default function AdminInventory() {
       category: vehicle.category,
       features: vehicle.features.join(', '),
       images: vehicle.images,
-      isFeatured: vehicle.isFeatured,
+      isFeatured: vehicle.isFeatured || false,
       condition: vehicle.condition
     });
     setIsEditModalOpen(true);
