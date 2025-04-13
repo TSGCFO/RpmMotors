@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from "@/lib/queryClient";
 import DashboardLayout from '@/components/admin/dashboard-layout';
-import { Vehicle } from '@shared/schema';
+import { Vehicle, InsertVehicle } from '@shared/schema';
 import { Edit, Trash2, Plus, Search, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -41,7 +41,7 @@ export default function AdminInventory() {
   
   // Add a new vehicle
   const addVehicleMutation = useMutation({
-    mutationFn: (newVehicle: Omit<Vehicle, 'id'>) => 
+    mutationFn: (newVehicle: InsertVehicle) => 
       apiRequest('POST', '/api/vehicles', newVehicle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });

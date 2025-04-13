@@ -168,7 +168,7 @@ export default function AdminDashboard() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
+                        {inquiry.status ? inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) : 'New'}
                       </span>
                     </div>
                     <p className="text-gray-600 text-sm truncate mt-1">{inquiry.message}</p>
