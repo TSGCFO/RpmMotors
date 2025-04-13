@@ -15,6 +15,9 @@ import Contact from "@/pages/contact";
 import Sitemap from "@/pages/sitemap";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Terms from "@/pages/terms";
+import AdminDashboard from "@/pages/admin";
+import AdminAnalytics from "@/pages/admin/analytics";
+import AdminMarketing from "@/pages/admin/marketing";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -54,6 +57,9 @@ function Router() {
         <Route path="/sitemap" component={Sitemap} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms" component={Terms} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/analytics" component={AdminAnalytics} />
+        <Route path="/admin/marketing" component={AdminMarketing} />
         <Route component={NotFound} />
       </Switch>
       <Footer />
