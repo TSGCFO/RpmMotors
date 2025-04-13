@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Vehicle } from "@shared/schema";
 import { Link } from "wouter";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import PageMeta from "@/components/seo/page-meta";
+import StructuredData from "@/components/seo/structured-data";
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -44,8 +47,55 @@ export default function Gallery() {
     setSelectedCategory(category);
   };
 
+  // Prepare SEO metadata
+  const pageTitle = "Luxury Car Photo Gallery | RPM Auto";
+  const pageDescription = "Explore our stunning collection of luxury vehicle photographs. Browse by category to view our premium inventory of exotic and high-end cars.";
+  
+  // Prepare breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Gallery", href: "/gallery", current: true }
+  ];
+  
+  // Prepare ImageGallery structured data
+  const galleryImages = filteredImages.map((image, index) => ({
+    "@type": "ImageObject",
+    "contentUrl": image,
+    "description": `Luxury vehicle image ${index + 1}`
+  }));
+  
   return (
     <main className="bg-[#F5F5F5] min-h-screen">
+      {/* SEO Components */}
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        keywords="luxury car gallery, exotic car photos, premium auto gallery, vehicle images, RPM Auto gallery, car photography"
+        ogType="website"
+        ogImage={allImages.length > 0 ? allImages[0] : "/RPM Auto.png"}
+        canonical="https://rpmauto.com/gallery"
+      />
+      
+      {/* ImageGallery Schema */}
+      {filteredImages.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ImageGallery",
+            "name": "RPM Auto Luxury Vehicle Gallery",
+            "description": "Collection of premium and exotic vehicles available at RPM Auto",
+            "image": galleryImages
+          })
+        }} />
+      )}
+      
+      {/* Breadcrumb */}
+      <div className="bg-white py-4 border-b border-gray-200">
+        <div className="container mx-auto px-6">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+      </div>
+      
       {/* Hero Section */}
       <section className="bg-black text-white py-16 relative">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -144,15 +194,11 @@ export default function Gallery() {
               Browse our inventory to discover more details about our premium selection of vehicles.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Link href="/inventory">
-                <a className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                  Browse Inventory
-                </a>
+              <Link href="/inventory" className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
+                Browse Inventory
               </Link>
-              <Link href="/contact">
-                <a className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
-                  Contact Us
-                </a>
+              <Link href="/contact" className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
+                Contact Us
               </Link>
             </div>
           </div>

@@ -1,19 +1,60 @@
+# Main robots.txt file for RPM Auto (https://rpmauto.com)
+# Updated: April 13, 2025
+
+# For all search engines and crawlers
 User-agent: *
 Allow: /
 
-# Sitemap
+# Sitemap location (primary sitemap)
 Sitemap: https://rpmauto.com/sitemap.xml
 
-# Priority pages
-Allow: /inventory
-Allow: /services
-Allow: /financing
-Allow: /about
-Allow: /contact
-Allow: /gallery
+# Primary content pages - allow explicit crawling
+Allow: /inventory$
+Allow: /inventory/$
+Allow: /inventory/vehicle/
+Allow: /services$
+Allow: /services/$
+Allow: /financing$
+Allow: /financing/$
+Allow: /about$
+Allow: /about/$
+Allow: /contact$
+Allow: /contact/$
+Allow: /gallery$
+Allow: /gallery/$
 
-# Block potentially sensitive pages
-Disallow: /admin/
-Disallow: /login
-Disallow: /logout
+# Prevent crawling of API endpoints, admin areas, and authentication pages
 Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login$
+Disallow: /logout$
+Disallow: /register$
+Disallow: /reset-password
+Disallow: /callback
+
+# Prevent crawling search result pages and filters to avoid duplicate content
+Disallow: /*?*query=
+Disallow: /*?*filter=
+Disallow: /*?*sort=
+
+# Special instructions for Google
+User-agent: Googlebot
+Allow: /
+# Additional Google-specific disallow directives could be added here
+
+# Special instructions for Bing
+User-agent: Bingbot
+Allow: /
+# Additional Bing-specific disallow directives could be added here
+
+# Image-specific crawlers - allow image folders
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /assets/
+Allow: /photos/
+
+# Additional notes:
+# - Crawl delay is managed via server configuration headers (not specified here)
+# - URL parameters are managed via Google Search Console
+# - This file should be checked and updated on a quarterly basis
