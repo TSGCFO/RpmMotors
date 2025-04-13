@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { FinancingCalculator } from "@/components/ui/financing-calculator";
 import { ContactForm } from "@/components/ui/contact-form";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import PageMeta from "@/components/seo/page-meta";
+import StructuredData from "@/components/seo/structured-data";
 
 export default function Financing() {
   useEffect(() => {
@@ -54,8 +57,54 @@ export default function Financing() {
     }
   ];
 
+  // Prepare SEO metadata
+  const pageTitle = "Luxury Car Financing & Leasing Options | RPM Auto";
+  const pageDescription = "Explore our flexible financing options for luxury vehicles. Competitive rates, specialized programs for exotic cars, leasing options and international financing solutions.";
+  
+  // Prepare breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Financing", href: "/financing", current: true }
+  ];
+  
+  // FAQ structured data
+  const faqList = faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }));
+  
   return (
     <main className="bg-[#F5F5F5] min-h-screen">
+      {/* SEO Components */}
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        keywords="luxury car financing, auto loans, vehicle leasing, exotic car financing, international financing, auto loan calculator, car payment"
+        ogType="website"
+        ogImage="/RPM Auto.png"
+        canonical="https://rpmauto.com/financing"
+      />
+      
+      {/* FAQ Schema */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqList
+        })
+      }} />
+      
+      {/* Breadcrumb */}
+      <div className="bg-white py-4 border-b border-gray-200">
+        <div className="container mx-auto px-6">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+      </div>
+      
       {/* Hero Section */}
       <section className="relative bg-black text-white py-16">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -69,10 +118,8 @@ export default function Financing() {
               <a href="#calculator" className="inline-block px-8 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
                 Explore Payment Options
               </a>
-              <Link href="/contact">
-                <a className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
-                  Speak With a Specialist
-                </a>
+              <Link href="/contact" className="inline-block px-8 py-3 bg-transparent border-2 border-white text-white font-['Poppins'] font-semibold rounded hover:bg-white hover:text-black transition">
+                Speak With a Specialist
               </Link>
             </div>
           </div>
