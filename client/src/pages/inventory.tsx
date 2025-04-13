@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { Vehicle } from "@shared/schema";
 import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import PageMeta from "@/components/seo/page-meta";
 import { 
   Select,
   SelectContent,
@@ -30,6 +32,9 @@ export default function Inventory() {
     search: ""
   });
 
+  // State to track category name for breadcrumb
+  const [categoryName, setCategoryName] = useState<string>("");
+  
   // Parse query parameters
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1]);
@@ -39,13 +44,20 @@ export default function Inventory() {
     
     if (category) {
       setFilters(prev => ({ ...prev, category }));
+      
+      // Set readable category name for breadcrumb
+      const formattedCategory = category.replace(/-/g, " ")
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      setCategoryName(formattedCategory);
+    } else {
+      setCategoryName("");
     }
     
     if (search) {
       setFilters(prev => ({ ...prev, search }));
     }
-    
-    document.title = "Inventory | RPM Auto";
   }, [location]);
 
   // Fetch all vehicles
@@ -118,11 +130,51 @@ export default function Inventory() {
     });
   };
 
+  // Prepare page title and description based on filters
+  const pageTitle = categoryName 
+    ? `${categoryName} | RPM Auto Inventory`
+    : "Our Inventory | RPM Auto";
+    
+  const pageDescription = categoryName
+    ? `Explore our collection of ${categoryName.toLowerCase()} at RPM Auto. Premium selection of luxury vehicles in Woodbridge, ON.`
+    : "Browse our inventory of premium luxury vehicles at RPM Auto in Woodbridge, ON. Find your dream car today.";
+    
+  // Prepare breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Inventory", href: "/inventory", current: !categoryName }
+  ];
+  
+  if (categoryName) {
+    breadcrumbItems.push({ 
+      label: categoryName, 
+      href: `/inventory?category=${filters.category}`,
+      current: true 
+    });
+  }
+  
   return (
     <main className="py-12 bg-[#F5F5F5] min-h-screen">
+      {/* SEO Components */}
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        keywords="luxury cars, exotic cars, premium vehicles, car inventory, Woodbridge, Toronto, Ontario"
+        ogType="website"
+        ogImage="/RPM Auto.png"
+        canonical={categoryName ? `https://rpmauto.com/inventory?category=${filters.category}` : "https://rpmauto.com/inventory"}
+      />
+      
       <div className="container mx-auto px-6">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+        
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-['Poppins'] font-bold mb-4">Our Inventory</h1>
+          <h1 className="text-4xl font-['Poppins'] font-bold mb-4">
+            {categoryName ? categoryName : "Our Inventory"}
+          </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Explore our collection of premium luxury vehicles. Use the filters to find your dream car.
           </p>

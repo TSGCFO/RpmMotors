@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ContactForm } from "@/components/ui/contact-form";
 import { VehicleGallery } from "@/components/ui/vehicle-gallery";
 import { FinancingCalculator } from "@/components/ui/financing-calculator";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import PageMeta from "@/components/seo/page-meta";
+import StructuredData from "@/components/seo/structured-data";
 
 export default function VehicleDetails() {
   const [, params] = useRoute<{ id: string }>("/inventory/:id");
@@ -65,10 +68,8 @@ export default function VehicleDetails() {
             <p className="text-gray-600 mb-8">
               We couldn't find the vehicle you're looking for. It may have been sold or removed from our inventory.
             </p>
-            <Link href="/inventory">
-              <a className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                Browse Our Inventory
-              </a>
+            <Link href="/inventory" className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
+              Browse Our Inventory
             </Link>
           </div>
         </div>
@@ -76,22 +77,70 @@ export default function VehicleDetails() {
     );
   }
 
+  // Prepare SEO data
+  const pageTitle = `${vehicle.year} ${vehicle.make} ${vehicle.model} | RPM Auto`;
+  const pageDescription = `${vehicle.year} ${vehicle.make} ${vehicle.model} with ${formatNumber(vehicle.mileage)} km, ${vehicle.transmission}, ${vehicle.exteriorColor}. Available at RPM Auto in Woodbridge.`;
+  
+  // Prepare breadcrumb items
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Inventory", href: "/inventory" },
+    { 
+      label: `${vehicle.year} ${vehicle.make} ${vehicle.model}`, 
+      href: `/inventory/${vehicle.id}`,
+      current: true 
+    }
+  ];
+  
+  // Prepare vehicle structured data
+  const vehicleData = {
+    name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+    description: vehicle.description,
+    brand: vehicle.make,
+    model: vehicle.model,
+    modelDate: vehicle.year.toString(),
+    vehicleEngine: {
+      engineType: "Internal combustion",
+      fuelType: vehicle.fuelType
+    },
+    url: `https://rpmauto.com/inventory/${vehicle.id}`,
+    mileageFromOdometer: {
+      value: vehicle.mileage,
+      unitCode: "KMT"
+    },
+    vehicleTransmission: vehicle.transmission,
+    driveWheelConfiguration: vehicle.drivetrain,
+    vehicleInteriorColor: "Not specified",
+    vehicleExteriorColor: vehicle.exteriorColor,
+    image: vehicle.photos[0],
+    offers: {
+      price: vehicle.price,
+      priceCurrency: "CAD",
+      availability: "https://schema.org/InStock",
+      url: `https://rpmauto.com/inventory/${vehicle.id}`
+    }
+  };
+  
   return (
     <main className="bg-[#F5F5F5] min-h-screen">
+      {/* SEO Components */}
+      <PageMeta
+        title={pageTitle}
+        description={pageDescription}
+        keywords={`${vehicle.make}, ${vehicle.model}, used cars, luxury cars, ${vehicle.category}, Woodbridge, Toronto, Ontario`}
+        ogType="product"
+        ogImage={vehicle.photos[0]}
+        canonical={`https://rpmauto.com/inventory/${vehicle.id}`}
+      />
+      <StructuredData
+        type="vehicle"
+        vehicleData={vehicleData}
+      />
+      
       {/* Breadcrumb Navigation */}
       <div className="bg-white py-4 border-b border-gray-200">
         <div className="container mx-auto px-6">
-          <div className="flex items-center text-sm text-gray-600">
-            <Link href="/">
-              <a className="hover:text-[#E31837] transition-colors">Home</a>
-            </Link>
-            <span className="mx-2">/</span>
-            <Link href="/inventory">
-              <a className="hover:text-[#E31837] transition-colors">Inventory</a>
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900 font-semibold">{vehicle.year} {vehicle.make} {vehicle.model}</span>
-          </div>
+          <Breadcrumb items={breadcrumbItems} className="mb-0" />
         </div>
       </div>
 
