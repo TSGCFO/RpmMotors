@@ -17,27 +17,27 @@ export function CarCard({ vehicle }: CarCardProps) {
     mileage,
     fuelType,
     transmission,
-    exteriorColor,
-    drivetrain,
-    thumbnail,
-    photos
+    color,
+    condition,
+    features = [],
+    images = []
   } = vehicle;
 
   return (
     <Card className="bg-white rounded-lg overflow-hidden shadow-md group transition-all hover:shadow-xl">
       <div className="relative overflow-hidden">
-        {vehicle.featured && (
+        {vehicle.isFeatured && (
           <span className="absolute top-4 left-4 z-10 bg-[#E31837] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
             Featured
           </span>
         )}
         <img 
-          src={thumbnail} 
+          src={images[0] || '/placeholder-car.jpg'} 
           alt={`${year} ${make} ${model}`} 
           className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-500"
         />
         <div className="flex justify-center space-x-2 pt-2 pb-3 bg-white">
-          <span className="text-xs text-gray-600">{photos.length} Photos</span>
+          <span className="text-xs text-gray-600">{images.length} Photos</span>
           <span className="text-gray-300">|</span>
           <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
         </div>
@@ -69,11 +69,11 @@ export function CarCard({ vehicle }: CarCardProps) {
             </div>
             <div className="flex items-center">
               <i className="fas fa-paint-brush w-5 text-gray-400"></i>
-              <span>{exteriorColor}</span>
+              <span>{color}</span>
             </div>
             <div className="flex items-center">
               <i className="fas fa-car w-5 text-gray-400"></i>
-              <span>{drivetrain}</span>
+              <span>{features && features.length > 0 ? features[0] : 'Standard'}</span>
             </div>
           </div>
         </div>
