@@ -67,8 +67,42 @@ export function deleteCookie(name: string, path = '/'): void {
 }
 
 // Check if user has given consent for cookies
+export interface ConsentPreferences {
+  necessary: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  personalization: boolean;
+}
+
 export function hasConsentedToCookies(): boolean {
   return getCookie('cookie_consent') === 'true';
+}
+
+export function getConsentPreferences(): ConsentPreferences | null {
+  const preferencesStr = localStorage.getItem('cookie_preferences');
+  if (!preferencesStr) return null;
+  
+  try {
+    return JSON.parse(preferencesStr) as ConsentPreferences;
+  } catch (e) {
+    console.error('Error parsing cookie preferences', e);
+    return null;
+  }
+}
+
+export function hasAnalyticsConsent(): boolean {
+  const preferences = getConsentPreferences();
+  return !!preferences?.analytics;
+}
+
+export function hasMarketingConsent(): boolean {
+  const preferences = getConsentPreferences();
+  return !!preferences?.marketing;
+}
+
+export function hasPersonalizationConsent(): boolean {
+  const preferences = getConsentPreferences();
+  return !!preferences?.personalization;
 }
 
 // Save user's cookie consent preference

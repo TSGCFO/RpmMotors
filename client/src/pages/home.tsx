@@ -471,6 +471,9 @@ export default function Home() {
         </div>
       </section>
       
+      {/* A/B Tested CTA Banner */}
+      <CTABanner />
+      
       {/* Map Section */}
       <MapSection />
     </main>
