@@ -17,6 +17,7 @@ import Terms from "@/pages/terms";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
+import CookieConsent from "@/components/ui/cookie-consent";
 
 function Router() {
   return (
