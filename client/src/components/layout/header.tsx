@@ -32,7 +32,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-black text-white w-full z-50">
+    <header className="bg-black text-white w-full z-50" role="banner" aria-label="Main Header">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center pt-4 pb-3 px-4">
           {/* Logo Section */}
@@ -119,7 +119,7 @@ export default function Header() {
           
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <nav className="flex justify-center">
+            <nav className="flex justify-center" role="navigation" aria-label="Main Navigation">
               <ul className="flex font-['Poppins'] font-semibold text-sm uppercase tracking-wide">
                 <li>
                   <Link href="/" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>
@@ -162,7 +162,7 @@ export default function Header() {
           
           {/* Mobile Menu */}
           <div className={`md:hidden border-t border-gray-800 px-4 py-4 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
-            <nav>
+            <nav role="navigation" aria-label="Mobile Navigation">
               <ul className="flex flex-col space-y-4 font-['Poppins'] font-semibold text-sm uppercase tracking-wide">
                 <li>
                   <Link href="/" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/') ? 'text-[#E31837]' : ''}`}>

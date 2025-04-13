@@ -1,0 +1,65 @@
+{
+  "name": "RPM Auto - Luxury & Exotic Car Dealership",
+  "short_name": "RPM Auto",
+  "description": "Premium automotive dealership offering luxury and exotic vehicles in the Greater Toronto Area with exceptional service and exclusive inventory.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E31837",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/homepage.jpg",
+      "type": "image/jpeg",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/inventory.jpg",
+      "type": "image/jpeg",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile-home.jpg",
+      "type": "image/jpeg",
+      "sizes": "720x1280",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "categories": ["automotive", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Browse Inventory",
+      "short_name": "Inventory",
+      "description": "View our current vehicle inventory",
+      "url": "/inventory",
+      "icons": [{ "src": "/icons/inventory.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Get in touch with our team",
+      "url": "/contact",
+      "icons": [{ "src": "/icons/contact.png", "sizes": "192x192" }]
+    }
+  ]
+}

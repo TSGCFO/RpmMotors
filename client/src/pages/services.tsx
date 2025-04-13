@@ -6,7 +6,7 @@ import PageMeta from "@/components/seo/page-meta";
 import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import ServicesSchema from "@/components/seo/services-schema";
-import { JsonLdSchema, createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
+import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 
 export default function Services() {
   useEffect(() => {
@@ -104,9 +104,47 @@ export default function Services() {
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/services"
       />
+      <CanonicalUrl path="/services" />
+      
+      {/* LocalBusiness structured data */}
       <StructuredData
         type="localBusiness"
         businessData={businessData}
+      />
+      
+      {/* Breadcrumb structured data */}
+      <JsonLdSchema
+        schema={createBreadcrumbSchema([
+          { name: "Home", item: "https://rpmauto.com/" },
+          { name: "Services", item: "https://rpmauto.com/services" }
+        ])}
+      />
+      
+      {/* Services specific schema */}
+      <ServicesSchema
+        businessName="RPM Auto"
+        businessUrl="https://rpmauto.com"
+        services={services.map(service => ({
+          name: service.title,
+          description: service.description,
+          url: `https://rpmauto.com/services#${service.id}`,
+          image: `https://rpmauto.com/services-${service.id}.jpg`,
+          provider: {
+            name: "RPM Auto",
+            url: "https://rpmauto.com"
+          },
+          serviceType: "AutomotiveServices",
+          areaServed: {
+            addressLocality: "Woodbridge",
+            addressRegion: "ON",
+            postalCode: "L4H 0A1",
+            addressCountry: "CA"
+          },
+          availableChannel: {
+            name: "RPM Auto Service Center",
+            serviceUrl: "https://rpmauto.com/contact"
+          }
+        }))}
       />
       
       {/* Breadcrumb */}
