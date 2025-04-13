@@ -9,6 +9,8 @@ import { ServiceCard } from "@/components/ui/service-card";
 import { TestimonialCard } from "@/components/ui/testimonial-card";
 import { ContactForm } from "@/components/ui/contact-form";
 import { MapSection } from "@/components/ui/map-section";
+import PageMeta from "@/components/seo/page-meta";
+import StructuredData from "@/components/seo/structured-data";
 
 export default function Home() {
   // Fetch featured vehicles
@@ -21,10 +23,35 @@ export default function Home() {
     queryKey: ["/api/testimonials"],
   });
   
-  // Set page title
-  useEffect(() => {
-    document.title = "RPM Auto: New & Used Luxury Cars Dealer | Woodbridge, ON";
-  }, []);
+  // Business data for structured data
+  const businessData = {
+    name: "RPM Auto",
+    description: "RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
+    url: "https://rpmauto.com",
+    telephone: "(905) 264-1969",
+    address: {
+      streetAddress: "6260 Hwy 7 Unit 6",
+      addressLocality: "Woodbridge",
+      addressRegion: "ON",
+      postalCode: "L4H 4G3",
+      addressCountry: "CA"
+    },
+    geo: {
+      latitude: 43.7856,
+      longitude: -79.5857
+    },
+    openingHours: [
+      "Monday 9:00-19:00",
+      "Tuesday 9:00-19:00",
+      "Wednesday 9:00-19:00",
+      "Thursday 9:00-19:00",
+      "Friday 9:00-19:00",
+      "Saturday 10:00-17:00",
+      "Sunday 11:00-16:00"
+    ],
+    image: "/RPM Auto.png",
+    priceRange: "$$$$"
+  };
   
   const categories = [
     {
@@ -90,6 +117,19 @@ export default function Home() {
 
   return (
     <main>
+      {/* SEO Components */}
+      <PageMeta 
+        title="RPM Auto: New & Used Luxury Cars Dealer | Woodbridge, ON"
+        description="RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles with expert service."
+        keywords="luxury cars, exotic cars, premium vehicles, car dealership, Woodbridge, Toronto, Ontario, sports cars, SUVs, financing, auto service"
+        ogType="website"
+        ogImage="/RPM Auto.png"
+        canonical="https://rpmauto.com/"
+      />
+      <StructuredData 
+        type="localBusiness"
+        businessData={businessData}
+      />
       {/* Hero Slider */}
       <HeroSlider />
       
@@ -122,10 +162,11 @@ export default function Home() {
               <h2 className="text-3xl font-['Poppins'] font-bold mb-2">Featured Vehicles</h2>
               <p className="text-gray-600">Explore our premium selection of luxury vehicles</p>
             </div>
-            <Link href="/inventory">
-              <a className="hidden md:inline-block px-6 py-2 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                View All
-              </a>
+            <Link 
+              href="/inventory" 
+              className="hidden md:inline-block px-6 py-2 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
+            >
+              View All
             </Link>
           </div>
           
@@ -162,10 +203,11 @@ export default function Home() {
           )}
           
           <div className="mt-8 text-center md:hidden">
-            <Link href="/inventory">
-              <a className="inline-block px-6 py-2 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                View All Inventory
-              </a>
+            <Link 
+              href="/inventory" 
+              className="inline-block px-6 py-2 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
+            >
+              View All Inventory
             </Link>
           </div>
         </div>
@@ -221,16 +263,18 @@ export default function Home() {
                   With over a decade of experience in the luxury automotive industry, we've built our reputation on trust, quality, and unparalleled customer service. Each vehicle in our inventory is hand-selected and thoroughly inspected to ensure the highest standards of performance and reliability.
                 </p>
                 <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                  <Link href="/about">
-                    <a className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition">
-                      Learn More About Us
-                    </a>
+                  <Link 
+                    href="/about" 
+                    className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-opacity-90 transition"
+                  >
+                    Learn More About Us
                   </Link>
-                  <Link href="/contact">
-                    <a className="inline-flex items-center text-white hover:text-[#E31837] transition-colors">
-                      <span className="mr-2">Contact Us</span>
-                      <i className="fas fa-arrow-right"></i>
-                    </a>
+                  <Link 
+                    href="/contact" 
+                    className="inline-flex items-center text-white hover:text-[#E31837] transition-colors"
+                  >
+                    <span className="mr-2">Contact Us</span>
+                    <i className="fas fa-arrow-right"></i>
                   </Link>
                 </div>
               </div>
