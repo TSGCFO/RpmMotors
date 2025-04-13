@@ -81,7 +81,7 @@ export const testimonials = pgTable("testimonials", {
 
 export const insertTestimonialSchema = createInsertSchema(testimonials).omit({
   id: true,
-  approved: true,
+  isApproved: true,
   createdAt: true,
 });
 
