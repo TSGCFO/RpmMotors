@@ -6,6 +6,7 @@ import { CarCard } from "@/components/ui/car-card";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import RecentlyViewedVehicles from "@/components/ui/recently-viewed-vehicles";
 import PageMeta from "@/components/seo/page-meta";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
@@ -531,6 +532,9 @@ export default function Inventory() {
           </div>
         </div>
       </div>
+      
+      {/* Recently Viewed Vehicles */}
+      <RecentlyViewedVehicles />
     </main>
   );
 }
