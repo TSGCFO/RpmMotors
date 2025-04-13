@@ -254,7 +254,7 @@ export default function Inventory() {
                       <SelectValue placeholder="All Makes" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Makes</SelectItem>
+                      <SelectItem value="all-makes">All Makes</SelectItem>
                       {uniqueMakes.map(make => (
                         <SelectItem key={make} value={make}>{make}</SelectItem>
                       ))}
@@ -310,7 +310,7 @@ export default function Inventory() {
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all-categories">All Categories</SelectItem>
                       <SelectItem value="sports-cars">Sports Cars</SelectItem>
                       <SelectItem value="luxury-sedans">Luxury Sedans</SelectItem>
                       <SelectItem value="suvs-crossovers">SUVs & Crossovers</SelectItem>
@@ -351,7 +351,7 @@ export default function Inventory() {
                           <SelectValue placeholder="All Makes" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Makes</SelectItem>
+                          <SelectItem value="all-makes">All Makes</SelectItem>
                           {uniqueMakes.map(make => (
                             <SelectItem key={make} value={make}>{make}</SelectItem>
                           ))}
