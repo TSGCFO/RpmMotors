@@ -3,6 +3,8 @@ import { ContactForm } from "@/components/ui/contact-form";
 import { MapSection } from "@/components/ui/map-section";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import PageMeta from "@/components/seo/page-meta";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import StructuredData from "@/components/seo/structured-data";
 
 export default function Contact() {
@@ -56,9 +58,81 @@ export default function Contact() {
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/contact"
       />
+      <CanonicalUrl path="/contact" />
+      
+      {/* LocalBusiness structured data */}
       <StructuredData
         type="localBusiness"
         businessData={businessData}
+      />
+      
+      {/* Breadcrumb structured data */}
+      <JsonLdSchema
+        schema={createBreadcrumbSchema([
+          { name: "Home", item: "https://rpmauto.com/" },
+          { name: "Contact Us", item: "https://rpmauto.com/contact" }
+        ])}
+      />
+      
+      {/* ContactPage schema */}
+      <JsonLdSchema
+        schema={{
+          "@type": "ContactPage",
+          "name": "Contact RPM Auto",
+          "description": pageDescription,
+          "url": "https://rpmauto.com/contact",
+          "mainEntity": {
+            "@type": "AutoDealer",
+            "name": "RPM Auto",
+            "telephone": "+1-905-264-1969",
+            "email": "info@rpmauto.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "6260 Hwy 7 Unit 6",
+              "addressLocality": "Woodbridge",
+              "addressRegion": "ON",
+              "postalCode": "L4H 4G3",
+              "addressCountry": "CA"
+            },
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+1-905-264-1969 ext. 1",
+                "contactType": "sales",
+                "email": "sales@rpmauto.com",
+                "availableLanguage": ["English"]
+              },
+              {
+                "@type": "ContactPoint",
+                "telephone": "+1-905-264-1969 ext. 2",
+                "contactType": "finance",
+                "email": "finance@rpmauto.com",
+                "availableLanguage": ["English"]
+              },
+              {
+                "@type": "ContactPoint",
+                "telephone": "+1-905-264-1969 ext. 3",
+                "contactType": "customer service",
+                "email": "service@rpmauto.com",
+                "availableLanguage": ["English"]
+              }
+            ],
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "19:00"
+              },
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Saturday"],
+                "opens": "10:00",
+                "closes": "17:00"
+              }
+            ]
+          }
+        }}
       />
       
       {/* Breadcrumb */}

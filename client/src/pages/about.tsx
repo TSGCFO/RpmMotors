@@ -4,7 +4,10 @@ import { TestimonialCard } from "@/components/ui/testimonial-card";
 import { useQuery } from "@tanstack/react-query";
 import { Testimonial } from "@shared/schema";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
+import CanonicalUrl from "@/components/seo/canonical-url";
+import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import StructuredData from "@/components/seo/structured-data";
 
 export default function About() {
@@ -91,9 +94,55 @@ export default function About() {
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/about"
       />
+      <CanonicalUrl path="/about" />
+      
+      {/* LocalBusiness structured data */}
       <StructuredData
         type="localBusiness"
         businessData={businessData}
+      />
+      
+      {/* Breadcrumb structured data */}
+      <JsonLdSchema
+        schema={createBreadcrumbSchema([
+          { name: "Home", item: "https://rpmauto.com/" },
+          { name: "About Us", item: "https://rpmauto.com/about" }
+        ])}
+      />
+      
+      {/* About Page schema */}
+      <JsonLdSchema
+        schema={{
+          "@type": "AboutPage",
+          "name": "About RPM Auto",
+          "description": pageDescription,
+          "url": "https://rpmauto.com/about",
+          "mainEntity": {
+            "@type": "AutoDealer",
+            "name": "RPM Auto",
+            "foundingDate": "2013",
+            "description": "A premier destination for luxury and exotic vehicles in the Greater Toronto Area, providing exceptional service and an unparalleled selection of premium automobiles.",
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "value": teamMembers.length
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "123 Main Street",
+              "addressLocality": "Woodbridge",
+              "addressRegion": "ON",
+              "postalCode": "L4H 0A1",
+              "addressCountry": "CA"
+            },
+            "employee": teamMembers.map(member => ({
+              "@type": "Person",
+              "name": member.name,
+              "jobTitle": member.position,
+              "description": member.bio,
+              "image": member.image
+            }))
+          }
+        }}
       />
       
       {/* Breadcrumb */}
@@ -137,10 +186,13 @@ export default function About() {
             </div>
             <div>
               <div className="relative">
-                <img 
+                <OptimizedImage 
                   src="https://images.unsplash.com/photo-1547038577-da80abbc4f19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1752&q=80" 
-                  alt="RPM Auto Dealership" 
+                  alt="RPM Auto Dealership - Our luxury car showroom in Woodbridge, Ontario" 
                   className="w-full h-auto rounded-lg shadow-xl"
+                  width={1752}
+                  height={980}
+                  priority={true}
                 />
                 <div className="absolute -bottom-6 -left-6 bg-[#E31837] text-white p-6 rounded shadow-lg hidden md:block">
                   <p className="text-3xl font-['Poppins'] font-bold">10+</p>
@@ -219,10 +271,13 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <img 
+                <OptimizedImage 
                   src={member.image} 
-                  alt={member.name} 
+                  alt={`${member.name}, ${member.position} at RPM Auto`} 
                   className="w-full h-64 object-cover"
+                  width={687}
+                  height={1030}
+                  priority={index < 2}
                 />
                 <div className="p-6">
                   <h3 className="text-xl font-['Poppins'] font-bold mb-1">{member.name}</h3>
