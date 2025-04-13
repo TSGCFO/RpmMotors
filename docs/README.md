@@ -8,6 +8,10 @@ Welcome to the RPM Auto Website documentation. This comprehensive set of documen
 
 - [Developer Guide](./DEVELOPER.md) - Comprehensive developer documentation including project structure, component details, and development guidelines
 - [Technical Wiki](./TECHNICAL_WIKI.md) - In-depth technical details on field compatibility issues, TypeScript type safety, and error handling
+- [Style Guide](./STYLE_GUIDE.md) - Detailed design system documentation including colors, typography, components, and styling principles
+- [Code Architecture](./CODE_ARCHITECTURE.md) - Architectural patterns, code organization, and design principles
+- [Debugging Guide](./DEBUGGING_GUIDE.md) - Step-by-step procedures for identifying and resolving common issues
+- [Field Migration Guide](./FIELD_MIGRATION_GUIDE.md) - Documentation of field naming changes and migration strategies
 
 ## Recent Updates (April 13, 2025)
 
