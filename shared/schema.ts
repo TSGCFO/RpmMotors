@@ -2,11 +2,13 @@ import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Base user schema
+// User schema (current database schema without extensions)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  // These fields are defined here for future use but not in the actual DB yet
+  // We'll add them once we can perform the migration
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -16,6 +18,32 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Extended user profile information (for future implementation)
+export interface UserProfile extends User {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  role?: string;
+}
+
+// Saved vehicles schema to track user's saved/favorited vehicles (for future implementation)
+// Define but don't create the table until migration is possible
+export const savedVehicles = pgTable("saved_vehicles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  vehicleId: integer("vehicle_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSavedVehicleSchema = createInsertSchema(savedVehicles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSavedVehicle = z.infer<typeof insertSavedVehicleSchema>;
+export type SavedVehicle = typeof savedVehicles.$inferSelect;
 
 // Vehicle schema
 export const vehicles = pgTable("vehicles", {

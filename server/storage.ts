@@ -174,13 +174,19 @@ export class DatabaseStorage implements IStorage {
 
   // Initialize a default admin user if no users exist
   async initializeDefaultAdmin(): Promise<void> {
-    const allUsers = await db.select().from(users);
-    if (allUsers.length === 0) {
-      await this.createUser({
-        username: "admin",
-        password: "rpmauto2025" // Default admin password
-      });
-      console.log("Created default admin user");
+    try {
+      const allUsers = await db.select().from(users);
+      if (allUsers.length === 0) {
+        // This is a temporary solution until we can fix the database schema
+        // For now, only use the fields that already exist in the table
+        await db.insert(users).values({
+          username: "admin",
+          password: "rpmauto2025" // Default admin password
+        });
+        console.log("Created default admin user");
+      }
+    } catch (error) {
+      console.error("Error initializing admin user:", error);
     }
   }
   
@@ -210,53 +216,17 @@ export class DatabaseStorage implements IStorage {
             "https://images.unsplash.com/photo-1614162692292-7ac56d7f373e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80"
           ],
           vin: "WP0AC2A99JS175960"
-        },
-        {
-          make: "Mercedes-Benz",
-          model: "S580",
-          year: 2022,
-          price: 154900,
-          mileage: 8600,
-          fuelType: "Gasoline",
-          transmission: "Automatic",
-          color: "Obsidian Black",
-          description: "Luxurious 2022 Mercedes-Benz S580 with 4MATIC all-wheel drive. Features include Burmester 3D surround sound, augmented reality navigation, and level 2 autonomous driving capabilities. The interior showcases premium Nappa leather and open-pore wood trim.",
-          category: "Luxury Sedans",
-          condition: "Excellent",
-          isFeatured: true,
-          features: ["4MATIC All-Wheel Drive", "Burmester 3D Sound", "Augmented Reality Navigation", "Level 2 Autonomous Driving"],
-          images: [
-            "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-            "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-          ],
-          vin: "WDDUG7GB5MA456789"
-        },
-        {
-          make: "Ferrari",
-          model: "F8 Tributo",
-          year: 2021,
-          price: 399900,
-          mileage: 3200,
-          fuelType: "Gasoline",
-          transmission: "Automatic",
-          color: "Rosso Corsa",
-          description: "Stunning 2021 Ferrari F8 Tributo in the iconic Rosso Corsa. Features a twin-turbocharged 3.9L V8 engine producing 710 horsepower. Includes carbon fiber racing seats, advanced vehicle dynamics control, and Ferrari's 7-speed dual-clutch transmission.",
-          category: "Exotic Collection",
-          condition: "Excellent",
-          isFeatured: true,
-          features: ["Carbon Fiber Racing Seats", "Advanced Vehicle Dynamics", "Dual-Clutch Transmission", "Premium Sound System"],
-          images: [
-            "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1744&q=80",
-            "https://images.unsplash.com/photo-1592198084033-aade902d1aae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
-          ],
-          vin: "ZFF92LMS000245789"
         }
       ];
       
-      for (const vehicle of sampleVehicles) {
-        await this.createVehicle(vehicle);
+      try {
+        for (const vehicle of sampleVehicles) {
+          await db.insert(vehicles).values(vehicle);
+        }
+        console.log("Created sample vehicle");
+      } catch (error) {
+        console.error("Error creating sample vehicles:", error);
       }
-      console.log("Created sample vehicles");
     }
     
     // Check if we already have testimonials
@@ -269,26 +239,21 @@ export class DatabaseStorage implements IStorage {
           vehicle: "Ferrari 488 Owner",
           rating: 5,
           comment: "The team at RPM Auto made buying my dream car an absolute pleasure. Their knowledge, professionalism, and attention to detail exceeded my expectations."
-        },
-        {
-          name: "Sarah K.",
-          vehicle: "Mercedes-Benz Collector",
-          rating: 5,
-          comment: "I've purchased multiple vehicles from RPM Auto over the years. Their inventory is exceptional, and their commitment to customer satisfaction is unmatched."
-        },
-        {
-          name: "David R.",
-          vehicle: "Porsche Cayenne Owner",
-          rating: 4,
-          comment: "The financing options offered by RPM Auto were flexible and competitive. They worked with me to find the perfect solution for my budget and preferences."
         }
       ];
       
-      for (const testimonial of sampleTestimonials) {
-        const newTestimonial = await this.createTestimonial(testimonial);
-        await this.approveTestimonial(newTestimonial.id);
+      try {
+        for (const testimonial of sampleTestimonials) {
+          await db.insert(testimonials).values(testimonial);
+        }
+        // Approve testimonial
+        await db.update(testimonials)
+          .set({ isApproved: true })
+          .where(eq(testimonials.name, "Michael T."));
+        console.log("Created sample testimonial");
+      } catch (error) {
+        console.error("Error creating sample testimonials:", error);
       }
-      console.log("Created sample testimonials");
     }
   }
 }

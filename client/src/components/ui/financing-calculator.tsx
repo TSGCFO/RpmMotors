@@ -1,174 +1,210 @@
-import { useState } from "react";
-import { calculateLoanPayment, formatCurrency } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { calculateLoanPayment, formatCurrency } from "@/lib/utils";
 
 interface FinancingCalculatorProps {
-  vehiclePrice: number;
+  vehiclePrice?: number;
+  className?: string;
 }
 
-export function FinancingCalculator({ vehiclePrice }: FinancingCalculatorProps) {
+export function FinancingCalculator({
+  vehiclePrice = 0,
+  className = "",
+}: FinancingCalculatorProps) {
   const [price, setPrice] = useState(vehiclePrice);
-  const [downPayment, setDownPayment] = useState(Math.round(vehiclePrice * 0.2));
-  const [interestRate, setInterestRate] = useState(4.99);
+  const [downPayment, setDownPayment] = useState(Math.round(vehiclePrice * 0.2)); // Default 20% down
+  const [interestRate, setInterestRate] = useState(4.5);
   const [termYears, setTermYears] = useState(5);
-  
-  const principal = price - downPayment;
-  const monthlyPayment = calculateLoanPayment(principal, interestRate, termYears);
-  
+  const [monthlyPayment, setMonthlyPayment] = useState(0);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(20);
+
+  // Handle price input change
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      setPrice(value);
-    }
+    const newPrice = parseFloat(e.target.value) || 0;
+    setPrice(newPrice);
+    
+    // Keep the same down payment percentage
+    const newDownPayment = Math.round(newPrice * (downPaymentPercent / 100));
+    setDownPayment(newDownPayment);
   };
-  
+
+  // Handle down payment input change
   const handleDownPaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 0 && value < price) {
-      setDownPayment(value);
+    const newDownPayment = parseFloat(e.target.value) || 0;
+    setDownPayment(newDownPayment);
+    
+    // Update down payment percentage
+    const newPercent = price > 0 ? Math.round((newDownPayment / price) * 100) : 0;
+    setDownPaymentPercent(newPercent);
+  };
+
+  // Handle down payment percentage change via slider
+  const handleDownPaymentPercentChange = (values: number[]) => {
+    const newPercent = values[0];
+    setDownPaymentPercent(newPercent);
+    
+    // Update down payment amount
+    const newDownPayment = Math.round(price * (newPercent / 100));
+    setDownPayment(newDownPayment);
+  };
+
+  // Handle interest rate change via slider
+  const handleInterestRateChange = (values: number[]) => {
+    setInterestRate(values[0]);
+  };
+
+  // Handle term years change via slider
+  const handleTermYearsChange = (values: number[]) => {
+    setTermYears(values[0]);
+  };
+
+  // Calculate monthly payment whenever inputs change
+  useEffect(() => {
+    const loanAmount = price - downPayment;
+    if (loanAmount <= 0 || termYears <= 0) {
+      setMonthlyPayment(0);
+      return;
     }
-  };
-  
-  const handleDownPaymentSlider = (value: number[]) => {
-    setDownPayment(value[0]);
-  };
-  
-  const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      setInterestRate(value);
+    
+    const payment = calculateLoanPayment(loanAmount, interestRate, termYears);
+    setMonthlyPayment(payment);
+  }, [price, downPayment, interestRate, termYears]);
+
+  // Initial calculation when component mounts or vehiclePrice changes
+  useEffect(() => {
+    if (vehiclePrice !== price) {
+      setPrice(vehiclePrice);
+      const newDownPayment = Math.round(vehiclePrice * 0.2);
+      setDownPayment(newDownPayment);
     }
-  };
-  
-  const handleTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      setTermYears(value);
-    }
-  };
-  
-  const loanTermOptions = [
-    { value: 3, label: "3 Years" },
-    { value: 4, label: "4 Years" },
-    { value: 5, label: "5 Years" },
-    { value: 6, label: "6 Years" },
-    { value: 7, label: "7 Years" }
-  ];
+  }, [vehiclePrice]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-xl font-['Poppins'] font-semibold mb-4">Financing Calculator</h3>
+    <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
+      <h3 className="text-xl font-['Poppins'] font-semibold mb-4">
+        Financing Calculator
+      </h3>
       
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="price" className="mb-1 block">Vehicle Price</Label>
+      <div className="space-y-6">
+        {/* Vehicle Price */}
+        <div className="space-y-2">
+          <Label htmlFor="vehicle-price">Vehicle Price</Label>
           <Input
-            id="price"
+            id="vehicle-price"
             type="number"
+            min="0"
+            step="100"
             value={price}
             onChange={handlePriceChange}
-            className="w-full"
           />
         </div>
         
-        <div>
-          <div className="flex justify-between mb-1">
-            <Label htmlFor="downPayment">Down Payment</Label>
-            <span className="text-sm text-gray-500">{formatCurrency(downPayment)}</span>
+        {/* Down Payment */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="down-payment">Down Payment</Label>
+            <span className="text-sm text-gray-500">{downPaymentPercent}%</span>
           </div>
           <Input
-            id="downPayment"
+            id="down-payment"
             type="number"
+            min="0"
+            step="100"
             value={downPayment}
             onChange={handleDownPaymentChange}
-            className="w-full mb-2"
           />
           <Slider
-            defaultValue={[downPayment]}
-            max={Math.floor(price * 0.8)}
-            min={0}
-            step={1000}
-            value={[downPayment]}
-            onValueChange={handleDownPaymentSlider}
+            defaultValue={[20]}
+            max={50}
+            step={1}
+            value={[downPaymentPercent]}
+            onValueChange={handleDownPaymentPercentChange}
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>$0</span>
-            <span>{formatCurrency(Math.floor(price * 0.8))}</span>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>0%</span>
+            <span>50%</span>
           </div>
         </div>
         
-        <div>
-          <div className="flex justify-between mb-1">
-            <Label htmlFor="interestRate">Interest Rate (%)</Label>
-            <span className="text-sm text-gray-500">{interestRate.toFixed(2)}%</span>
+        {/* Interest Rate */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="interest-rate">Interest Rate</Label>
+            <span className="text-sm text-gray-500">{interestRate.toFixed(1)}%</span>
           </div>
-          <Input
-            id="interestRate"
-            type="number"
-            value={interestRate}
-            onChange={handleInterestRateChange}
-            step="0.01"
-            className="w-full"
+          <Slider
+            id="interest-rate"
+            defaultValue={[4.5]}
+            min={0.5}
+            max={15}
+            step={0.1}
+            value={[interestRate]}
+            onValueChange={handleInterestRateChange}
           />
-        </div>
-        
-        <div>
-          <Label htmlFor="term" className="mb-1 block">Loan Term</Label>
-          <div className="grid grid-cols-5 gap-2 mb-4">
-            {loanTermOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`py-2 px-3 text-center text-sm rounded-md transition-colors ${
-                  termYears === option.value
-                    ? "bg-[#E31837] text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-                onClick={() => setTermYears(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>0.5%</span>
+            <span>15%</span>
           </div>
         </div>
         
-        <div className="bg-[#F5F5F5] p-4 rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm">Principal:</span>
-            <span className="font-semibold">{formatCurrency(principal)}</span>
+        {/* Loan Term */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="loan-term">Loan Term</Label>
+            <span className="text-sm text-gray-500">{termYears} years</span>
           </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm">Interest Rate:</span>
-            <span className="font-semibold">{interestRate.toFixed(2)}%</span>
+          <Slider
+            id="loan-term"
+            defaultValue={[5]}
+            min={1}
+            max={10}
+            step={1}
+            value={[termYears]}
+            onValueChange={handleTermYearsChange}
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>1 year</span>
+            <span>10 years</span>
           </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm">Term:</span>
-            <span className="font-semibold">{termYears} years</span>
-          </div>
-          <div className="border-t border-gray-300 my-2 pt-2">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold">Monthly Payment:</span>
-              <span className="text-xl font-bold text-[#E31837]">
+        </div>
+        
+        {/* Results */}
+        <div className="bg-gray-50 p-4 rounded-md mt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm text-gray-500">Monthly Payment</div>
+              <div className="text-2xl font-['Poppins'] font-bold text-[#E31837]">
                 {formatCurrency(monthlyPayment)}
-              </span>
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">Total Loan Amount</div>
+              <div className="text-lg font-['Poppins'] font-semibold">
+                {formatCurrency(price - downPayment)}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">Total Interest</div>
+              <div className="text-lg font-['Poppins'] font-semibold">
+                {formatCurrency(monthlyPayment * termYears * 12 - (price - downPayment))}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">Total Cost</div>
+              <div className="text-lg font-['Poppins'] font-semibold">
+                {formatCurrency(downPayment + monthlyPayment * termYears * 12)}
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="pt-4">
-          <Button 
-            className="w-full bg-[#E31837] hover:bg-opacity-90"
-            onClick={() => window.location.href = '/financing'}
-          >
-            Apply for Financing
-          </Button>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            This is an estimate. Contact us for personalized financing options.
-          </p>
-        </div>
+      </div>
+      
+      <div className="mt-6 text-center">
+        <p className="text-xs text-gray-500">
+          This calculator provides an estimate. Contact us for personalized financing options.
+        </p>
       </div>
     </div>
   );
