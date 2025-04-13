@@ -83,7 +83,7 @@ export default function RecentlyViewedVehicles() {
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
                   <div className="h-48 bg-gray-200 overflow-hidden">
                     <img 
-                      src={vehicle.thumbnail || `https://via.placeholder.com/400x300?text=${vehicle.make}+${vehicle.model}`}
+                      src={(vehicle.images && vehicle.images.length > 0) ? vehicle.images[0] : `https://via.placeholder.com/400x300?text=${vehicle.make}+${vehicle.model}`}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} 
                       className="w-full h-full object-cover hover:scale-105 transition"
                     />

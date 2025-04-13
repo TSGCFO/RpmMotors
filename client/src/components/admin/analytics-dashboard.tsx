@@ -144,7 +144,7 @@ export default function AnalyticsDashboard() {
                 <div className="bg-[#F5F5F5] p-4 rounded-lg hover:shadow-md transition cursor-pointer">
                   <div className="relative h-36 mb-4">
                     <OptimizedImage
-                      src={vehicle.photos[0]}
+                      src={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ''}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
                       className="w-full h-full object-cover rounded"
                     />

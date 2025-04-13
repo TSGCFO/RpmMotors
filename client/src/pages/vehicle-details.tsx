@@ -258,7 +258,7 @@ export default function VehicleDetails() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Photo Gallery */}
-            <VehicleGallery photos={vehicle.photos} vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
+            <VehicleGallery photos={vehicle.images || []} vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
 
             {/* Vehicle Information */}
             <div>
@@ -303,8 +303,8 @@ export default function VehicleDetails() {
                   <div className="flex items-center">
                     <i className="fas fa-car w-8 text-[#E31837]"></i>
                     <div>
-                      <p className="text-sm text-gray-500">Drivetrain</p>
-                      <p className="font-semibold">{vehicle.drivetrain}</p>
+                      <p className="text-sm text-gray-500">Features</p>
+                      <p className="font-semibold">{vehicle.features && vehicle.features.length > 0 ? vehicle.features[0] : "Standard"}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -369,7 +369,7 @@ export default function VehicleDetails() {
                   <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                     <div className="relative h-52">
                       <OptimizedImage 
-                        src={vehicle.photos[0]} 
+                        src={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ''} 
                         alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} 
                         className="w-full h-full object-cover"
                       />

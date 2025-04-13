@@ -19,7 +19,7 @@ export default function Gallery() {
   }, []);
 
   // Extract all unique images from vehicles
-  const allImages = vehicles?.flatMap(vehicle => vehicle.photos) || [];
+  const allImages = vehicles?.flatMap(vehicle => vehicle.images || []) || [];
   
   // Get unique categories from vehicles
   const categories = vehicles 
@@ -30,7 +30,7 @@ export default function Gallery() {
   const filteredImages = selectedCategory
     ? vehicles
         ?.filter(vehicle => vehicle.category === selectedCategory)
-        .flatMap(vehicle => vehicle.photos) || []
+        .flatMap(vehicle => vehicle.images || []) || []
     : allImages;
 
   const openLightbox = (image: string) => {
