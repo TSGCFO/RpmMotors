@@ -5,7 +5,7 @@ import {
   Testimonial, InsertTestimonial, testimonials
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, or, and, asc, desc } from "drizzle-orm";
+import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -175,14 +175,33 @@ export class DatabaseStorage implements IStorage {
   // Initialize a default admin user if no users exist
   async initializeDefaultAdmin(): Promise<void> {
     try {
+      const existingColumns = await db.execute(sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' 
+        AND table_schema = 'public'
+      `);
+      
+      const columnNames = existingColumns.rows.map(row => row.column_name);
+      console.log("Available user columns:", columnNames);
+      
       const allUsers = await db.select().from(users);
       if (allUsers.length === 0) {
-        // This is a temporary solution until we can fix the database schema
-        // For now, only use the fields that already exist in the table
-        await db.insert(users).values({
+        // Create admin user with only the columns that exist
+        const adminUser: Record<string, string> = {
           username: "admin",
           password: "rpmauto2025" // Default admin password
-        });
+        };
+        
+        // Add optional fields only if they exist in the table
+        if (columnNames.includes('email')) {
+          adminUser['email'] = "admin@rpmauto.com";
+        }
+        if (columnNames.includes('role')) {
+          adminUser['role'] = "admin";
+        }
+        
+        await db.insert(users).values([adminUser] as any);
         console.log("Created default admin user");
       }
     } catch (error) {
@@ -196,33 +215,29 @@ export class DatabaseStorage implements IStorage {
     const existingVehicles = await db.select().from(vehicles);
     if (existingVehicles.length === 0) {
       // Sample vehicles
-      const sampleVehicles = [
-        {
-          make: "Porsche",
-          model: "911 GT3",
-          year: 2023,
-          price: 179900,
-          mileage: 1500,
-          fuelType: "Gasoline",
-          transmission: "Automatic",
-          color: "GT Silver",
-          description: "2023 Porsche 911 GT3 in pristine condition. This vehicle features a naturally aspirated 4.0L flat-six engine producing 502 horsepower. Includes track-focused suspension, carbon ceramic brakes, and Porsche's PDK transmission.",
-          category: "Sports Cars",
-          condition: "Excellent",
-          isFeatured: true,
-          features: ["Carbon Ceramic Brakes", "Sport Chrono Package", "PDK Transmission", "Track Package"],
-          images: [
-            "https://images.unsplash.com/photo-1617814076668-4af3ff1dd40f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80",
-            "https://images.unsplash.com/photo-1614162692292-7ac56d7f373e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80"
-          ],
-          vin: "WP0AC2A99JS175960"
-        }
-      ];
+      const sampleVehicle = {
+        make: "Porsche",
+        model: "911 GT3",
+        year: 2023,
+        price: 179900,
+        mileage: 1500,
+        fuelType: "Gasoline",
+        transmission: "Automatic",
+        color: "GT Silver",
+        description: "2023 Porsche 911 GT3 in pristine condition. This vehicle features a naturally aspirated 4.0L flat-six engine producing 502 horsepower. Includes track-focused suspension, carbon ceramic brakes, and Porsche's PDK transmission.",
+        category: "Sports Cars",
+        condition: "Excellent",
+        isFeatured: true,
+        features: ["Carbon Ceramic Brakes", "Sport Chrono Package", "PDK Transmission", "Track Package"],
+        images: [
+          "https://images.unsplash.com/photo-1617814076668-4af3ff1dd40f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80",
+          "https://images.unsplash.com/photo-1614162692292-7ac56d7f373e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80"
+        ],
+        vin: "WP0AC2A99JS175960"
+      };
       
       try {
-        for (const vehicle of sampleVehicles) {
-          await db.insert(vehicles).values(vehicle);
-        }
+        await db.insert(vehicles).values([sampleVehicle] as any);
         console.log("Created sample vehicle");
       } catch (error) {
         console.error("Error creating sample vehicles:", error);
