@@ -7,6 +7,62 @@ import {
 import { db } from "./db";
 import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
 
+// Define interfaces for filtering, pagination, and sorting
+export interface VehicleFilters {
+  make?: string;
+  model?: string;
+  minYear?: number;
+  maxYear?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minMileage?: number;
+  maxMileage?: number;
+  fuelType?: string;
+  transmission?: string;
+  color?: string;
+  category?: string;
+  condition?: string;
+  isFeatured?: boolean;
+}
+
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
+export interface SortOptions {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export interface VehicleQueryOptions {
+  filters?: VehicleFilters;
+  pagination?: PaginationOptions;
+  sort?: SortOptions;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }
+}
+
+export interface InventoryStats {
+  totalVehicles: number;
+  totalValue: number;
+  byMake: { make: string; count: number }[];
+  byCategory: { category: string; count: number }[];
+  byYear: { year: number; count: number }[];
+  byFuelType: { fuelType: string; count: number }[];
+  featuredCount: number;
+  priceRange: { min: number; max: number; avg: number };
+  mileageRange: { min: number; max: number; avg: number };
+}
+
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
@@ -14,14 +70,18 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   // Vehicle methods
-  getVehicles(): Promise<Vehicle[]>;
+  getVehicles(options?: VehicleQueryOptions): Promise<Vehicle[]>;
+  getPaginatedVehicles(options?: VehicleQueryOptions): Promise<PaginatedResult<Vehicle>>;
   getVehicleById(id: number): Promise<Vehicle | undefined>;
-  getFeaturedVehicles(): Promise<Vehicle[]>;
-  getVehiclesByCategory(category: string): Promise<Vehicle[]>;
-  searchVehicles(query: string): Promise<Vehicle[]>;
+  getFeaturedVehicles(limit?: number): Promise<Vehicle[]>;
+  getVehiclesByCategory(category: string, options?: VehicleQueryOptions): Promise<Vehicle[]>;
+  searchVehicles(query: string, options?: VehicleQueryOptions): Promise<Vehicle[]>;
+  filterVehicles(filters: VehicleFilters, options?: VehicleQueryOptions): Promise<Vehicle[]>;
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
   updateVehicle(id: number, updates: Partial<Vehicle>): Promise<Vehicle | undefined>;
   deleteVehicle(id: number): Promise<boolean>;
+  getRelatedVehicles(vehicleId: number, limit?: number): Promise<Vehicle[]>;
+  getInventoryStats(): Promise<InventoryStats>;
   
   // Inquiry methods
   getInquiries(): Promise<Inquiry[]>;
@@ -58,8 +118,60 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Vehicle methods
-  async getVehicles(): Promise<Vehicle[]> {
-    return await db.select().from(vehicles);
+  async getVehicles(options?: VehicleQueryOptions): Promise<Vehicle[]> {
+    let query = db.select().from(vehicles);
+    
+    // Apply filters if provided
+    if (options?.filters) {
+      query = this.applyFilters(query, options.filters);
+    }
+    
+    // Apply sorting if provided
+    if (options?.sort) {
+      query = this.applySorting(query, options.sort);
+    }
+    
+    // Apply pagination if provided
+    if (options?.pagination) {
+      const { page, limit } = options.pagination;
+      const offset = (page - 1) * limit;
+      query = query.limit(limit).offset(offset);
+    }
+    
+    return await query;
+  }
+  
+  async getPaginatedVehicles(options?: VehicleQueryOptions): Promise<PaginatedResult<Vehicle>> {
+    // Get the total count
+    let countQuery = db.select({ count: sql`count(*)` }).from(vehicles);
+    
+    // Apply filters to count query if provided
+    if (options?.filters) {
+      countQuery = this.applyFilters(countQuery, options.filters);
+    }
+    
+    const [countResult] = await countQuery;
+    const total = Number(countResult.count);
+    
+    // Set defaults for pagination
+    const page = options?.pagination?.page || 1;
+    const limit = options?.pagination?.limit || 10;
+    
+    // Get the vehicles for the current page
+    const data = await this.getVehicles({
+      ...options,
+      pagination: { page, limit }
+    });
+    
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
   
   async getVehicleById(id: number): Promise<Vehicle | undefined> {
@@ -67,23 +179,93 @@ export class DatabaseStorage implements IStorage {
     return vehicle || undefined;
   }
   
-  async getFeaturedVehicles(): Promise<Vehicle[]> {
-    return await db.select().from(vehicles).where(eq(vehicles.isFeatured, true));
+  async getFeaturedVehicles(limit?: number): Promise<Vehicle[]> {
+    let query = db.select().from(vehicles).where(eq(vehicles.isFeatured, true));
+    
+    if (limit) {
+      query = query.limit(limit);
+    }
+    
+    return await query;
   }
   
-  async getVehiclesByCategory(category: string): Promise<Vehicle[]> {
-    return await db.select().from(vehicles).where(eq(vehicles.category, category));
+  async getVehiclesByCategory(category: string, options?: VehicleQueryOptions): Promise<Vehicle[]> {
+    let query = db.select().from(vehicles).where(eq(vehicles.category, category));
+    
+    // Apply filters if provided (excluding category as it's already set)
+    if (options?.filters) {
+      const { category: _, ...otherFilters } = options.filters;
+      query = this.applyFilters(query, otherFilters);
+    }
+    
+    // Apply sorting if provided
+    if (options?.sort) {
+      query = this.applySorting(query, options.sort);
+    }
+    
+    // Apply pagination if provided
+    if (options?.pagination) {
+      const { page, limit } = options.pagination;
+      const offset = (page - 1) * limit;
+      query = query.limit(limit).offset(offset);
+    }
+    
+    return await query;
   }
   
-  async searchVehicles(query: string): Promise<Vehicle[]> {
+  async searchVehicles(query: string, options?: VehicleQueryOptions): Promise<Vehicle[]> {
     const searchPattern = `%${query}%`;
-    return await db.select().from(vehicles).where(
+    
+    let dbQuery = db.select().from(vehicles).where(
       or(
         like(vehicles.make, searchPattern),
         like(vehicles.model, searchPattern),
-        like(vehicles.description, searchPattern)
+        like(vehicles.description, searchPattern),
+        like(vehicles.color, searchPattern),
+        like(vehicles.category, searchPattern),
+        like(vehicles.vin, searchPattern)
       )
     );
+    
+    // Apply filters if provided
+    if (options?.filters) {
+      dbQuery = this.applyFilters(dbQuery, options.filters);
+    }
+    
+    // Apply sorting if provided
+    if (options?.sort) {
+      dbQuery = this.applySorting(dbQuery, options.sort);
+    }
+    
+    // Apply pagination if provided
+    if (options?.pagination) {
+      const { page, limit } = options.pagination;
+      const offset = (page - 1) * limit;
+      dbQuery = dbQuery.limit(limit).offset(offset);
+    }
+    
+    return await dbQuery;
+  }
+  
+  async filterVehicles(filters: VehicleFilters, options?: VehicleQueryOptions): Promise<Vehicle[]> {
+    let query = db.select().from(vehicles);
+    
+    // Apply the provided filters
+    query = this.applyFilters(query, filters);
+    
+    // Apply sorting if provided
+    if (options?.sort) {
+      query = this.applySorting(query, options.sort);
+    }
+    
+    // Apply pagination if provided
+    if (options?.pagination) {
+      const { page, limit } = options.pagination;
+      const offset = (page - 1) * limit;
+      query = query.limit(limit).offset(offset);
+    }
+    
+    return await query;
   }
   
   async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
@@ -109,6 +291,237 @@ export class DatabaseStorage implements IStorage {
       .where(eq(vehicles.id, id))
       .returning();
     return !!deletedVehicle;
+  }
+  
+  async getRelatedVehicles(vehicleId: number, limit: number = 4): Promise<Vehicle[]> {
+    // First get the current vehicle to find related ones
+    const vehicle = await this.getVehicleById(vehicleId);
+    
+    if (!vehicle) {
+      return [];
+    }
+    
+    // Find vehicles with same make or category, excluding the current vehicle
+    return await db.select()
+      .from(vehicles)
+      .where(
+        and(
+          or(
+            eq(vehicles.make, vehicle.make),
+            eq(vehicles.category, vehicle.category)
+          ),
+          sql`${vehicles.id} != ${vehicleId}`
+        )
+      )
+      .limit(limit);
+  }
+  
+  async getInventoryStats(): Promise<InventoryStats> {
+    // Get total count
+    const [countResult] = await db.select({ count: sql`count(*)` }).from(vehicles);
+    const totalVehicles = Number(countResult.count);
+    
+    // Get total value (sum of all prices)
+    const [totalValueResult] = await db.select({ 
+      sum: sql`COALESCE(SUM(price), 0)` 
+    }).from(vehicles);
+    const totalValue = Number(totalValueResult.sum);
+    
+    // Get counts by make
+    const makeStats = await db
+      .select({
+        make: vehicles.make,
+        count: sql`count(*)`
+      })
+      .from(vehicles)
+      .groupBy(vehicles.make);
+    
+    // Get counts by category
+    const categoryStats = await db
+      .select({
+        category: vehicles.category,
+        count: sql`count(*)`
+      })
+      .from(vehicles)
+      .groupBy(vehicles.category);
+    
+    // Get counts by year
+    const yearStats = await db
+      .select({
+        year: vehicles.year,
+        count: sql`count(*)`
+      })
+      .from(vehicles)
+      .groupBy(vehicles.year);
+    
+    // Get counts by fuel type
+    const fuelTypeStats = await db
+      .select({
+        fuelType: vehicles.fuelType,
+        count: sql`count(*)`
+      })
+      .from(vehicles)
+      .groupBy(vehicles.fuelType);
+    
+    // Get count of featured vehicles
+    const [featuredResult] = await db
+      .select({ count: sql`count(*)` })
+      .from(vehicles)
+      .where(eq(vehicles.isFeatured, true));
+    const featuredCount = Number(featuredResult.count);
+    
+    // Get price range and average
+    const [priceStats] = await db
+      .select({
+        min: sql`COALESCE(MIN(price), 0)`,
+        max: sql`COALESCE(MAX(price), 0)`,
+        avg: sql`COALESCE(AVG(price), 0)`
+      })
+      .from(vehicles);
+    
+    // Get mileage range and average
+    const [mileageStats] = await db
+      .select({
+        min: sql`COALESCE(MIN(mileage), 0)`,
+        max: sql`COALESCE(MAX(mileage), 0)`,
+        avg: sql`COALESCE(AVG(mileage), 0)`
+      })
+      .from(vehicles);
+    
+    return {
+      totalVehicles,
+      totalValue,
+      byMake: makeStats.map(stat => ({
+        make: stat.make,
+        count: Number(stat.count)
+      })),
+      byCategory: categoryStats.map(stat => ({
+        category: stat.category,
+        count: Number(stat.count)
+      })),
+      byYear: yearStats.map(stat => ({
+        year: stat.year,
+        count: Number(stat.count)
+      })),
+      byFuelType: fuelTypeStats.map(stat => ({
+        fuelType: stat.fuelType,
+        count: Number(stat.count)
+      })),
+      featuredCount,
+      priceRange: {
+        min: Number(priceStats.min),
+        max: Number(priceStats.max),
+        avg: Number(priceStats.avg)
+      },
+      mileageRange: {
+        min: Number(mileageStats.min),
+        max: Number(mileageStats.max),
+        avg: Number(mileageStats.avg)
+      }
+    };
+  }
+  
+  // Helper methods for query building
+  private applyFilters<T>(query: any, filters: VehicleFilters): T {
+    const conditions = [];
+    
+    if (filters.make) {
+      conditions.push(eq(vehicles.make, filters.make));
+    }
+    
+    if (filters.model) {
+      conditions.push(eq(vehicles.model, filters.model));
+    }
+    
+    if (filters.minYear !== undefined) {
+      conditions.push(sql`${vehicles.year} >= ${filters.minYear}`);
+    }
+    
+    if (filters.maxYear !== undefined) {
+      conditions.push(sql`${vehicles.year} <= ${filters.maxYear}`);
+    }
+    
+    if (filters.minPrice !== undefined) {
+      conditions.push(sql`${vehicles.price} >= ${filters.minPrice}`);
+    }
+    
+    if (filters.maxPrice !== undefined) {
+      conditions.push(sql`${vehicles.price} <= ${filters.maxPrice}`);
+    }
+    
+    if (filters.minMileage !== undefined) {
+      conditions.push(sql`${vehicles.mileage} >= ${filters.minMileage}`);
+    }
+    
+    if (filters.maxMileage !== undefined) {
+      conditions.push(sql`${vehicles.mileage} <= ${filters.maxMileage}`);
+    }
+    
+    if (filters.fuelType) {
+      conditions.push(eq(vehicles.fuelType, filters.fuelType));
+    }
+    
+    if (filters.transmission) {
+      conditions.push(eq(vehicles.transmission, filters.transmission));
+    }
+    
+    if (filters.color) {
+      conditions.push(eq(vehicles.color, filters.color));
+    }
+    
+    if (filters.category) {
+      conditions.push(eq(vehicles.category, filters.category));
+    }
+    
+    if (filters.condition) {
+      conditions.push(eq(vehicles.condition, filters.condition));
+    }
+    
+    if (filters.isFeatured !== undefined) {
+      conditions.push(eq(vehicles.isFeatured, filters.isFeatured));
+    }
+    
+    // Apply all conditions if there are any
+    if (conditions.length > 0) {
+      return query.where(and(...conditions));
+    }
+    
+    return query;
+  }
+  
+  private applySorting<T>(query: any, sort: SortOptions): T {
+    const { field, direction } = sort;
+    
+    // Map the field name to the actual column
+    const columnMap: Record<string, any> = {
+      id: vehicles.id,
+      make: vehicles.make,
+      model: vehicles.model,
+      year: vehicles.year,
+      price: vehicles.price,
+      mileage: vehicles.mileage,
+      fuelType: vehicles.fuelType,
+      transmission: vehicles.transmission,
+      color: vehicles.color,
+      category: vehicles.category,
+      condition: vehicles.condition,
+      createdAt: vehicles.createdAt
+    };
+    
+    const column = columnMap[field];
+    
+    if (column) {
+      if (direction === 'asc') {
+        return query.orderBy(asc(column));
+      } else {
+        return query.orderBy(desc(column));
+      }
+    }
+    
+    // Default sort by id if field not found
+    return direction === 'asc' 
+      ? query.orderBy(asc(vehicles.id)) 
+      : query.orderBy(desc(vehicles.id));
   }
   
   // Inquiry methods

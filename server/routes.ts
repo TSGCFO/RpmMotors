@@ -6,20 +6,77 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Helper to parse pagination, sorting, and filter parameters
+  const parseVehicleQueryOptions = (req: Request) => {
+    const options: any = {};
+    
+    // Parse pagination parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    options.pagination = { page, limit };
+    
+    // Parse sorting parameters
+    if (req.query.sort) {
+      const sortField = req.query.sort as string;
+      const direction = req.query.direction === 'desc' ? 'desc' : 'asc';
+      options.sort = { field: sortField, direction };
+    }
+    
+    // Parse filtering parameters
+    const filters: any = {};
+    
+    // String filters
+    ['make', 'model', 'fuelType', 'transmission', 'color', 'category', 'condition'].forEach(param => {
+      if (req.query[param]) {
+        filters[param] = req.query[param] as string;
+      }
+    });
+    
+    // Number range filters
+    ['minYear', 'maxYear', 'minPrice', 'maxPrice', 'minMileage', 'maxMileage'].forEach(param => {
+      const value = parseInt(req.query[param] as string);
+      if (!isNaN(value)) {
+        filters[param] = value;
+      }
+    });
+    
+    // Boolean filters
+    if (req.query.featured === 'true') {
+      filters.isFeatured = true;
+    } else if (req.query.featured === 'false') {
+      filters.isFeatured = false;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      options.filters = filters;
+    }
+    
+    return options;
+  };
+
   // Vehicle routes
-  app.get("/api/vehicles", async (_req: Request, res: Response) => {
+  app.get("/api/vehicles", async (req: Request, res: Response) => {
     try {
-      const vehicles = await storage.getVehicles();
-      res.json(vehicles);
+      const options = parseVehicleQueryOptions(req);
+      const paginated = req.query.paginated === 'true';
+      
+      if (paginated) {
+        const result = await storage.getPaginatedVehicles(options);
+        res.json(result);
+      } else {
+        const vehicles = await storage.getVehicles(options);
+        res.json(vehicles);
+      }
     } catch (error) {
       console.error("Error fetching vehicles:", error);
       res.status(500).json({ message: "Failed to fetch vehicles" });
     }
   });
 
-  app.get("/api/vehicles/featured", async (_req: Request, res: Response) => {
+  app.get("/api/vehicles/featured", async (req: Request, res: Response) => {
     try {
-      const featuredVehicles = await storage.getFeaturedVehicles();
+      const limit = parseInt(req.query.limit as string) || undefined;
+      const featuredVehicles = await storage.getFeaturedVehicles(limit);
       res.json(featuredVehicles);
     } catch (error) {
       console.error("Error fetching featured vehicles:", error);
@@ -30,7 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vehicles/category/:category", async (req: Request, res: Response) => {
     try {
       const category = req.params.category;
-      const vehicles = await storage.getVehiclesByCategory(category);
+      const options = parseVehicleQueryOptions(req);
+      const vehicles = await storage.getVehiclesByCategory(category, options);
       res.json(vehicles);
     } catch (error) {
       console.error(`Error fetching vehicles by category ${req.params.category}:`, error);
@@ -45,11 +103,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const vehicles = await storage.searchVehicles(query);
+      const options = parseVehicleQueryOptions(req);
+      const vehicles = await storage.searchVehicles(query, options);
       res.json(vehicles);
     } catch (error) {
       console.error("Error searching vehicles:", error);
       res.status(500).json({ message: "Failed to search vehicles" });
+    }
+  });
+
+  app.get("/api/vehicles/filter", async (req: Request, res: Response) => {
+    try {
+      const options = parseVehicleQueryOptions(req);
+      
+      if (!options.filters || Object.keys(options.filters).length === 0) {
+        return res.status(400).json({ message: "At least one filter parameter is required" });
+      }
+      
+      const vehicles = await storage.filterVehicles(options.filters, {
+        pagination: options.pagination,
+        sort: options.sort
+      });
+      
+      res.json(vehicles);
+    } catch (error) {
+      console.error("Error filtering vehicles:", error);
+      res.status(500).json({ message: "Failed to filter vehicles" });
+    }
+  });
+
+  app.get("/api/vehicles/stats", async (_req: Request, res: Response) => {
+    try {
+      const stats = await storage.getInventoryStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching inventory stats:", error);
+      res.status(500).json({ message: "Failed to fetch inventory statistics" });
     }
   });
 
@@ -69,6 +158,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Error fetching vehicle ${req.params.id}:`, error);
       res.status(500).json({ message: "Failed to fetch vehicle" });
+    }
+  });
+
+  app.get("/api/vehicles/:id/related", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid vehicle ID" });
+      }
+      
+      const limit = parseInt(req.query.limit as string) || 4;
+      const relatedVehicles = await storage.getRelatedVehicles(id, limit);
+      res.json(relatedVehicles);
+    } catch (error) {
+      console.error(`Error fetching related vehicles for ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to fetch related vehicles" });
     }
   });
 
