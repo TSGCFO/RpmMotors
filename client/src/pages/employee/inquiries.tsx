@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Inquiry } from '@shared/schema';
 import EmployeeLayout from '@/components/employee/employee-layout';
+import { Car } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -102,8 +103,8 @@ export default function EmployeeInquiries() {
     const matchesSearch = searchQuery === '' || 
       inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (inquiry.subject && inquiry.subject.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (inquiry.message && inquiry.message.toLowerCase().includes(searchQuery.toLowerCase()));
+      (inquiry.subject ? inquiry.subject.toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
+      (inquiry.message ? inquiry.message.toLowerCase().includes(searchQuery.toLowerCase()) : false);
     
     const matchesStatus = statusFilter === '' || inquiry.status === statusFilter;
     
@@ -236,7 +237,7 @@ export default function EmployeeInquiries() {
                     {filteredInquiries.map((inquiry) => (
                       <TableRow key={inquiry.id}>
                         <TableCell className="font-medium">
-                          {new Date(inquiry.createdAt).toLocaleDateString()}
+                          {inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString() : 'Unknown date'}
                         </TableCell>
                         <TableCell>{inquiry.name}</TableCell>
                         <TableCell>{inquiry.subject}</TableCell>
@@ -320,7 +321,7 @@ export default function EmployeeInquiries() {
                   <h3 className="text-lg font-semibold">{selectedInquiry.subject}</h3>
                   <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                     <CalendarIcon className="h-3 w-3" />
-                    {new Date(selectedInquiry.createdAt).toLocaleString()}
+                    {selectedInquiry.createdAt ? new Date(selectedInquiry.createdAt).toLocaleString() : 'Unknown date'}
                   </p>
                 </div>
                 <Badge 
@@ -422,7 +423,7 @@ export default function EmployeeInquiries() {
                     <p className="text-sm text-gray-600">From: {selectedInquiry.name}</p>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {new Date(selectedInquiry.createdAt).toLocaleDateString()}
+                    {selectedInquiry.createdAt ? new Date(selectedInquiry.createdAt).toLocaleDateString() : 'Unknown date'}
                   </p>
                 </div>
                 <div className="mt-2 text-sm text-gray-700">
