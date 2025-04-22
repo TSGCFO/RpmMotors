@@ -115,7 +115,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <Link href="/admin/inventory">
+            <Link href="/admin/inventory-manager">
               <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                 <Car className="h-8 w-8 text-[#E31837] mb-2" />
                 <span className="text-sm font-medium text-gray-900">Manage Inventory</span>
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
               )}
             </div>
             <div className="px-6 py-3 bg-gray-50">
-              <Link href="/admin/inventory">
+              <Link href="/admin/inventory-manager">
                 <a className="text-sm text-[#E31837] font-medium hover:underline">
                   View All Vehicles
                 </a>
