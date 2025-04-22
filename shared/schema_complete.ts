@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, json, unique, foreignKey, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema
 export const users = pgTable("users", {
@@ -395,7 +396,7 @@ export const websiteAnalytics = pgTable("website_analytics", {
   searchQueries: json("search_queries").$type<string[]>().default([]),
   leadSources: json("lead_sources").$type<Record<string, number>>().default({}),
   visitorDemographics: json("visitor_demographics").$type<Record<string, any>>().default({}),
-  date: date("date").notNull().default(sql\`CURRENT_DATE\`).unique(),
+  date: date("date").notNull().defaultNow().unique(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
 

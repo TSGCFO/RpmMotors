@@ -1,28 +1,38 @@
-import fs from 'fs';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-
-// Configure WebSocket
-neonConfig.webSocketConstructor = ws;
-
-// Load SQL migration file
-const migrationSQL = fs.readFileSync('./migration.sql', 'utf8');
-
-// Create a database connection
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const fs = require('fs');
+const path = require('path');
+const { Pool } = require('@neondatabase/serverless');
 
 async function applyMigration() {
-  const client = await pool.connect();
+  console.log('Starting database migration...');
+  
+  const DATABASE_URL = process.env.DATABASE_URL;
+  if (!DATABASE_URL) {
+    console.error('DATABASE_URL environment variable is not set');
+    process.exit(1);
+  }
+
+  // Create a new PostgreSQL client
+  const pool = new Pool({ connectionString: DATABASE_URL });
+  
   try {
-    console.log('Starting migration...');
-    await client.query(migrationSQL);
-    console.log('Migration successfully applied!');
+    // Read the migration SQL file
+    const migrationFilePath = path.join(__dirname, 'migration.sql');
+    const migrationSQL = fs.readFileSync(migrationFilePath, 'utf8');
+    
+    console.log('Applying migration...');
+    
+    // Execute the migration SQL
+    await pool.query(migrationSQL);
+    
+    console.log('Migration completed successfully!');
   } catch (error) {
-    console.error('Migration failed:', error);
+    console.error('Error applying migration:', error);
+    process.exit(1);
   } finally {
-    client.release();
+    // Close the database connection
     await pool.end();
   }
 }
 
-applyMigration();
+// Run the migration
+applyMigration().catch(console.error);
