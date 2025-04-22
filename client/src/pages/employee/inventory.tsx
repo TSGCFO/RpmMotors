@@ -1120,13 +1120,25 @@ export default function EmployeeInventoryManager() {
                             <TableCell className="font-medium">{vehicle.id}</TableCell>
                             <TableCell>
                               <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden">
-                                {vehicle.images && vehicle.images.length > 0 ? (
+                                {vehicle.images && (
                                   <img 
-                                    src={typeof vehicle.images[0] === 'string' ? vehicle.images[0] : ''} 
+                                    src={
+                                      typeof vehicle.images === 'string' 
+                                        ? vehicle.images.split(',')[0]
+                                        : Array.isArray(vehicle.images) && vehicle.images.length > 0
+                                          ? vehicle.images[0]
+                                          : ''
+                                    } 
                                     alt={`${vehicle.make} ${vehicle.model}`}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = '';
+                                      e.currentTarget.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-gray-400"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div>';
+                                    }}
                                   />
-                                ) : (
+                                )}
+                                {!vehicle.images && (
                                   <div className="h-full w-full flex items-center justify-center">
                                     <Car className="h-5 w-5 text-gray-400" />
                                   </div>
@@ -1306,11 +1318,22 @@ export default function EmployeeInventoryManager() {
             {selectedVehicle && (
               <div className="flex items-center bg-gray-50 p-3 rounded">
                 <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden mr-3">
-                  {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
+                  {selectedVehicle.images ? (
                     <img 
-                      src={typeof selectedVehicle.images[0] === 'string' ? selectedVehicle.images[0] : ''} 
+                      src={
+                        typeof selectedVehicle.images === 'string' 
+                          ? selectedVehicle.images.split(',')[0]
+                          : Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 0
+                            ? selectedVehicle.images[0]
+                            : ''
+                      } 
                       alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
                       className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '';
+                        e.currentTarget.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-gray-400"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div>';
+                      }}
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
@@ -1365,11 +1388,24 @@ export default function EmployeeInventoryManager() {
               <div className="flex flex-col md:flex-row gap-6">
                 {/* Main image */}
                 <div className="md:w-1/2 h-64 rounded-lg overflow-hidden bg-gray-100">
-                  {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
+                  {selectedVehicle.images ? (
                     <img 
-                      src={typeof selectedVehicle.images[0] === 'string' ? selectedVehicle.images[0] : ''} 
+                      src={
+                        typeof selectedVehicle.images === 'string' 
+                          ? selectedVehicle.images.split(',')[0]
+                          : Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 0
+                            ? selectedVehicle.images[0]
+                            : ''
+                      } 
                       alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
                       className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '';
+                        if (e.currentTarget.parentElement) {
+                          e.currentTarget.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 text-gray-400"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div>';
+                        }
+                      }}
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
@@ -1430,19 +1466,49 @@ export default function EmployeeInventoryManager() {
               </div>
               
               {/* Image thumbnails */}
-              {selectedVehicle.images && selectedVehicle.images.length > 1 && (
+              {selectedVehicle.images && (
+                Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 1 || 
+                (typeof selectedVehicle.images === 'string' && selectedVehicle.images.includes(','))
+              ) && (
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Images</h3>
                   <div className="grid grid-cols-5 gap-2">
-                    {selectedVehicle.images.map((image, index) => (
-                      <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
-                        <img 
-                          src={typeof image === 'string' ? image : ''} 
-                          alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ))}
+                    {Array.isArray(selectedVehicle.images) 
+                      ? selectedVehicle.images.map((image, index) => (
+                        <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
+                          <img 
+                            src={typeof image === 'string' ? image : ''} 
+                            alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '';
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div>';
+                              }
+                            }}
+                          />
+                        </div>
+                      ))
+                      : typeof selectedVehicle.images === 'string' && selectedVehicle.images.includes(',')
+                        ? selectedVehicle.images.split(',').map((image, index) => (
+                          <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
+                            <img 
+                              src={image.trim()} 
+                              alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '';
+                                if (e.currentTarget.parentElement) {
+                                  e.currentTarget.parentElement.innerHTML = '<div class="h-full w-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div>';
+                                }
+                              }}
+                            />
+                          </div>
+                        ))
+                        : null
+                    }
                   </div>
                 </div>
               )}
@@ -1454,16 +1520,33 @@ export default function EmployeeInventoryManager() {
               </div>
               
               {/* Features */}
-              {selectedVehicle.features && selectedVehicle.features.length > 0 && (
+              {selectedVehicle.features && (
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Features</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {Array.isArray(selectedVehicle.features) && selectedVehicle.features.map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
+                    {Array.isArray(selectedVehicle.features) 
+                      ? selectedVehicle.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-4 w-4 text-green-500 mr-2" />
+                          <span>{feature}</span>
+                        </div>
+                      ))
+                      : typeof selectedVehicle.features === 'string' && selectedVehicle.features.includes(',')
+                        ? selectedVehicle.features.split(',').map((feature, index) => (
+                          <div key={index} className="flex items-center">
+                            <Check className="h-4 w-4 text-green-500 mr-2" />
+                            <span>{feature.trim()}</span>
+                          </div>
+                        ))
+                        : typeof selectedVehicle.features === 'string'
+                          ? (
+                            <div className="flex items-center">
+                              <Check className="h-4 w-4 text-green-500 mr-2" />
+                              <span>{selectedVehicle.features}</span>
+                            </div>
+                          )
+                          : null
+                    }
                   </div>
                 </div>
               )}
