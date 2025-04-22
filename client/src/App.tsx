@@ -19,6 +19,10 @@ import AdminDashboard from "@/pages/admin";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminMarketing from "@/pages/admin/marketing";
 import AdminInventory from "@/pages/admin/inventory";
+// Employee portal pages
+import EmployeeDashboard from "@/pages/employee";
+import EmployeeInventory from "@/pages/employee/inventory";
+import EmployeeInquiries from "@/pages/employee/inquiries";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -43,13 +47,15 @@ function Router() {
     }
   }, [location]);
   
-  // Check if we're on an admin page
+  // Check if we're on an admin or employee page
   const isAdminPage = location.startsWith('/admin');
+  const isEmployeePage = location.startsWith('/employee');
+  const isPortalPage = isAdminPage || isEmployeePage;
   
   return (
     <>
-      {/* Only show header and footer on non-admin pages */}
-      {!isAdminPage && <Header />}
+      {/* Only show header and footer on regular customer pages */}
+      {!isPortalPage && <Header />}
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/inventory" component={Inventory} />
@@ -62,14 +68,22 @@ function Router() {
         <Route path="/sitemap" component={Sitemap} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms" component={Terms} />
+        
+        {/* Admin routes */}
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
         <Route path="/admin/marketing" component={AdminMarketing} />
+        
+        {/* Employee portal routes */}
+        <Route path="/employee" component={EmployeeDashboard} />
+        <Route path="/employee/inventory" component={EmployeeInventory} />
+        <Route path="/employee/inquiries" component={EmployeeInquiries} />
+        
         <Route component={NotFound} />
       </Switch>
-      {!isAdminPage && <Footer />}
-      {!isAdminPage && <BackToTop />}
+      {!isPortalPage && <Footer />}
+      {!isPortalPage && <BackToTop />}
     </>
   );
 }

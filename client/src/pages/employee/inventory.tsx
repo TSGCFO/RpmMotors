@@ -1,0 +1,1492 @@
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Vehicle, InsertVehicle } from '@shared/schema';
+import EmployeeLayout from '@/components/employee/employee-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from '@/components/ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Car, 
+  Plus, 
+  Search, 
+  Filter, 
+  MoreVertical, 
+  Edit, 
+  Trash2, 
+  Star, 
+  Eye, 
+  X,
+  Check,
+  AlertCircle,
+  ArrowUpDown,
+  Loader2
+} from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+// Define interface for filter state
+interface FilterState {
+  make: string;
+  model: string;
+  category: string;
+  minYear: string;
+  maxYear: string;
+  minPrice: string;
+  maxPrice: string;
+  condition: string;
+  transmission: string;
+  fuelType: string;
+  featured: string;
+}
+
+// Define interface for sort state
+interface SortState {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export default function EmployeeInventoryManager() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [selectedVehicles, setSelectedVehicles] = useState<Record<number, boolean>>({});
+  const [hasSelectedItems, setHasSelectedItems] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  
+  // Form data state
+  const [formData, setFormData] = useState({
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
+    price: 0,
+    mileage: 0,
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
+    color: '',
+    description: '',
+    category: 'Sports Cars',
+    condition: 'Excellent',
+    isFeatured: false,
+    features: '',
+    images: '',
+    vin: ''
+  });
+  
+  // Filter and sort states
+  const [filters, setFilters] = useState<FilterState>({
+    make: '',
+    model: '',
+    category: '',
+    minYear: '',
+    maxYear: '',
+    minPrice: '',
+    maxPrice: '',
+    condition: '',
+    transmission: '',
+    fuelType: '',
+    featured: ''
+  });
+  
+  const [sort, setSort] = useState<SortState>({
+    field: 'createdAt',
+    direction: 'desc'
+  });
+  
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Build query parameters for API request
+  const buildQueryParams = () => {
+    const params: Record<string, string> = {
+      page: page.toString(),
+      limit: limit.toString(),
+      sort: sort.field,
+      direction: sort.direction,
+      paginated: 'true'
+    };
+    
+    // Add search query if present
+    if (searchQuery) {
+      params.q = searchQuery;
+    }
+    
+    // Add filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        params[key] = value;
+      }
+    });
+    
+    return params;
+  };
+  
+  // Convert query params to URLSearchParams for fetch
+  const getQueryString = () => {
+    const params = buildQueryParams();
+    return new URLSearchParams(params).toString();
+  };
+  
+  // Fetch vehicles with pagination, search, filter, and sort
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['/api/vehicles', page, limit, searchQuery, filters, sort],
+    queryFn: async () => {
+      const queryString = getQueryString();
+      const res = await fetch(`/api/vehicles?${queryString}`);
+      if (!res.ok) throw new Error('Failed to fetch vehicles');
+      const data = await res.json();
+      
+      // Update total pages if paginated data
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+        return data;
+      }
+      
+      return { data, pagination: { total: data.length, page, limit, totalPages: 1 } };
+    }
+  });
+  
+  // Vehicle mutations
+  const addVehicleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Format the data (convert features and images to arrays)
+      const formattedData = {
+        ...data,
+        features: data.features.split(',').map((f: string) => f.trim()).filter(Boolean),
+        images: data.images.split(',').map((i: string) => i.trim()).filter(Boolean)
+      };
+      
+      const response = await apiRequest('POST', '/api/vehicles', formattedData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle added successfully',
+      });
+      setIsAddModalOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to add vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const updateVehicleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const id = data.id;
+      
+      // Format the data (convert features and images to arrays)
+      const formattedData = {
+        ...data,
+        features: typeof data.features === 'string' 
+          ? data.features.split(',').map((f: string) => f.trim()).filter(Boolean)
+          : data.features,
+        images: typeof data.images === 'string'
+          ? data.images.split(',').map((i: string) => i.trim()).filter(Boolean)
+          : data.images
+      };
+      
+      const response = await apiRequest('PUT', `/api/vehicles/${id}`, formattedData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle updated successfully',
+      });
+      setIsEditModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const deleteVehicleMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/vehicles/${id}`);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setIsDeleteModalOpen(false);
+      setSelectedVehicle(null);
+      toast({
+        title: 'Success',
+        description: 'Vehicle deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Bulk action to delete multiple vehicles
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const promises = ids.map(id => 
+        apiRequest('DELETE', `/api/vehicles/${id}`)
+      );
+      await Promise.all(promises);
+      return ids;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setSelectedVehicles({});
+      setHasSelectedItems(false);
+      toast({
+        title: 'Success',
+        description: 'Selected vehicles deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete selected vehicles: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Bulk action to toggle featured status
+  const bulkToggleFeaturedMutation = useMutation({
+    mutationFn: async ({ ids, featured }: { ids: number[], featured: boolean }) => {
+      const promises = ids.map(id => 
+        apiRequest('PUT', `/api/vehicles/${id}`, { isFeatured: featured })
+      );
+      await Promise.all(promises);
+      return ids;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setSelectedVehicles({});
+      setHasSelectedItems(false);
+      toast({
+        title: 'Success',
+        description: 'Featured status updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update featured status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+    });
+  };
+
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData({
+      ...formData,
+      isFeatured: checked
+    });
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value
+    });
+    // Reset to first page when filters change
+    setPage(1);
+  };
+
+  // Handle sort changes
+  const handleSortChange = (field: string) => {
+    setSort({
+      field,
+      direction: sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc'
+    });
+    // Reset to first page when sort changes
+    setPage(1);
+  };
+  
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Reset to first page when searching
+    setPage(1);
+    refetch();
+  };
+  
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setFilters({
+      make: '',
+      model: '',
+      category: '',
+      minYear: '',
+      maxYear: '',
+      minPrice: '',
+      maxPrice: '',
+      condition: '',
+      transmission: '',
+      fuelType: '',
+      featured: ''
+    });
+    setSearchQuery('');
+    setPage(1);
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditModalOpen && selectedVehicle) {
+      updateVehicleMutation.mutate({ ...formData, id: selectedVehicle.id });
+    } else {
+      addVehicleMutation.mutate(formData);
+    }
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (selectedVehicle) {
+      deleteVehicleMutation.mutate(selectedVehicle.id);
+    }
+  };
+  
+  // Handle bulk delete confirmation
+  const handleBulkDelete = () => {
+    const ids = Object.entries(selectedVehicles)
+      .filter(([_, selected]) => selected)
+      .map(([id]) => parseInt(id));
+    
+    if (ids.length > 0) {
+      bulkDeleteMutation.mutate(ids);
+    }
+  };
+  
+  // Handle bulk toggle featured
+  const handleBulkToggleFeatured = (featured: boolean) => {
+    const ids = Object.entries(selectedVehicles)
+      .filter(([_, selected]) => selected)
+      .map(([id]) => parseInt(id));
+    
+    if (ids.length > 0) {
+      bulkToggleFeaturedMutation.mutate({ ids, featured });
+    }
+  };
+
+  // Reset form fields
+  const resetForm = () => {
+    setFormData({
+      make: '',
+      model: '',
+      year: new Date().getFullYear(),
+      price: 0,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      color: '',
+      description: '',
+      category: 'Sports Cars',
+      condition: 'Excellent',
+      isFeatured: false,
+      features: '',
+      images: '',
+      vin: ''
+    });
+  };
+  
+  // Edit a vehicle
+  const handleEdit = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsEditModalOpen(true);
+  };
+  
+  // Delete a vehicle
+  const handleDelete = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsDeleteModalOpen(true);
+  };
+  
+  // View vehicle details
+  const handleViewDetails = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsDetailsModalOpen(true);
+  };
+  
+  // Toggle a vehicle selection for bulk actions
+  const toggleVehicleSelection = (id: number, checked: boolean) => {
+    setSelectedVehicles(prev => ({
+      ...prev,
+      [id]: checked
+    }));
+  };
+  
+  // Toggle all vehicle selections
+  const toggleAllSelection = (checked: boolean) => {
+    const newSelection: Record<number, boolean> = {};
+    if (data?.data) {
+      data.data.forEach(vehicle => {
+        newSelection[vehicle.id] = checked;
+      });
+    }
+    setSelectedVehicles(newSelection);
+  };
+  
+  // Check if a vehicle is selected
+  const isVehicleSelected = (id: number) => {
+    return !!selectedVehicles[id];
+  };
+  
+  // Count selected vehicles
+  const getSelectedCount = () => {
+    return Object.values(selectedVehicles).filter(Boolean).length;
+  };
+  
+  // Update hasSelectedItems when selections change
+  useEffect(() => {
+    setHasSelectedItems(getSelectedCount() > 0);
+  }, [selectedVehicles]);
+  
+  // Update form data when selectedVehicle changes
+  useEffect(() => {
+    if (selectedVehicle) {
+      setFormData({
+        ...selectedVehicle,
+        features: Array.isArray(selectedVehicle.features) 
+          ? selectedVehicle.features.join(', ') 
+          : typeof selectedVehicle.features === 'string' 
+            ? selectedVehicle.features 
+            : '',
+        images: Array.isArray(selectedVehicle.images) 
+          ? selectedVehicle.images.join(', ') 
+          : typeof selectedVehicle.images === 'string' 
+            ? selectedVehicle.images 
+            : ''
+      });
+    }
+  }, [selectedVehicle]);
+  
+  // Form component for add/edit vehicle
+  const VehicleForm = ({ isEdit = false }: { isEdit?: boolean }) => (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="make">Make</Label>
+          <Input id="make" name="make" value={formData.make} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="model">Model</Label>
+          <Input id="model" name="model" value={formData.model} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="year">Year</Label>
+          <Input id="year" name="year" type="number" value={formData.year} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="price">Price ($)</Label>
+          <Input id="price" name="price" type="number" value={formData.price} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="mileage">Mileage</Label>
+          <Input id="mileage" name="mileage" type="number" value={formData.mileage} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="vin">VIN</Label>
+          <Input id="vin" name="vin" value={formData.vin} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="fuelType">Fuel Type</Label>
+          <Select name="fuelType" value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select fuel type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Gasoline">Gasoline</SelectItem>
+              <SelectItem value="Diesel">Diesel</SelectItem>
+              <SelectItem value="Electric">Electric</SelectItem>
+              <SelectItem value="Hybrid">Hybrid</SelectItem>
+              <SelectItem value="Plug-in Hybrid">Plug-in Hybrid</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="transmission">Transmission</Label>
+          <Select name="transmission" value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select transmission" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Automatic">Automatic</SelectItem>
+              <SelectItem value="Manual">Manual</SelectItem>
+              <SelectItem value="Semi-Automatic">Semi-Automatic</SelectItem>
+              <SelectItem value="CVT">CVT</SelectItem>
+              <SelectItem value="DCT">DCT</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="color">Color</Label>
+          <Input id="color" name="color" value={formData.color} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select name="category" value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Sports Cars">Sports Cars</SelectItem>
+              <SelectItem value="Luxury Cars">Luxury Cars</SelectItem>
+              <SelectItem value="SUVs">SUVs</SelectItem>
+              <SelectItem value="Sedans">Sedans</SelectItem>
+              <SelectItem value="Convertibles">Convertibles</SelectItem>
+              <SelectItem value="Exotics">Exotics</SelectItem>
+              <SelectItem value="Hatchbacks">Hatchbacks</SelectItem>
+              <SelectItem value="Wagons">Wagons</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="condition">Condition</Label>
+          <Select name="condition" value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select condition" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="New">New</SelectItem>
+              <SelectItem value="Excellent">Excellent</SelectItem>
+              <SelectItem value="Very Good">Very Good</SelectItem>
+              <SelectItem value="Good">Good</SelectItem>
+              <SelectItem value="Fair">Fair</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2 flex items-center pt-8">
+          <Switch id="isFeatured" checked={formData.isFeatured} onCheckedChange={handleSwitchChange} />
+          <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} rows={4} required />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="features">Features (comma separated)</Label>
+        <Textarea id="features" name="features" value={formData.features} onChange={handleInputChange} rows={3} required />
+        <p className="text-xs text-gray-500">Example: Leather Seats, Navigation System, Backup Camera</p>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="images">Images (comma separated URLs)</Label>
+        <Textarea id="images" name="images" value={formData.images} onChange={handleInputChange} rows={3} required />
+        <p className="text-xs text-gray-500">Example: /vehicles/bmw/image1.jpg, /vehicles/bmw/image2.jpg</p>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={() => {
+          if (isEdit) {
+            setIsEditModalOpen(false);
+          } else {
+            setIsAddModalOpen(false);
+          }
+          resetForm();
+        }}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={addVehicleMutation.isPending || updateVehicleMutation.isPending}>
+          {(addVehicleMutation.isPending || updateVehicleMutation.isPending) ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>{isEdit ? 'Updating...' : 'Adding...'}</span>
+            </>
+          ) : (
+            <>
+              <span>{isEdit ? 'Update Vehicle' : 'Add Vehicle'}</span>
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+
+  return (
+    <EmployeeLayout>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
+            <p className="text-gray-600 mt-1">Manage your dealership's vehicle inventory</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Vehicle
+            </Button>
+          </div>
+        </div>
+        
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <form onSubmit={handleSearch} className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by make, model, or VIN..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button type="submit">Search</Button>
+              </form>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                className={showFilters ? 'bg-gray-100' : ''}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {Object.values(filters).some(v => v !== '') && (
+                  <Badge className="ml-2 bg-[#E31837]">
+                    {Object.values(filters).filter(v => v !== '').length}
+                  </Badge>
+                )}
+              </Button>
+              {Object.values(filters).some(v => v !== '') && (
+                <Button 
+                  variant="ghost" 
+                  onClick={handleClearFilters}
+                  size="icon"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="mt-4 border-t pt-4">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="filters">
+                  <AccordionTrigger>Advanced Filters</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-make">Make</Label>
+                        <Input 
+                          id="filter-make" 
+                          name="make" 
+                          value={filters.make} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any make"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-model">Model</Label>
+                        <Input 
+                          id="filter-model" 
+                          name="model" 
+                          value={filters.model} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any model"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-category">Category</Label>
+                        <Select 
+                          name="category" 
+                          value={filters.category}
+                          onValueChange={(value) => setFilters({...filters, category: value})}
+                        >
+                          <SelectTrigger id="filter-category">
+                            <SelectValue placeholder="Any category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any category</SelectItem>
+                            <SelectItem value="Sports Cars">Sports Cars</SelectItem>
+                            <SelectItem value="Luxury Cars">Luxury Cars</SelectItem>
+                            <SelectItem value="SUVs">SUVs</SelectItem>
+                            <SelectItem value="Sedans">Sedans</SelectItem>
+                            <SelectItem value="Convertibles">Convertibles</SelectItem>
+                            <SelectItem value="Exotics">Exotics</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-condition">Condition</Label>
+                        <Select 
+                          name="condition" 
+                          value={filters.condition}
+                          onValueChange={(value) => setFilters({...filters, condition: value})}
+                        >
+                          <SelectTrigger id="filter-condition">
+                            <SelectValue placeholder="Any condition" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any condition</SelectItem>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Excellent">Excellent</SelectItem>
+                            <SelectItem value="Very Good">Very Good</SelectItem>
+                            <SelectItem value="Good">Good</SelectItem>
+                            <SelectItem value="Fair">Fair</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-min-year">Min Year</Label>
+                        <Input 
+                          id="filter-min-year" 
+                          name="minYear" 
+                          type="number" 
+                          value={filters.minYear} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-max-year">Max Year</Label>
+                        <Input 
+                          id="filter-max-year" 
+                          name="maxYear" 
+                          type="number" 
+                          value={filters.maxYear} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-min-price">Min Price</Label>
+                        <Input 
+                          id="filter-min-price" 
+                          name="minPrice" 
+                          type="number"
+                          value={filters.minPrice} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-max-price">Max Price</Label>
+                        <Input 
+                          id="filter-max-price" 
+                          name="maxPrice" 
+                          type="number"
+                          value={filters.maxPrice} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-transmission">Transmission</Label>
+                        <Select 
+                          name="transmission" 
+                          value={filters.transmission}
+                          onValueChange={(value) => setFilters({...filters, transmission: value})}
+                        >
+                          <SelectTrigger id="filter-transmission">
+                            <SelectValue placeholder="Any transmission" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any transmission</SelectItem>
+                            <SelectItem value="Automatic">Automatic</SelectItem>
+                            <SelectItem value="Manual">Manual</SelectItem>
+                            <SelectItem value="Semi-Automatic">Semi-Automatic</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-fuel-type">Fuel Type</Label>
+                        <Select 
+                          name="fuelType" 
+                          value={filters.fuelType}
+                          onValueChange={(value) => setFilters({...filters, fuelType: value})}
+                        >
+                          <SelectTrigger id="filter-fuel-type">
+                            <SelectValue placeholder="Any fuel type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any fuel type</SelectItem>
+                            <SelectItem value="Gasoline">Gasoline</SelectItem>
+                            <SelectItem value="Diesel">Diesel</SelectItem>
+                            <SelectItem value="Electric">Electric</SelectItem>
+                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-featured">Featured</Label>
+                        <Select 
+                          name="featured" 
+                          value={filters.featured}
+                          onValueChange={(value) => setFilters({...filters, featured: value})}
+                        >
+                          <SelectTrigger id="filter-featured">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any</SelectItem>
+                            <SelectItem value="true">Featured Only</SelectItem>
+                            <SelectItem value="false">Non-Featured Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button variant="outline" onClick={handleClearFilters} className="mr-2">
+                        Clear Filters
+                      </Button>
+                      <Button onClick={() => refetch()}>
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          )}
+        </div>
+        
+        {/* Bulk Actions Bar - only shown when items are selected */}
+        {hasSelectedItems && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <Check className="text-blue-500 h-5 w-5 mr-2" />
+              <span>
+                <strong>{getSelectedCount()}</strong> vehicles selected
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Bulk Actions
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleBulkToggleFeatured(true)}>
+                    <Star className="h-4 w-4 mr-2" />
+                    Mark as Featured
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleBulkToggleFeatured(false)}>
+                    <Star className="h-4 w-4 mr-2 text-gray-400" />
+                    Unmark as Featured
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleBulkDelete}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Selected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setSelectedVehicles({});
+                  setHasSelectedItems(false);
+                }}
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Main inventory table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Vehicle Inventory</CardTitle>
+            <CardDescription>
+              {data?.pagination?.total
+                ? `${data.pagination.total} vehicles found`
+                : 'Loading inventory...'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E31837]"></div>
+              </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                <h3 className="text-lg font-medium">Error Loading Inventory</h3>
+                <p className="text-gray-500 mt-2">There was a problem fetching vehicle data.</p>
+                <Button variant="outline" onClick={() => refetch()} className="mt-4">
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="relative overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[40px]">
+                          <Checkbox 
+                            checked={data?.data?.length > 0 && getSelectedCount() === data.data.length}
+                            onCheckedChange={(checked) => toggleAllSelection(!!checked)}
+                          />
+                        </TableHead>
+                        <TableHead className="w-[70px]">ID</TableHead>
+                        <TableHead className="w-[70px]">Image</TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('make')}>
+                            Make/Model
+                            {sort.field === 'make' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('year')}>
+                            Year
+                            {sort.field === 'year' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('price')}>
+                            Price
+                            {sort.field === 'price' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('mileage')}>
+                            Mileage
+                            {sort.field === 'mileage' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data?.data?.length ? (
+                        data.data.map((vehicle) => (
+                          <TableRow key={vehicle.id}>
+                            <TableCell>
+                              <Checkbox 
+                                checked={isVehicleSelected(vehicle.id)}
+                                onCheckedChange={(checked) => toggleVehicleSelection(vehicle.id, !!checked)}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{vehicle.id}</TableCell>
+                            <TableCell>
+                              <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden">
+                                {vehicle.images && vehicle.images.length > 0 ? (
+                                  <img 
+                                    src={typeof vehicle.images[0] === 'string' ? vehicle.images[0] : ''} 
+                                    alt={`${vehicle.make} ${vehicle.model}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-full w-full flex items-center justify-center">
+                                    <Car className="h-5 w-5 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{vehicle.make} {vehicle.model}</div>
+                              <div className="text-sm text-gray-500">{vehicle.vin}</div>
+                            </TableCell>
+                            <TableCell>{vehicle.year}</TableCell>
+                            <TableCell>${vehicle.price.toLocaleString()}</TableCell>
+                            <TableCell>{vehicle.mileage.toLocaleString()}</TableCell>
+                            <TableCell>{vehicle.category}</TableCell>
+                            <TableCell>
+                              {vehicle.isFeatured ? (
+                                <Badge variant="default" className="bg-[#E31837]">
+                                  <Star className="h-3 w-3 mr-1 fill-current" />
+                                  Featured
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">Standard</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleViewDetails(vehicle)}>
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>View Details</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleEdit(vehicle)}>
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Edit Vehicle</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleDelete(vehicle)}>
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Delete Vehicle</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={9} className="text-center py-16 text-gray-500">
+                            No vehicles found with the current filters.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                {/* Pagination */}
+                {data?.pagination && data.pagination.totalPages > 1 && (
+                  <div className="mt-4">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setPage(page > 1 ? page - 1 : 1)}
+                            disabled={page === 1}
+                            className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        
+                        {[...Array(data.pagination.totalPages)].map((_, i) => {
+                          const pageNum = i + 1;
+                          // Show first page, last page, current page, and pages around current page
+                          if (
+                            pageNum === 1 || 
+                            pageNum === data.pagination.totalPages ||
+                            (pageNum >= page - 1 && pageNum <= page + 1)
+                          ) {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  isActive={page === pageNum}
+                                  onClick={() => setPage(pageNum)}
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          } else if (
+                            (pageNum === 2 && page > 3) ||
+                            (pageNum === data.pagination.totalPages - 1 && page < data.pagination.totalPages - 2)
+                          ) {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+                          return null;
+                        })}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setPage(page < data.pagination.totalPages ? page + 1 : data.pagination.totalPages)}
+                            disabled={page === data.pagination.totalPages}
+                            className={page === data.pagination.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Add Vehicle Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Vehicle</DialogTitle>
+            <DialogDescription>
+              Fill out the form below to add a new vehicle to the inventory.
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleForm />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Vehicle Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Vehicle</DialogTitle>
+            <DialogDescription>
+              Update the vehicle information below.
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleForm isEdit={true} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this vehicle? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedVehicle && (
+              <div className="flex items-center bg-gray-50 p-3 rounded">
+                <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden mr-3">
+                  {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
+                    <img 
+                      src={typeof selectedVehicle.images[0] === 'string' ? selectedVehicle.images[0] : ''} 
+                      alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Car className="h-5 w-5 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">{selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}</p>
+                  <p className="text-sm text-gray-500">ID: {selectedVehicle.id} | VIN: {selectedVehicle.vin}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteVehicleMutation.isPending}
+            >
+              {deleteVehicleMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete Vehicle</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Vehicle Details Modal */}
+      <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Vehicle Details</DialogTitle>
+            <DialogDescription>
+              Detailed information for this vehicle.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedVehicle && (
+            <div className="mt-4 space-y-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Main image */}
+                <div className="md:w-1/2 h-64 rounded-lg overflow-hidden bg-gray-100">
+                  {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
+                    <img 
+                      src={typeof selectedVehicle.images[0] === 'string' ? selectedVehicle.images[0] : ''} 
+                      alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Car className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Basic information */}
+                <div className="md:w-1/2 space-y-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+                    </h2>
+                    {selectedVehicle.isFeatured && (
+                      <Badge className="mt-1 bg-[#E31837]">
+                        <Star className="h-3 w-3 mr-1 fill-current" />
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="text-2xl font-bold text-[#E31837]">
+                    ${selectedVehicle.price.toLocaleString()}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">VIN:</span>
+                      <span className="font-medium">{selectedVehicle.vin}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Mileage:</span>
+                      <span className="font-medium">{selectedVehicle.mileage.toLocaleString()} miles</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Exterior Color:</span>
+                      <span className="font-medium">{selectedVehicle.color}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Transmission:</span>
+                      <span className="font-medium">{selectedVehicle.transmission}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Fuel Type:</span>
+                      <span className="font-medium">{selectedVehicle.fuelType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Condition:</span>
+                      <span className="font-medium">{selectedVehicle.condition}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Category:</span>
+                      <span className="font-medium">{selectedVehicle.category}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Image thumbnails */}
+              {selectedVehicle.images && selectedVehicle.images.length > 1 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Images</h3>
+                  <div className="grid grid-cols-5 gap-2">
+                    {selectedVehicle.images.map((image, index) => (
+                      <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
+                        <img 
+                          src={typeof image === 'string' ? image : ''} 
+                          alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Description */}
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Description</h3>
+                <p className="text-gray-700">{selectedVehicle.description}</p>
+              </div>
+              
+              {/* Features */}
+              {selectedVehicle.features && selectedVehicle.features.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Features</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Array.isArray(selectedVehicle.features) && selectedVehicle.features.map((feature, index) => (
+                      <div key={index} className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailsModalOpen(false)}>
+              Close
+            </Button>
+            <Button 
+              variant="default" 
+              onClick={() => {
+                setIsDetailsModalOpen(false);
+                handleEdit(selectedVehicle!);
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Vehicle
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </EmployeeLayout>
+  );
+}
