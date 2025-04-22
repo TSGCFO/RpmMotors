@@ -214,18 +214,22 @@ export class DatabaseStorage implements IStorage {
       const columnNames = existingColumns.rows.map(row => row.column_name);
       console.log("Available user columns (after migration):", columnNames);
       
-      const allUsers = await db.select().from(users);
-      if (allUsers.length === 0) {
-        // Use a simplified approach - just insert the basic user
-        try {
+      // Check if users table exists before trying to query it
+      try {
+        const allUsers = await db.execute(sql`
+          SELECT * FROM users LIMIT 1
+        `);
+        
+        if (allUsers.rows.length === 0) {
+          // Use raw SQL to ensure we only insert fields that exist
           await db.execute(sql`
-            INSERT INTO users (username, password)
+            INSERT INTO users (username, password) 
             VALUES ('admin', 'rpmauto2025')
           `);
           console.log("Created default admin user with minimal fields");
-        } catch (insertError) {
-          console.error("Error inserting admin user:", insertError);
         }
+      } catch (usersError) {
+        console.error("Error checking for users:", usersError);
       }
     } catch (error) {
       console.error("Error initializing admin user:", error);
