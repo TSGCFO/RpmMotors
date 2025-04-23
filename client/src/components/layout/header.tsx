@@ -31,8 +31,14 @@ export default function Header() {
     return location === path;
   };
 
+  // Check if current location is employee portal
+  const isEmployeePortal = location.startsWith('/employee');
+  
   return (
-    <header className="bg-black text-white w-full z-50" role="banner" aria-label="Main Header">
+    <header className={`relative ${isEmployeePortal ? 'bg-gray-900' : 'bg-black'} text-white w-full z-50`} role="banner" aria-label="Main Header">
+      {isEmployeePortal && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-[#E31837]"></div>
+      )}
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center pt-4 pb-3 px-4">
           {/* Logo Section */}
@@ -95,12 +101,25 @@ export default function Header() {
             <div className="search-bar ml-0 md:ml-4 mt-3 md:mt-0 w-full md:w-auto">
               <SearchBar />
             </div>
+            
+            {/* Employee Portal Link */}
+            <div className="employee-portal ml-0 md:ml-4 mt-3 md:mt-0">
+              <Link href="/employee">
+                <Button 
+                  variant="outline" 
+                  className="bg-transparent text-white border-white hover:bg-[#E31837] hover:text-white hover:border-[#E31837] text-xs uppercase font-semibold tracking-wide"
+                >
+                  <i className="fas fa-user-tie mr-2"></i>
+                  Employee Portal
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
       
       {/* Main Navigation */}
-      <div className="bg-black border-t border-gray-800">
+      <div className={`${isEmployeePortal ? 'bg-gray-900' : 'bg-black'} border-t border-gray-800`}>
         <div className="container mx-auto">
           {/* Mobile Menu Button */}
           <div className="md:hidden px-4 py-4 flex justify-between items-center">
@@ -197,6 +216,14 @@ export default function Header() {
                 <li>
                   <Link href="/contact" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>
                     Contact Us
+                  </Link>
+                </li>
+                <li className="border-t border-gray-800 pt-4 mt-2">
+                  <Link href="/employee" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/employee') ? 'text-[#E31837]' : ''}`}>
+                    <span className="flex items-center">
+                      <i className="fas fa-user-tie mr-2"></i>
+                      Employee Portal
+                    </span>
                   </Link>
                 </li>
               </ul>
