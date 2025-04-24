@@ -1853,62 +1853,26 @@ export default function EmployeeInventoryManager() {
                                   <img 
                                     src={
                                       typeof vehicle.images === 'string' 
-                                        ? vehicle.images.split(',')[0]
+                                        ? (() => {
+                                            const imgPath = vehicle.images.split(',')[0].trim();
+                                            return imgPath.startsWith('http') || imgPath.startsWith('/') 
+                                              ? imgPath 
+                                              : `/${imgPath}`;
+                                          })()
                                         : Array.isArray(vehicle.images) && vehicle.images.length > 0
-                                          ? vehicle.images[0]
-                                          : ''
+                                          ? (() => {
+                                              const imgPath = vehicle.images[0].trim();
+                                              return imgPath.startsWith('http') || imgPath.startsWith('/') 
+                                                ? imgPath 
+                                                : `/${imgPath}`;
+                                            })()
+                                          : '/placeholder-car.jpg'
                                     } 
                                     alt={`${vehicle.make} ${vehicle.model}`}
                                     className="h-full w-full object-cover"
                                     onError={(e) => {
                                       e.currentTarget.onerror = null;
-                                      e.currentTarget.src = '';
-                                      const parent = e.currentTarget.parentElement;
-                                      if (parent) {
-                                        // Create and append fallback elements instead of using innerHTML
-                                        const fallbackDiv = document.createElement('div');
-                                        fallbackDiv.className = 'h-full w-full flex items-center justify-center';
-                                        
-                                        const carIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                                        carIcon.setAttribute('width', '20');
-                                        carIcon.setAttribute('height', '20');
-                                        carIcon.setAttribute('viewBox', '0 0 24 24');
-                                        carIcon.setAttribute('fill', 'none');
-                                        carIcon.setAttribute('stroke', 'currentColor');
-                                        carIcon.setAttribute('stroke-width', '2');
-                                        carIcon.setAttribute('stroke-linecap', 'round');
-                                        carIcon.setAttribute('stroke-linejoin', 'round');
-                                        carIcon.classList.add('h-5', 'w-5', 'text-gray-400');
-                                        
-                                        const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                        path1.setAttribute('d', 'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2');
-                                        
-                                        const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                                        circle1.setAttribute('cx', '7');
-                                        circle1.setAttribute('cy', '17');
-                                        circle1.setAttribute('r', '2');
-                                        
-                                        const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                        path2.setAttribute('d', 'M9 17h6');
-                                        
-                                        const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                                        circle2.setAttribute('cx', '17');
-                                        circle2.setAttribute('cy', '17');
-                                        circle2.setAttribute('r', '2');
-                                        
-                                        carIcon.appendChild(path1);
-                                        carIcon.appendChild(circle1);
-                                        carIcon.appendChild(path2);
-                                        carIcon.appendChild(circle2);
-                                        
-                                        fallbackDiv.appendChild(carIcon);
-                                        
-                                        // Clear parent and append fallback
-                                        while (parent.firstChild) {
-                                          parent.removeChild(parent.firstChild);
-                                        }
-                                        parent.appendChild(fallbackDiv);
-                                      }
+                                      e.currentTarget.src = '/placeholder-car.jpg';
                                     }}
                                   />
                                 )}
