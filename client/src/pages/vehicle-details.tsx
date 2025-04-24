@@ -206,7 +206,10 @@ export default function VehicleDetails() {
           vehicleInteriorColor: "Not specified",
           vehicleExteriorColor: vehicle.color,
           image: vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : "",
-          offers: {
+          offers: vehicle.isSold ? {
+            availability: "https://schema.org/SoldOut",
+            url: `https://rpmauto.com/inventory/${vehicle.id}`
+          } : {
             price: vehicle.price,
             priceCurrency: "CAD",
             availability: "https://schema.org/InStock",
@@ -237,6 +240,11 @@ export default function VehicleDetails() {
             <div>
               <h1 className="text-3xl md:text-4xl font-['Poppins'] font-bold text-gray-900">
                 {vehicle.year} {vehicle.make} {vehicle.model}
+                {vehicle.isSold && (
+                  <span className="ml-3 text-base bg-black text-white font-bold uppercase px-3 py-1 rounded-md">
+                    Sold
+                  </span>
+                )}
               </h1>
               <p className="text-gray-600 mt-1">
                 <span>Stock# {vehicle.vin.slice(-6)}</span>
@@ -247,7 +255,12 @@ export default function VehicleDetails() {
               </p>
             </div>
             <div className="mt-4 md:mt-0">
-              <p className="text-3xl font-['Poppins'] font-bold text-[#E31837]">{formatCurrency(vehicle.price)}</p>
+              {!vehicle.isSold && (
+                <p className="text-3xl font-['Poppins'] font-bold text-[#E31837]">{formatCurrency(vehicle.price)}</p>
+              )}
+              {vehicle.isSold && (
+                <p className="text-xl font-['Poppins'] font-bold text-gray-700">Contact for details</p>
+              )}
             </div>
           </div>
         </div>
@@ -334,8 +347,8 @@ export default function VehicleDetails() {
                 </a>
               </div>
 
-              {/* Financing Calculator */}
-              <FinancingCalculator vehiclePrice={vehicle.price} />
+              {/* Financing Calculator - Only show for vehicles that are not sold */}
+              {!vehicle.isSold && <FinancingCalculator vehiclePrice={vehicle.price} />}
             </div>
           </div>
         </div>
@@ -539,10 +552,21 @@ export default function VehicleDetails() {
                     <div className="p-4">
                       <h3 className="text-lg font-['Poppins'] font-semibold mb-1">
                         {vehicle.year} {vehicle.make} {vehicle.model}
+                        {vehicle.isSold && (
+                          <span className="ml-2 text-xs bg-black text-white font-bold uppercase px-2 py-0.5 rounded-sm">
+                            Sold
+                          </span>
+                        )}
                       </h3>
-                      <p className="text-[#E31837] font-bold mb-2">
-                        {formatCurrency(vehicle.price)}
-                      </p>
+                      {!vehicle.isSold ? (
+                        <p className="text-[#E31837] font-bold mb-2">
+                          {formatCurrency(vehicle.price)}
+                        </p>
+                      ) : (
+                        <p className="text-gray-700 font-medium mb-2">
+                          Contact for details
+                        </p>
+                      )}
                       <div className="text-sm text-gray-600">
                         <span>{formatNumber(vehicle.mileage)} km</span>
                         <span className="mx-2">•</span>
