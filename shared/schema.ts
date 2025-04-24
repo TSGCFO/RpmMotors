@@ -54,7 +54,7 @@ export const vehicles = pgTable("vehicles", {
   isFeatured: boolean("is_featured").default(false),
   isSold: boolean("is_sold").default(false),
   soldPrice: integer("sold_price").default(0),
-  soldDate: timestamp("sold_date", { mode: 'date' }),
+  soldDate: text("sold_date"),
   features: json("features").$type<string[]>().notNull().default([]),
   images: json("images").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow(),

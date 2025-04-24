@@ -288,14 +288,17 @@ export class DatabaseStorage implements IStorage {
           (typeof processedUpdates.soldDate === 'string' && processedUpdates.soldDate === '')) {
         processedUpdates.soldDate = null;
       } 
-      // If it's a string date, convert to a Date object
+      // If it's a string date, format it properly for storage
       else if (typeof processedUpdates.soldDate === 'string') {
         try {
-          // Convert string to Date object for the timestamp column
+          // Validate that it's a proper date
           const dateObj = new Date(processedUpdates.soldDate);
           if (!isNaN(dateObj.getTime())) {
-            // Valid date, use the Date object
-            processedUpdates.soldDate = dateObj;
+            // It's a valid date, format it as YYYY-MM-DD
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            processedUpdates.soldDate = `${year}-${month}-${day}`;
           } else {
             // Invalid date string, set to null
             processedUpdates.soldDate = null;
