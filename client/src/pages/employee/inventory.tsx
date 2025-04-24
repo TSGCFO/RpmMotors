@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Card, 
   CardContent, 
@@ -89,12 +91,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+{/* Tabs components already imported above */}
 import {
   Accordion,
   AccordionContent,
@@ -685,9 +682,386 @@ export default function EmployeeInventoryManager() {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="features">Features (comma separated)</Label>
-        <Textarea id="features" name="features" value={formData.features} onChange={handleInputChange} rows={3} required />
-        <p className="text-xs text-gray-500">Example: Leather Seats, Navigation System, Backup Camera</p>
+        <Label htmlFor="features">Vehicle Features</Label>
+        <Tabs defaultValue="simple" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="simple">Simple List</TabsTrigger>
+            <TabsTrigger value="categorized">Categorized</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="simple" className="mt-2">
+            <Textarea 
+              id="features" 
+              name="features" 
+              value={formData.features} 
+              onChange={handleInputChange} 
+              rows={5} 
+              required 
+              placeholder="Leather Seats, Navigation System, Backup Camera, LED Headlights"
+            />
+            <p className="text-xs text-gray-500 mt-1">Enter features separated by commas</p>
+          </TabsContent>
+          
+          <TabsContent value="categorized" className="mt-2">
+            <div className="grid gap-4">
+              {/* Performance & Handling */}
+              <div className="space-y-2">
+                <Label htmlFor="performance">Performance & Handling</Label>
+                <Textarea 
+                  id="performance" 
+                  placeholder="- M Sport Suspension&#10;- Performance Brakes&#10;- Sport Exhaust" 
+                  rows={3}
+                  value={formData.features.includes('## Performance & Handling') 
+                    ? formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Performance section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Performance & Handling\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve other sections if they exist
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Exterior Details */}
+              <div className="space-y-2">
+                <Label htmlFor="exterior">Exterior Details</Label>
+                <Textarea 
+                  id="exterior" 
+                  placeholder="- LED Headlights&#10;- Panoramic Roof&#10;- 19-inch Alloy Wheels" 
+                  rows={3}
+                  value={formData.features.includes('## Exterior Details') 
+                    ? formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Exterior section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Exterior Details\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve other sections if they exist
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Interior & Technology */}
+              <div className="space-y-2">
+                <Label htmlFor="interior">Interior & Technology</Label>
+                <Textarea 
+                  id="interior" 
+                  placeholder="- Leather Seats&#10;- Navigation System&#10;- Premium Sound System" 
+                  rows={3}
+                  value={formData.features.includes('## Interior & Technology') 
+                    ? formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Interior section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Interior & Technology\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve Safety section if it exists
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Other section if it exists
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Safety & Convenience */}
+              <div className="space-y-2">
+                <Label htmlFor="safety">Safety & Convenience</Label>
+                <Textarea 
+                  id="safety" 
+                  placeholder="- Backup Camera&#10;- Parking Sensors&#10;- Blind Spot Monitoring" 
+                  rows={3}
+                  value={formData.features.includes('## Safety & Convenience') 
+                    ? formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Interior section if it exists
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Safety section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Safety & Convenience\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve Other section if it exists
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Other Features */}
+              <div className="space-y-2">
+                <Label htmlFor="other">Other Features</Label>
+                <Textarea 
+                  id="other" 
+                  placeholder="- One Owner&#10;- Service History&#10;- Warranty" 
+                  rows={3}
+                  value={formData.features.includes('## Other Features') 
+                    ? formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Interior section if it exists
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Safety section if it exists
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    // Other section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Other Features\n${e.target.value.trim()}`;
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              <Alert>
+                <AlertDescription className="text-xs text-gray-500">
+                  Add features by category. Use bullet points (- Feature) for each item. Empty categories will be ignored.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <div className="space-y-2">
