@@ -52,6 +52,9 @@ export const vehicles = pgTable("vehicles", {
   category: text("category").notNull(), // e.g., "Sports Cars", "Luxury Sedans", etc.
   condition: text("condition").notNull().default("Used"), // New, Used, Certified Pre-Owned
   isFeatured: boolean("is_featured").default(false),
+  isSold: boolean("is_sold").default(false),
+  soldPrice: integer("sold_price"),
+  soldDate: timestamp("sold_date"),
   features: json("features").$type<string[]>().notNull().default([]),
   images: json("images").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow(),
