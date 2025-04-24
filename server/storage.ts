@@ -284,16 +284,18 @@ export class DatabaseStorage implements IStorage {
     // Clean up any formatting issues with soldDate before updating
     if (processedUpdates.soldDate !== undefined) {
       // If it's null or empty string, set to null
-      if (processedUpdates.soldDate === null || processedUpdates.soldDate === '') {
+      if (processedUpdates.soldDate === null || 
+          (typeof processedUpdates.soldDate === 'string' && processedUpdates.soldDate === '')) {
         processedUpdates.soldDate = null;
       } 
-      // If it's a string date, ensure it's in the right format
+      // If it's a string date, convert to a Date object
       else if (typeof processedUpdates.soldDate === 'string') {
         try {
-          // This keeps it as a string but validates it's a proper date
+          // Convert string to Date object for the timestamp column
           const dateObj = new Date(processedUpdates.soldDate);
           if (!isNaN(dateObj.getTime())) {
-            // Keep as is - the DB adapter will handle conversion to timestamp
+            // Valid date, use the Date object
+            processedUpdates.soldDate = dateObj;
           } else {
             // Invalid date string, set to null
             processedUpdates.soldDate = null;

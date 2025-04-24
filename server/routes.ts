@@ -218,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If setting a vehicle as sold without a date, default to current date
       if (updateData.isSold === true && (!updateData.soldDate || updateData.soldDate === '')) {
-        updateData.soldDate = new Date().toISOString();
+        updateData.soldDate = new Date();
       }
       
       // Partial validation of the update data
