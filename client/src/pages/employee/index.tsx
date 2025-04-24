@@ -261,10 +261,11 @@ export default function EmployeeDashboard() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/employee/activity">
-                    <a className="text-sm text-[#E31837] font-medium hover:underline">
-                      View All Activity
-                    </a>
+                  <Link 
+                    href="/employee/activity"
+                    className="text-sm text-[#E31837] font-medium hover:underline"
+                  >
+                    View All Activity
                   </Link>
                 </CardFooter>
               </Card>
@@ -319,10 +320,11 @@ export default function EmployeeDashboard() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/employee/inventory">
-                    <a className="text-sm text-[#E31837] font-medium hover:underline">
-                      View All Vehicles
-                    </a>
+                  <Link 
+                    href="/employee/inventory"
+                    className="text-sm text-[#E31837] font-medium hover:underline"
+                  >
+                    View All Vehicles
                   </Link>
                 </CardFooter>
               </Card>
@@ -371,10 +373,11 @@ export default function EmployeeDashboard() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Link href="/employee/inquiries">
-                  <a className="text-sm text-[#E31837] font-medium hover:underline">
-                    View All Inquiries
-                  </a>
+                <Link 
+                  href="/employee/inquiries"
+                  className="text-sm text-[#E31837] font-medium hover:underline"
+                >
+                  View All Inquiries
                 </Link>
               </CardFooter>
             </Card>
