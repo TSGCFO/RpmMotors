@@ -465,10 +465,19 @@ export default function EmployeeInventoryManager() {
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === 'year' || name === 'price' || name === 'mileage' || name === 'soldPrice' ? Number(value) : value
-    });
+    
+    if (name === 'soldDate' && value === '') {
+      // Handle empty soldDate as null
+      setFormData({
+        ...formData,
+        soldDate: null
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: name === 'year' || name === 'price' || name === 'mileage' || name === 'soldPrice' ? Number(value) : value
+      });
+    }
   };
 
   const handleSwitchChange = (checked: boolean) => {
@@ -848,7 +857,7 @@ export default function EmployeeInventoryManager() {
                   id="soldDate" 
                   name="soldDate" 
                   type="date" 
-                  value={formData.soldDate} 
+                  value={formData.soldDate || ''} 
                   onChange={handleInputChange} 
                 />
               </div>
