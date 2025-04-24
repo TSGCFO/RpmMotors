@@ -40,9 +40,16 @@ export function OptimizedImage({
   // Construct object-fit class
   const objectFitClass = objectFit ? `object-${objectFit}` : '';
   
+  // Normalize image src path
+  const normalizedSrc = (() => {
+    if (!src) return '/placeholder-car.jpg';
+    if (src.startsWith('http') || src.startsWith('/')) return src;
+    return `/${src}`;
+  })();
+
   return (
     <img
-      src={src}
+      src={normalizedSrc}
       alt={alt}
       width={width}
       height={height}
@@ -52,6 +59,10 @@ export function OptimizedImage({
         // If width/height are provided, set them as style props too for older browsers
         ...(width && { width: `${width}px` }),
         ...(height && { height: `${height}px` }),
+      }}
+      onError={(e) => {
+        e.currentTarget.onerror = null;
+        e.currentTarget.src = '/placeholder-car.jpg';
       }}
     />
   );
