@@ -437,7 +437,8 @@ export default function EmployeeInventoryManager() {
         apiRequest('PUT', `/api/vehicles/${id}`, { 
           isSold: sold,
           // If marking as sold, set today's date as soldDate
-          ...(sold ? { soldDate: today } : { soldDate: null, soldPrice: null })
+          // Use empty string instead of null for soldDate when unsetting sold status
+          ...(sold ? { soldDate: today, soldPrice: 0 } : { soldDate: '', soldPrice: 0 })
         })
       );
       await Promise.all(promises);
@@ -814,7 +815,16 @@ export default function EmployeeInventoryManager() {
             <Switch 
               id="isSold" 
               checked={formData.isSold} 
-              onCheckedChange={(checked) => setFormData({...formData, isSold: checked})}
+              onCheckedChange={(checked) => {
+                // Set today's date when marking as sold, empty string when unmarking
+                const today = new Date().toISOString().split('T')[0];
+                setFormData({
+                  ...formData, 
+                  isSold: checked,
+                  soldDate: checked ? today : '',
+                  soldPrice: checked ? formData.soldPrice : 0
+                });
+              }}
             />
             <Label htmlFor="isSold" className="ml-2">Vehicle is sold</Label>
           </div>
