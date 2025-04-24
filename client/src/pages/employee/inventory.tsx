@@ -594,28 +594,7 @@ export default function EmployeeInventoryManager() {
     return Object.values(selectedVehicles).filter(Boolean).length;
   };
   
-    Object.entries(sections).forEach(([section, content]) => {
-      markdown += `## ${section}\n${content}\n\n`;
-    });
-    
-    return markdown.trim();
-  };
-  
-  // Helper function to get custom categories (excludes standard ones)
-  const getCustomCategories = (features: string): string[] => {
-    const allSections = extractFeatureSections(features);
-    const standardSections = [
-      'Performance & Handling',
-      'Exterior Details',
-      'Interior & Technology',
-      'Safety & Convenience',
-      'Other Features'
-    ];
-    
-    return Object.keys(allSections).filter(
-      section => !standardSections.includes(section)
-    );
-  };
+  // This code has been moved to the getCustomCategories function above
   
   // Update hasSelectedItems when selections change
   useEffect(() => {
@@ -1472,6 +1451,7 @@ export default function EmployeeInventoryManager() {
     </form>
   );
 
+  // Main component return
   return (
     <EmployeeLayout>
       <div className="space-y-6">
