@@ -208,9 +208,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid vehicle ID" });
       }
       
+      // Handle the sold date properly before validation
+      const updateData = { ...req.body };
+      
+      // If setting a vehicle as not sold, explicitly set soldDate to null
+      if (updateData.isSold === false) {
+        updateData.soldDate = null;
+      }
+      
+      // If setting a vehicle as sold without a date, default to current date
+      if (updateData.isSold === true && (!updateData.soldDate || updateData.soldDate === '')) {
+        updateData.soldDate = new Date().toISOString();
+      }
+      
       // Partial validation of the update data
       const updateVehicleSchema = insertVehicleSchema.partial();
-      const validationResult = updateVehicleSchema.safeParse(req.body);
+      const validationResult = updateVehicleSchema.safeParse(updateData);
       
       if (!validationResult.success) {
         const errorMessage = fromZodError(validationResult.error).message;

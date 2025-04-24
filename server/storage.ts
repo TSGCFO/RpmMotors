@@ -278,9 +278,36 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateVehicle(id: number, updates: Partial<Vehicle>): Promise<Vehicle | undefined> {
+    // Process the updates to ensure soldDate is properly handled
+    const processedUpdates = { ...updates };
+    
+    // Clean up any formatting issues with soldDate before updating
+    if (processedUpdates.soldDate !== undefined) {
+      // If it's null or empty string, set to null
+      if (processedUpdates.soldDate === null || processedUpdates.soldDate === '') {
+        processedUpdates.soldDate = null;
+      } 
+      // If it's a string date, ensure it's in the right format
+      else if (typeof processedUpdates.soldDate === 'string') {
+        try {
+          // This keeps it as a string but validates it's a proper date
+          const dateObj = new Date(processedUpdates.soldDate);
+          if (!isNaN(dateObj.getTime())) {
+            // Keep as is - the DB adapter will handle conversion to timestamp
+          } else {
+            // Invalid date string, set to null
+            processedUpdates.soldDate = null;
+          }
+        } catch {
+          // Error parsing date, set to null
+          processedUpdates.soldDate = null;
+        }
+      }
+    }
+    
     const [updatedVehicle] = await db
       .update(vehicles)
-      .set(updates)
+      .set(processedUpdates)
       .where(eq(vehicles.id, id))
       .returning();
     return updatedVehicle || undefined;
