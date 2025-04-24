@@ -162,7 +162,7 @@ export default function EmployeeInventoryManager() {
     vin: '',
     isSold: false,
     soldPrice: 0,
-    soldDate: ''
+    soldDate: null as string | null
   });
   
   // Filter and sort states
@@ -437,8 +437,8 @@ export default function EmployeeInventoryManager() {
         apiRequest('PUT', `/api/vehicles/${id}`, { 
           isSold: sold,
           // If marking as sold, set today's date as soldDate
-          // Use empty string instead of null for soldDate when unsetting sold status
-          ...(sold ? { soldDate: today, soldPrice: 0 } : { soldDate: '', soldPrice: 0 })
+          soldPrice: 0,
+          soldDate: sold ? today : null
         })
       );
       await Promise.all(promises);
@@ -597,7 +597,7 @@ export default function EmployeeInventoryManager() {
       vin: '',
       isSold: false,
       soldPrice: 0,
-      soldDate: ''
+      soldDate: null
     });
   };
   
@@ -816,12 +816,12 @@ export default function EmployeeInventoryManager() {
               id="isSold" 
               checked={formData.isSold} 
               onCheckedChange={(checked) => {
-                // Set today's date when marking as sold, empty string when unmarking
+                // Set today's date when marking as sold, null when unmarking
                 const today = new Date().toISOString().split('T')[0];
                 setFormData({
                   ...formData, 
                   isSold: checked,
-                  soldDate: checked ? today : '',
+                  soldDate: checked ? today : null,
                   soldPrice: checked ? formData.soldPrice : 0
                 });
               }}
