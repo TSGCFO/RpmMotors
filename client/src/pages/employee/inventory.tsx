@@ -119,6 +119,7 @@ interface FilterState {
   transmission: string;
   fuelType: string;
   featured: string;
+  sold: string;
 }
 
 // Define interface for sort state
@@ -176,7 +177,8 @@ export default function EmployeeInventoryManager() {
     condition: '',
     transmission: '',
     fuelType: '',
-    featured: ''
+    featured: '',
+    sold: ''
   });
   
   const [sort, setSort] = useState<SortState>({
@@ -517,7 +519,8 @@ export default function EmployeeInventoryManager() {
       condition: '',
       transmission: '',
       fuelType: '',
-      featured: ''
+      featured: '',
+      sold: ''
     });
     setSearchQuery('');
     setPage(1);
@@ -1774,6 +1777,24 @@ export default function EmployeeInventoryManager() {
                             <SelectItem value="">Any</SelectItem>
                             <SelectItem value="true">Featured Only</SelectItem>
                             <SelectItem value="false">Non-Featured Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-sold">Sold Status</Label>
+                        <Select 
+                          name="sold" 
+                          value={filters.sold}
+                          onValueChange={(value) => setFilters({...filters, sold: value})}
+                        >
+                          <SelectTrigger id="filter-sold">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All Vehicles</SelectItem>
+                            <SelectItem value="true">Sold Only</SelectItem>
+                            <SelectItem value="false">Available Only</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
