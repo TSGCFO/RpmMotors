@@ -178,32 +178,36 @@ export default function EmployeeDashboard() {
             
             {/* Quick Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <Link href="/employee/inventory">
-                <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                  <Car className="h-8 w-8 text-[#E31837] mb-2" />
-                  <span className="text-sm font-medium text-gray-900">Manage Inventory</span>
-                </a>
+              <Link 
+                href="/employee/inventory"
+                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+              >
+                <Car className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">Manage Inventory</span>
               </Link>
               
-              <Link href="/employee/inquiries">
-                <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                  <MessageSquare className="h-8 w-8 text-[#E31837] mb-2" />
-                  <span className="text-sm font-medium text-gray-900">View Inquiries</span>
-                </a>
+              <Link 
+                href="/employee/inquiries"
+                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+              >
+                <MessageSquare className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">View Inquiries</span>
               </Link>
               
-              <Link href="/employee/testimonials">
-                <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                  <FileEdit className="h-8 w-8 text-[#E31837] mb-2" />
-                  <span className="text-sm font-medium text-gray-900">Manage Testimonials</span>
-                </a>
+              <Link 
+                href="/employee/testimonials"
+                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+              >
+                <FileEdit className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">Manage Testimonials</span>
               </Link>
               
-              <Link href="/employee/reports">
-                <a className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                  <TrendingUp className="h-8 w-8 text-[#E31837] mb-2" />
-                  <span className="text-sm font-medium text-gray-900">View Reports</span>
-                </a>
+              <Link 
+                href="/employee/reports"
+                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+              >
+                <TrendingUp className="h-8 w-8 text-[#E31837] mb-2" />
+                <span className="text-sm font-medium text-gray-900">View Reports</span>
               </Link>
             </div>
             

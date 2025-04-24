@@ -169,8 +169,8 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
           </form>
           
           <div className="mt-4 text-center">
-            <Link href="/">
-              <a className="text-sm text-[#E31837] hover:underline">Return to Website</a>
+            <Link href="/" className="text-sm text-[#E31837] hover:underline">
+              Return to Website
             </Link>
           </div>
         </div>
@@ -208,17 +208,16 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
               <TooltipProvider key={item.path}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link href={item.path}>
-                      <a
-                        className={`flex items-center px-3 py-2 my-1 text-sm font-medium rounded-md ${
-                          location === item.path
-                            ? 'bg-[#E31837]/10 text-[#E31837]'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        {item.icon}
-                        <span className="ml-3">{item.label}</span>
-                      </a>
+                    <Link 
+                      href={item.path}
+                      className={`flex items-center px-3 py-2 my-1 text-sm font-medium rounded-md ${
+                        location === item.path
+                          ? 'bg-[#E31837]/10 text-[#E31837]'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="ml-3">{item.label}</span>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right">
@@ -229,11 +228,12 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
             ))}
             
             <div className="pt-4 mt-6 border-t border-gray-200">
-              <Link href="/">
-                <a className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100">
-                  <Home className="h-5 w-5" />
-                  <span className="ml-3">Visit Website</span>
-                </a>
+              <Link 
+                href="/"
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100"
+              >
+                <Home className="h-5 w-5" />
+                <span className="ml-3">Visit Website</span>
               </Link>
               <button
                 onClick={handleLogout}
@@ -281,29 +281,28 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
             </div>
             <nav className="px-2 py-3">
               {navItems.map((item) => (
-                <Link key={item.path} href={item.path}>
-                  <a
-                    className={`flex items-center px-3 py-2 my-1 text-sm font-medium rounded-md ${
-                      location === item.path
-                        ? 'bg-[#E31837]/10 text-[#E31837]'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.icon}
-                    <span className="ml-3">{item.label}</span>
-                  </a>
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  className={`flex items-center px-3 py-2 my-1 text-sm font-medium rounded-md ${
+                    location === item.path
+                      ? 'bg-[#E31837]/10 text-[#E31837]'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.icon}
+                  <span className="ml-3">{item.label}</span>
                 </Link>
               ))}
               <div className="pt-4 mt-6 border-t border-gray-200">
-                <Link href="/">
-                  <a
-                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Home className="h-5 w-5" />
-                    <span className="ml-3">Visit Website</span>
-                  </a>
+                <Link 
+                  href="/"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Home className="h-5 w-5" />
+                  <span className="ml-3">Visit Website</span>
                 </Link>
                 <button
                   onClick={() => {
