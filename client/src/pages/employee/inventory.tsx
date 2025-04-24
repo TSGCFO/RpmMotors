@@ -1243,9 +1243,25 @@ export default function EmployeeInventoryManager() {
                       }
                     }
                     
+                    // Preserve custom categories if they exist
+                    const sections = extractFeatureSections(formData.features);
+                    const standardSections = [
+                      'Performance & Handling',
+                      'Exterior Details',
+                      'Interior & Technology',
+                      'Safety & Convenience',
+                      'Other Features'
+                    ];
+                    
+                    Object.entries(sections).forEach(([section, content]) => {
+                      if (!standardSections.includes(section) && content.trim()) {
+                        updatedFeatures += `## ${section}\n${content}\n\n`;
+                      }
+                    });
+                    
                     // Other section
                     if (e.target.value.trim()) {
-                      updatedFeatures += `## Other Features\n${e.target.value.trim()}`;
+                      updatedFeatures += `## Other Features\n${e.target.value.trim()}\n\n`;
                     }
 
                     // Update form data
@@ -1256,6 +1272,127 @@ export default function EmployeeInventoryManager() {
                   }}
                 />
               </div>
+              
+              {/* Custom Categories */}
+              <Collapsible className="space-y-2 pt-2 border-t mt-4">
+                <div className="flex items-center justify-between space-x-4">
+                  <h4 className="text-sm font-medium">Custom Categories</h4>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <PlusCircle className="h-4 w-4 mr-1" />
+                      Add Custom Category
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+                
+                <CollapsibleContent className="space-y-4">
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="customCategoryName" className="text-sm">Category Name</Label>
+                      <Input
+                        id="customCategoryName"
+                        value={customCategoryName}
+                        onChange={(e) => setCustomCategoryName(e.target.value)}
+                        placeholder="E.g., Premium Package Features"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={!customCategoryName.trim()}
+                      onClick={() => {
+                        if (!customCategoryName.trim()) return;
+                        
+                        // Create a new section for this custom category
+                        let updatedFeatures = formData.features || '';
+                        
+                        if (updatedFeatures && !updatedFeatures.endsWith('\n\n')) {
+                          updatedFeatures += '\n\n';
+                        }
+                        
+                        updatedFeatures += `## ${customCategoryName.trim()}\n- Add features here\n\n`;
+                        
+                        setFormData({
+                          ...formData,
+                          features: updatedFeatures.trim()
+                        });
+                        
+                        setCustomCategoryName('');
+                        
+                        // Show toast success
+                        toast({
+                          title: "Category Added",
+                          description: `Custom category "${customCategoryName.trim()}" has been added`,
+                        });
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {/* Display existing custom categories */}
+                  {getCustomCategories(formData.features).length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-sm font-medium">Existing Custom Categories</h4>
+                      <div className="space-y-3">
+                        {getCustomCategories(formData.features).map((category, index) => {
+                          const content = formData.features.includes(`## ${category}`)
+                            ? formData.features.split(`## ${category}`)[1]
+                                .split(/(?=^## )/m)[0]
+                                .trim()
+                            : '';
+                            
+                          return (
+                            <div key={index} className="space-y-2 border p-3 rounded-md">
+                              <div className="flex items-center justify-between">
+                                <Label className="font-medium">{category}</Label>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-7 text-xs px-2"
+                                  onClick={() => {
+                                    // Remove this category from features
+                                    const sections = extractFeatureSections(formData.features);
+                                    delete sections[category];
+                                    
+                                    setFormData({
+                                      ...formData,
+                                      features: buildFeaturesMarkdown(sections)
+                                    });
+                                    
+                                    toast({
+                                      title: "Category Removed",
+                                      description: `Custom category "${category}" has been removed`,
+                                    });
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                              <Textarea
+                                rows={3}
+                                value={content}
+                                placeholder={`- Add ${category} features here`}
+                                onChange={(e) => {
+                                  // Update just this category's content
+                                  const sections = extractFeatureSections(formData.features);
+                                  sections[category] = e.target.value.trim();
+                                  
+                                  setFormData({
+                                    ...formData,
+                                    features: buildFeaturesMarkdown(sections)
+                                  });
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
               
               <div className="space-y-4 mt-4">
                 <Alert>
