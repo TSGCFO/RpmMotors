@@ -64,6 +64,8 @@ export const vehicles = pgTable("vehicles", {
 export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   id: true,
   createdAt: true,
+}).extend({
+  soldDate: z.string().nullable(),
 });
 
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
