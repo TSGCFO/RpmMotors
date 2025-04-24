@@ -353,6 +353,168 @@ export default function VehicleDetails() {
         </div>
       </section>
 
+      {/* Vehicle Features */}
+      <section className="py-6">
+        <div className="container mx-auto px-6">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-2xl font-['Poppins'] font-semibold mb-4">Key Features & Highlights</h2>
+            
+            {vehicle.features && (
+              <div className="space-y-6">
+                {/* Categorized features */}
+                {(() => {
+                  // Get features array
+                  const featuresArray = typeof vehicle.features === 'string' 
+                    ? vehicle.features.split(',').map(f => f.trim()) 
+                    : Array.isArray(vehicle.features) ? vehicle.features : [];
+                  
+                  // Check if features already contain category headers (starting with ##, ### etc.)
+                  const hasMarkdownCategories = featuresArray.some(f => f.trim().startsWith('#'));
+                  
+                  // If features already have markdown categories, parse those
+                  if (hasMarkdownCategories) {
+                    const categoriesMap = {};
+                    let currentCategory = "Other Features";
+                    
+                    featuresArray.forEach(feature => {
+                      // Check if this is a category header (starts with # or ##)
+                      if (feature.trim().startsWith('#')) {
+                        // Extract category name by removing # symbols and trimming
+                        currentCategory = feature.replace(/^#+\s*/, '').trim();
+                        if (!categoriesMap[currentCategory]) {
+                          categoriesMap[currentCategory] = [];
+                        }
+                      } else if (feature.trim()) {
+                        // Add non-empty feature to current category
+                        if (!categoriesMap[currentCategory]) {
+                          categoriesMap[currentCategory] = [];
+                        }
+                        categoriesMap[currentCategory].push(feature.trim());
+                      }
+                    });
+                    
+                    return (
+                      <>
+                        {Object.entries(categoriesMap).map(([category, features]) => 
+                          features.length > 0 ? (
+                            <div key={category} className="mb-6">
+                              <h3 className="text-xl font-['Poppins'] font-semibold mb-3 text-[#E31837]">{category}</h3>
+                              <ul className="list-disc pl-6 space-y-1">
+                                {features.map((feature, index) => (
+                                  <li key={index} className="text-gray-700">{feature}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : null
+                        )}
+                      </>
+                    );
+                  }
+                  
+                  // Otherwise, auto-categorize features based on keywords
+                  const categories = {
+                    "Performance & Handling": featuresArray.filter(f => 
+                      f.toLowerCase().includes('suspension') || 
+                      f.toLowerCase().includes('brake') || 
+                      f.toLowerCase().includes('exhaust') || 
+                      f.toLowerCase().includes('performance') || 
+                      f.toLowerCase().includes('turbo') || 
+                      f.toLowerCase().includes('horsepower') || 
+                      f.toLowerCase().includes('sport') ||
+                      f.toLowerCase().includes('wheel') ||
+                      f.toLowerCase().includes('aerodynamic') ||
+                      f.toLowerCase().includes('engine') ||
+                      f.toLowerCase().includes('power') ||
+                      f.toLowerCase().includes('handling') ||
+                      f.toLowerCase().includes('drive') ||
+                      f.toLowerCase().includes('speed')
+                    ),
+                    "Exterior Details": featuresArray.filter(f => 
+                      f.toLowerCase().includes('grille') || 
+                      f.toLowerCase().includes('light') || 
+                      f.toLowerCase().includes('exterior') || 
+                      f.toLowerCase().includes('paint') || 
+                      f.toLowerCase().includes('roof') ||
+                      f.toLowerCase().includes('skirt') ||
+                      f.toLowerCase().includes('spoiler') ||
+                      f.toLowerCase().includes('diffuser') ||
+                      f.toLowerCase().includes('window') ||
+                      f.toLowerCase().includes('mirror') ||
+                      f.toLowerCase().includes('color') ||
+                      f.toLowerCase().includes('body') ||
+                      f.toLowerCase().includes('glass')
+                    ),
+                    "Interior & Technology": featuresArray.filter(f => 
+                      f.toLowerCase().includes('seat') || 
+                      f.toLowerCase().includes('audio') || 
+                      f.toLowerCase().includes('navigation') || 
+                      f.toLowerCase().includes('climate') || 
+                      f.toLowerCase().includes('apple carplay') || 
+                      f.toLowerCase().includes('android auto') ||
+                      f.toLowerCase().includes('display') ||
+                      f.toLowerCase().includes('leather') ||
+                      f.toLowerCase().includes('steering wheel') ||
+                      f.toLowerCase().includes('interior') ||
+                      f.toLowerCase().includes('dashboard') ||
+                      f.toLowerCase().includes('tech') ||
+                      f.toLowerCase().includes('bluetooth') ||
+                      f.toLowerCase().includes('screen') ||
+                      f.toLowerCase().includes('infotainment') ||
+                      f.toLowerCase().includes('connectivity')
+                    ),
+                    "Safety & Convenience": featuresArray.filter(f => 
+                      f.toLowerCase().includes('camera') || 
+                      f.toLowerCase().includes('sensor') || 
+                      f.toLowerCase().includes('airbag') || 
+                      f.toLowerCase().includes('safety') || 
+                      f.toLowerCase().includes('keyless') || 
+                      f.toLowerCase().includes('cruise') ||
+                      f.toLowerCase().includes('assist') ||
+                      f.toLowerCase().includes('control') ||
+                      f.toLowerCase().includes('warning') ||
+                      f.toLowerCase().includes('prevention') ||
+                      f.toLowerCase().includes('protection') ||
+                      f.toLowerCase().includes('emergency') ||
+                      f.toLowerCase().includes('brake') ||
+                      f.toLowerCase().includes('park')
+                    )
+                  };
+                  
+                  // Find uncategorized features
+                  const categorizedFeatures = [...categories["Performance & Handling"], 
+                    ...categories["Exterior Details"], 
+                    ...categories["Interior & Technology"], 
+                    ...categories["Safety & Convenience"]];
+                  
+                  const uncategorized = featuresArray.filter(f => !categorizedFeatures.includes(f));
+                  
+                  if (uncategorized.length > 0) {
+                    categories["Other Features"] = uncategorized;
+                  }
+                  
+                  return (
+                    <>
+                      {Object.entries(categories).map(([category, features]) => 
+                        features.length > 0 ? (
+                          <div key={category} className="mb-6">
+                            <h3 className="text-xl font-['Poppins'] font-semibold mb-3 text-[#E31837]">{category}</h3>
+                            <ul className="list-disc pl-6 space-y-1">
+                              {features.map((feature, index) => (
+                                <li key={index} className="text-gray-700">{feature}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Recently Viewed Vehicles Section */}
       {recentlyViewed.length > 0 && (
         <section className="py-8">
