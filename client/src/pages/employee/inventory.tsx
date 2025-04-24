@@ -1888,11 +1888,27 @@ export default function EmployeeInventoryManager() {
                               <div className="text-sm text-gray-500">{vehicle.vin}</div>
                             </TableCell>
                             <TableCell>{vehicle.year}</TableCell>
-                            <TableCell>${vehicle.price.toLocaleString()}</TableCell>
+                            <TableCell>
+                              {vehicle.isSold ? (
+                                <div className="flex flex-col">
+                                  <span className="line-through text-gray-500">${vehicle.price.toLocaleString()}</span>
+                                  <span className="font-semibold text-[#E31837]">
+                                    ${vehicle.soldPrice ? vehicle.soldPrice.toLocaleString() : vehicle.price.toLocaleString()}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span>${vehicle.price.toLocaleString()}</span>
+                              )}
+                            </TableCell>
                             <TableCell>{vehicle.mileage.toLocaleString()}</TableCell>
                             <TableCell>{vehicle.category}</TableCell>
                             <TableCell>
-                              {vehicle.isFeatured ? (
+                              {vehicle.isSold ? (
+                                <Badge variant="default" className="bg-black">
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Sold
+                                </Badge>
+                              ) : vehicle.isFeatured ? (
                                 <Badge variant="default" className="bg-[#E31837]">
                                   <Star className="h-3 w-3 mr-1 fill-current" />
                                   Featured
@@ -2246,19 +2262,46 @@ export default function EmployeeInventoryManager() {
                     <h2 className="text-2xl font-bold">
                       {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
                     </h2>
-                    {selectedVehicle.isFeatured && (
-                      <Badge className="mt-1 bg-[#E31837]">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Featured
-                      </Badge>
+                    <div className="flex mt-1 space-x-2">
+                      {selectedVehicle.isSold && (
+                        <Badge className="bg-black">
+                          <Check className="h-3 w-3 mr-1" />
+                          Sold
+                        </Badge>
+                      )}
+                      {selectedVehicle.isFeatured && (
+                        <Badge className="bg-[#E31837]">
+                          <Star className="h-3 w-3 mr-1 fill-current" />
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-2xl font-bold">
+                    {selectedVehicle.isSold ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center">
+                          <span className="line-through text-gray-500 text-xl mr-2">List: ${selectedVehicle.price.toLocaleString()}</span>
+                        </div>
+                        <div className="text-[#E31837]">
+                          Sold: ${selectedVehicle.soldPrice ? selectedVehicle.soldPrice.toLocaleString() : selectedVehicle.price.toLocaleString()}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-[#E31837]">${selectedVehicle.price.toLocaleString()}</span>
                     )}
                   </div>
                   
-                  <div className="text-2xl font-bold text-[#E31837]">
-                    ${selectedVehicle.price.toLocaleString()}
-                  </div>
-                  
                   <div className="space-y-2">
+                    {selectedVehicle.isSold && selectedVehicle.soldDate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Sold Date:</span>
+                        <span className="font-medium">
+                          {new Date(selectedVehicle.soldDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-500">VIN:</span>
                       <span className="font-medium">{selectedVehicle.vin}</span>
