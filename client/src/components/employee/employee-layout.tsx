@@ -185,7 +185,7 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
         <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center">
-              <img src="/logo.png" alt="RPM Auto" className="h-8 w-auto" />
+              <img src="/assets/logo.png" alt="RPM Auto" className="h-8 w-auto" />
               <span className="ml-2 text-xl font-bold text-gray-900">Employee Portal</span>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
           <div className="px-4 mt-6">
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src="/avatars/01.png" />
+                <AvatarImage src="/assets/avatars/01.png" />
                 <AvatarFallback className="bg-[#E31837] text-white">{username.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
@@ -250,7 +250,7 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
-          <img src="/logo.png" alt="RPM Auto" className="h-6 w-auto" />
+          <img src="/assets/logo.png" alt="RPM Auto" className="h-6 w-auto" />
           <span className="ml-2 font-bold text-gray-900">Employee Portal</span>
         </div>
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -263,14 +263,14 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
           <SheetContent side="left" className="p-0 w-72">
             <SheetHeader className="px-4 py-3 border-b">
               <SheetTitle className="text-left flex items-center">
-                <img src="/logo.png" alt="RPM Auto" className="h-6 w-auto mr-2" />
+                <img src="/assets/logo.png" alt="RPM Auto" className="h-6 w-auto mr-2" />
                 Employee Portal
               </SheetTitle>
             </SheetHeader>
             <div className="px-4 py-4 border-b">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/avatars/01.png" />
+                  <AvatarImage src="/assets/avatars/01.png" />
                   <AvatarFallback className="bg-[#E31837] text-white">{username.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
