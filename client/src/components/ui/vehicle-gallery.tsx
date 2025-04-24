@@ -38,9 +38,13 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
         onClick={() => openLightbox(photos.indexOf(mainImage))}
       >
         <img 
-          src={mainImage.startsWith('http') ? mainImage : `/${mainImage}`} 
+          src={mainImage.startsWith('http') || mainImage.startsWith('/') ? mainImage : `/${mainImage}`} 
           alt={vehicleName} 
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = '/placeholder-car.jpg';
+          }}
         />
       </div>
 
@@ -55,9 +59,13 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
             onClick={() => handleThumbnailClick(photo)}
           >
             <img 
-              src={photo.startsWith('http') ? photo : `/${photo}`} 
+              src={photo.startsWith('http') || photo.startsWith('/') ? photo : `/${photo}`} 
               alt={`${vehicleName} - View ${index + 1}`} 
               className="w-full h-20 object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/placeholder-car.jpg';
+              }}
             />
           </div>
         ))}
@@ -98,10 +106,14 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
 
           <div className="relative w-full h-full flex items-center justify-center p-8">
             <img 
-              src={photos[lightboxIndex].startsWith('http') ? photos[lightboxIndex] : `/${photos[lightboxIndex]}`} 
+              src={photos[lightboxIndex].startsWith('http') || photos[lightboxIndex].startsWith('/') ? photos[lightboxIndex] : `/${photos[lightboxIndex]}`} 
               alt={`${vehicleName} - View ${lightboxIndex + 1}`}
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/placeholder-car.jpg';
+              }}
             />
             <div className="absolute bottom-4 left-0 right-0 text-center text-white">
               <p>{lightboxIndex + 1} / {photos.length}</p>
