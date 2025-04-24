@@ -183,6 +183,53 @@ export default function EmployeeInventoryManager() {
   const [showFilters, setShowFilters] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
   
+  // Helper function to extract feature sections from markdown
+  const extractFeatureSections = (markdown: string) => {
+    const sections: Record<string, string> = {};
+    
+    if (!markdown) return sections;
+    
+    // Split by ## headings
+    const sectionBlocks = markdown.split(/^## /m).filter(Boolean);
+    
+    // Process each section
+    sectionBlocks.forEach(block => {
+      const lines = block.split('\n');
+      const sectionName = lines[0].trim();
+      const content = lines.slice(1).join('\n').trim();
+      sections[sectionName] = content;
+    });
+    
+    return sections;
+  };
+  
+  // Helper function to build markdown from sections
+  const buildFeaturesMarkdown = (sections: Record<string, string>) => {
+    let markdown = '';
+    
+    Object.entries(sections).forEach(([section, content]) => {
+      if (content.trim()) {
+        markdown += `## ${section}\n${content.trim()}\n\n`;
+      }
+    });
+    
+    return markdown.trim();
+  };
+  
+  // Helper function to get custom categories
+  const getCustomCategories = (markdown: string) => {
+    const sections = extractFeatureSections(markdown);
+    const standardSections = [
+      'Performance & Handling',
+      'Exterior Details',
+      'Interior & Technology',
+      'Safety & Convenience',
+      'Other Features'
+    ];
+    
+    return Object.keys(sections).filter(section => !standardSections.includes(section));
+  };
+  
   // Build query parameters for API request
   const buildQueryParams = () => {
     const params: Record<string, string> = {
@@ -547,53 +594,6 @@ export default function EmployeeInventoryManager() {
     return Object.values(selectedVehicles).filter(Boolean).length;
   };
   
-  // Helper function to extract all sections from feature markdown
-  const extractFeatureSections = (features: string): Record<string, string> => {
-    const sections: Record<string, string> = {};
-    
-    if (!features || !features.includes('##')) {
-      return sections;
-    }
-    
-    // Split by section headers and process each section
-    const parts = features.split(/^## /m).filter(Boolean);
-    
-    parts.forEach(part => {
-      const lines = part.split('\n');
-      if (lines.length > 0) {
-        const sectionName = lines[0].trim();
-        const sectionContent = lines.slice(1).join('\n').trim();
-        if (sectionContent) {
-          sections[sectionName] = sectionContent;
-        }
-      }
-    });
-    
-    return sections;
-  };
-  
-  // Helper function to build markdown from sections
-  const buildFeaturesMarkdown = (sections: Record<string, string>): string => {
-    let markdown = '';
-    
-    // Standard sections order (if they exist)
-    const standardSections = [
-      'Performance & Handling',
-      'Exterior Details',
-      'Interior & Technology',
-      'Safety & Convenience',
-      'Other Features'
-    ];
-    
-    // Add standard sections first (in the predefined order)
-    standardSections.forEach(section => {
-      if (sections[section]) {
-        markdown += `## ${section}\n${sections[section]}\n\n`;
-        delete sections[section]; // Remove to avoid duplication
-      }
-    });
-    
-    // Add any remaining custom sections
     Object.entries(sections).forEach(([section, content]) => {
       markdown += `## ${section}\n${content}\n\n`;
     });
@@ -1243,9 +1243,14 @@ export default function EmployeeInventoryManager() {
                       }
                     }
                     
-                    // Preserve custom categories if they exist
-                    const sections = extractFeatureSections(formData.features);
-                    const standardSections = [
+                    // Other section - must come before custom categories
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Other Features\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve any custom categories that might exist
+                    const featSections = extractFeatureSections(formData.features);
+                    const stdSections = [
                       'Performance & Handling',
                       'Exterior Details',
                       'Interior & Technology',
@@ -1253,16 +1258,11 @@ export default function EmployeeInventoryManager() {
                       'Other Features'
                     ];
                     
-                    Object.entries(sections).forEach(([section, content]) => {
-                      if (!standardSections.includes(section) && content.trim()) {
+                    Object.entries(featSections).forEach(([section, content]) => {
+                      if (!stdSections.includes(section) && content.trim()) {
                         updatedFeatures += `## ${section}\n${content}\n\n`;
                       }
                     });
-                    
-                    // Other section
-                    if (e.target.value.trim()) {
-                      updatedFeatures += `## Other Features\n${e.target.value.trim()}\n\n`;
-                    }
 
                     // Update form data
                     setFormData({
