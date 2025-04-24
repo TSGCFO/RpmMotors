@@ -548,19 +548,42 @@ export default function EmployeeInventoryManager() {
   // Update form data when selectedVehicle changes
   useEffect(() => {
     if (selectedVehicle) {
+      // Handle features formatting
+      let featuresValue = '';
+      
+      if (Array.isArray(selectedVehicle.features)) {
+        // If it's a simple array, join with commas
+        featuresValue = selectedVehicle.features.join(', ');
+      } else if (typeof selectedVehicle.features === 'string') {
+        // If it's already a string, use it directly
+        featuresValue = selectedVehicle.features;
+      }
+      
+      // Handle images formatting
+      let imagesValue = '';
+      if (Array.isArray(selectedVehicle.images)) {
+        imagesValue = selectedVehicle.images.join(', ');
+      } else if (typeof selectedVehicle.images === 'string') {
+        imagesValue = selectedVehicle.images;
+      }
+      
       setFormData({
         ...selectedVehicle,
-        features: Array.isArray(selectedVehicle.features) 
-          ? selectedVehicle.features.join(', ') 
-          : typeof selectedVehicle.features === 'string' 
-            ? selectedVehicle.features 
-            : '',
-        images: Array.isArray(selectedVehicle.images) 
-          ? selectedVehicle.images.join(', ') 
-          : typeof selectedVehicle.images === 'string' 
-            ? selectedVehicle.images 
-            : ''
+        features: featuresValue,
+        images: imagesValue
       });
+      
+      // Set default tab based on features format
+      // If features contain markdown headings, default to categorized tab
+      if (featuresValue.includes('## ')) {
+        const tabsElement = document.querySelector('[data-state="active"][role="tablist"]');
+        if (tabsElement) {
+          const categorizedTab = tabsElement.querySelector('[value="categorized"]') as HTMLButtonElement;
+          if (categorizedTab) {
+            categorizedTab.click();
+          }
+        }
+      }
     }
   }, [selectedVehicle]);
   
@@ -699,7 +722,110 @@ export default function EmployeeInventoryManager() {
               required 
               placeholder="Leather Seats, Navigation System, Backup Camera, LED Headlights"
             />
-            <p className="text-xs text-gray-500 mt-1">Enter features separated by commas</p>
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-gray-500">Enter features separated by commas</p>
+              
+              {formData.features && !formData.features.includes('##') && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs"
+                  onClick={() => {
+                    if (formData.features) {
+                      // Auto-categorize comma-separated features into different sections
+                      const features = formData.features.split(',').map(f => f.trim()).filter(Boolean);
+                      
+                      // Define categories and their keywords
+                      const categories = {
+                        "Performance & Handling": [
+                          "engine", "horsepower", "hp", "torque", "suspension", "brakes", "exhaust", 
+                          "transmission", "turbo", "supercharged", "performance", "handling", "sport mode",
+                          "driving mode", "awd", "4wd", "four-wheel", "differential", "sport package"
+                        ],
+                        "Exterior Details": [
+                          "led", "headlight", "taillight", "wheel", "rim", "tire", "panoramic", "sunroof", 
+                          "roof", "color", "paint", "exterior", "mirror", "fog light", "xenon", "hid", 
+                          "spoiler", "body kit", "carbon fiber", "aluminum", "alloy", "chrome", "grille"
+                        ],
+                        "Interior & Technology": [
+                          "leather", "seat", "heated", "ventilated", "cooled", "massage", "dashboard", 
+                          "infotainment", "touch", "screen", "display", "navigation", "navi", "gps", 
+                          "audio", "sound", "speaker", "bluetooth", "usb", "apple carplay", "android auto",
+                          "interior", "wood", "ambient", "lighting", "climate", "air conditioning", "ac"
+                        ],
+                        "Safety & Convenience": [
+                          "camera", "parking", "sensor", "blind spot", "lane", "assist", "cruise control", 
+                          "adaptive cruise", "emergency", "brake", "collision", "airbag", "safety", 
+                          "warning", "alarm", "keyless", "start", "entry", "remote", "power", "door", 
+                          "window", "trunk", "automatic", "rain", "wiper", "memory", "seat"
+                        ]
+                      };
+                      
+                      // Categorize features
+                      const categorizedFeatures: Record<string, string[]> = {
+                        "Performance & Handling": [],
+                        "Exterior Details": [],
+                        "Interior & Technology": [],
+                        "Safety & Convenience": [],
+                        "Other Features": []
+                      };
+                      
+                      features.forEach(feature => {
+                        const lowerFeature = feature.toLowerCase();
+                        let categorized = false;
+                        
+                        // Check each category
+                        for (const [category, keywords] of Object.entries(categories)) {
+                          for (const keyword of keywords) {
+                            if (lowerFeature.includes(keyword.toLowerCase())) {
+                              categorizedFeatures[category].push(feature);
+                              categorized = true;
+                              break;
+                            }
+                          }
+                          if (categorized) break;
+                        }
+                        
+                        // If not categorized, put in Other Features
+                        if (!categorized) {
+                          categorizedFeatures["Other Features"].push(feature);
+                        }
+                      });
+                      
+                      // Build markdown format
+                      let markdownFeatures = '';
+                      Object.entries(categorizedFeatures).forEach(([category, featList]) => {
+                        if (featList.length > 0) {
+                          markdownFeatures += `## ${category}\n`;
+                          featList.forEach(feat => {
+                            markdownFeatures += `- ${feat}\n`;
+                          });
+                          markdownFeatures += '\n';
+                        }
+                      });
+                      
+                      // Update form data
+                      setFormData({
+                        ...formData,
+                        features: markdownFeatures.trim()
+                      });
+                      
+                      // Switch to categorized tab
+                      const tabsElement = document.querySelector('[data-state="active"][role="tablist"]');
+                      if (tabsElement) {
+                        const categorizedTab = tabsElement.querySelector('[value="categorized"]') as HTMLButtonElement;
+                        if (categorizedTab) {
+                          categorizedTab.click();
+                        }
+                      }
+                    }
+                  }}
+                >
+                  Auto-Categorize
+                </Button>
+              )}
+            </div>
           </TabsContent>
           
           <TabsContent value="categorized" className="mt-2">
@@ -1054,11 +1180,46 @@ export default function EmployeeInventoryManager() {
                 />
               </div>
               
-              <Alert>
-                <AlertDescription className="text-xs text-gray-500">
-                  Add features by category. Use bullet points (- Feature) for each item. Empty categories will be ignored.
-                </AlertDescription>
-              </Alert>
+              <div className="space-y-4 mt-4">
+                <Alert>
+                  <AlertDescription className="text-xs text-gray-500">
+                    Add features by category. Use bullet points (- Feature) for each item. Empty categories will be ignored.
+                  </AlertDescription>
+                </Alert>
+                
+                {formData.features.includes('##') && (
+                  <div className="border rounded-md p-4 bg-gray-50">
+                    <h4 className="text-sm font-medium mb-2">Preview:</h4>
+                    <div className="prose prose-sm max-w-none">
+                      {formData.features.split('##').map((section, index) => {
+                        if (index === 0) return null; // Skip the first empty part
+                        
+                        const sectionTitle = section.split('\n')[0].trim();
+                        const sectionContent = section.substring(section.indexOf('\n')).trim();
+                        
+                        if (!sectionContent) return null;
+                        
+                        return (
+                          <div key={index} className="mb-3">
+                            <h3 className="text-base font-semibold">{sectionTitle}</h3>
+                            <ul className="mt-1">
+                              {sectionContent.split('\n').map((feature, fIndex) => {
+                                if (!feature.trim()) return null;
+                                return (
+                                  <li key={fIndex} className="flex items-center gap-2">
+                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                    <span>{feature.replace(/^-\s*/, '')}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
