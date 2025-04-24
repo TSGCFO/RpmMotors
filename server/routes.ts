@@ -47,6 +47,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       filters.isFeatured = false;
     }
     
+    // Handle sold status filter
+    if (req.query.sold === 'true') {
+      filters.isSold = true;
+    } else if (req.query.sold === 'false') {
+      filters.isSold = false;
+    }
+    
     if (Object.keys(filters).length > 0) {
       options.filters = filters;
     }

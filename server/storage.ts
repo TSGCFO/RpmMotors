@@ -23,6 +23,7 @@ export interface VehicleFilters {
   category?: string;
   condition?: string;
   isFeatured?: boolean;
+  isSold?: boolean;
 }
 
 export interface PaginationOptions {
@@ -479,6 +480,10 @@ export class DatabaseStorage implements IStorage {
     
     if (filters.isFeatured !== undefined) {
       conditions.push(eq(vehicles.isFeatured, filters.isFeatured));
+    }
+    
+    if (filters.isSold !== undefined) {
+      conditions.push(eq(vehicles.isSold, filters.isSold));
     }
     
     // Apply all conditions if there are any
