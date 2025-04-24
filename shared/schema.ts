@@ -61,11 +61,18 @@ export const vehicles = pgTable("vehicles", {
   vin: text("vin").notNull().unique(),
 });
 
+// Create a separate schema just for sold date validation to handle all cases
+const soldDateSchema = z.union([
+  z.string(),
+  z.null(),
+  z.undefined()
+]);
+
 export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   id: true,
   createdAt: true,
 }).extend({
-  soldDate: z.string().nullable(),
+  soldDate: soldDateSchema,
 });
 
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;

@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1745465476664,
+      "tag": "0000_striped_photon",
+      "breakpoints": true
+    }
+  ]
+}
