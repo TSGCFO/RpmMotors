@@ -9,6 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { 
   Card, 
   CardContent, 
@@ -63,6 +68,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Car, 
   Plus, 
+  PlusCircle,
   Search, 
   Filter, 
   MoreVertical, 
