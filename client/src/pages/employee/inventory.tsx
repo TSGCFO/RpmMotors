@@ -157,7 +157,10 @@ export default function EmployeeInventoryManager() {
     isFeatured: false,
     features: '',
     images: '',
-    vin: ''
+    vin: '',
+    isSold: false,
+    soldPrice: 0,
+    soldDate: ''
   });
   
   // Filter and sort states
@@ -428,7 +431,7 @@ export default function EmployeeInventoryManager() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+      [name]: name === 'year' || name === 'price' || name === 'mileage' || name === 'soldPrice' ? Number(value) : value
     });
   };
 
@@ -543,7 +546,10 @@ export default function EmployeeInventoryManager() {
       isFeatured: false,
       features: '',
       images: '',
-      vin: ''
+      vin: '',
+      isSold: false,
+      soldPrice: 0,
+      soldDate: ''
     });
   };
   
@@ -752,6 +758,45 @@ export default function EmployeeInventoryManager() {
         <div className="space-y-2 flex items-center pt-8">
           <Switch id="isFeatured" checked={formData.isFeatured} onCheckedChange={handleSwitchChange} />
           <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
+        </div>
+        
+        <div className="space-y-4 col-span-3 border-t border-gray-200 pt-4 mt-2">
+          <h3 className="text-base font-medium text-gray-900">Sold Status</h3>
+          
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="isSold" 
+              checked={formData.isSold} 
+              onCheckedChange={(checked) => setFormData({...formData, isSold: checked})}
+            />
+            <Label htmlFor="isSold" className="ml-2">Vehicle is sold</Label>
+          </div>
+          
+          {formData.isSold && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="soldPrice">Sold Price ($)</Label>
+                <Input 
+                  id="soldPrice" 
+                  name="soldPrice" 
+                  type="number" 
+                  value={formData.soldPrice} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="soldDate">Sold Date</Label>
+                <Input 
+                  id="soldDate" 
+                  name="soldDate" 
+                  type="date" 
+                  value={formData.soldDate} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
