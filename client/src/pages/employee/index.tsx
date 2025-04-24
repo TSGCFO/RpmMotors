@@ -241,20 +241,20 @@ export default function EmployeeDashboard() {
                               }).format(activity.timestamp)}
                             </div>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1 capitalize">
-                            {activity.type}
+                          <div className="text-xs text-gray-500 mt-1 capitalize flex items-center">
+                            <span>{activity.type}</span>
                             {activity.status && (
                               <Badge variant={
                                 activity.status === 'new' || activity.status === 'pending' 
                                   ? 'outline' 
                                   : activity.status === 'approved' 
-                                    ? 'success' 
+                                    ? 'secondary' 
                                     : 'secondary'
                               } className="ml-2">
                                 {activity.status}
                               </Badge>
                             )}
-                          </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -344,7 +344,7 @@ export default function EmployeeDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-center">
-                              <p className="font-medium">{inquiry.name}</p>
+                              <span className="font-medium">{inquiry.name}</span>
                               <Badge 
                                 variant={inquiry.status === 'new' ? 'default' : 'outline'} 
                                 className="ml-2"
