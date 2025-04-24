@@ -54,6 +54,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -425,6 +426,38 @@ export default function EmployeeInventoryManager() {
       });
     }
   });
+  
+  // Bulk action to toggle sold status
+  const bulkToggleSoldStatusMutation = useMutation({
+    mutationFn: async ({ ids, sold }: { ids: number[], sold: boolean }) => {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const promises = ids.map(id => 
+        apiRequest('PUT', `/api/vehicles/${id}`, { 
+          isSold: sold,
+          // If marking as sold, set today's date as soldDate
+          ...(sold ? { soldDate: today } : { soldDate: null, soldPrice: null })
+        })
+      );
+      await Promise.all(promises);
+      return ids;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setSelectedVehicles({});
+      setHasSelectedItems(false);
+      toast({
+        title: 'Success',
+        description: `Vehicles marked as ${variables.sold ? 'sold' : 'available'} successfully`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update sold status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -526,6 +559,17 @@ export default function EmployeeInventoryManager() {
     
     if (ids.length > 0) {
       bulkToggleFeaturedMutation.mutate({ ids, featured });
+    }
+  };
+  
+  // Handle bulk toggle sold status
+  const handleBulkToggleSoldStatus = (sold: boolean) => {
+    const ids = Object.entries(selectedVehicles)
+      .filter(([_, selected]) => selected)
+      .map(([id]) => parseInt(id));
+    
+    if (ids.length > 0) {
+      bulkToggleSoldStatusMutation.mutate({ ids, sold });
     }
   };
 
@@ -1775,6 +1819,16 @@ export default function EmployeeInventoryManager() {
                     <Star className="h-4 w-4 mr-2 text-gray-400" />
                     Unmark as Featured
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleBulkToggleSoldStatus(true)}>
+                    <Check className="h-4 w-4 mr-2" />
+                    Mark as Sold
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleBulkToggleSoldStatus(false)}>
+                    <X className="h-4 w-4 mr-2" />
+                    Mark as Available
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={handleBulkDelete}
                     className="text-red-600 focus:text-red-600"
