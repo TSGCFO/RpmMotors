@@ -1,0 +1,29 @@
+Warning: validateDOMNesting(...): %s cannot appear as a descendant of <%s>.%s <a> a 
+    at a
+    at a
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=61053520:337:18
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=61053520:52:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=61053520:33:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=61053520:41:13
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=61053520:52:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=61053520:33:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=61053520:41:13
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PSLAEUKM.js?v=61053520:1980:13
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=61053520:187:13
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JJS7DLG7.js?v=61053520:38:15)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PSLAEUKM.js?v=61053520:1915:15)
+    at Popper (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PSLAEUKM.js?v=61053520:1972:11)
+    at Tooltip (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=61053520:105:5)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JJS7DLG7.js?v=61053520:38:15)
+    at TooltipProvider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=61053520:61:5)
+    at nav
+    at div
+    at aside
+    at div
+    at EmployeeLayout (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/components/employee/employee-layout.tsx:54:42)
+    at EmployeeDashboard (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/pages/employee/index.tsx:35:60)
+    at Route (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=61053520:323:16)
+    at Switch (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=61053520:379:17)
+    at Router (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/App.tsx?v=5aqJw5Vp4MKvguat0O_cT:53:22)
+    at QueryClientProvider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=61053520:2805:3)
+    at App

@@ -175,6 +175,7 @@ export default function EmployeeInventoryManager() {
   });
   
   const [showFilters, setShowFilters] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState('');
   
   // Build query parameters for API request
   const buildQueryParams = () => {
@@ -538,6 +539,76 @@ export default function EmployeeInventoryManager() {
   // Count selected vehicles
   const getSelectedCount = () => {
     return Object.values(selectedVehicles).filter(Boolean).length;
+  };
+  
+  // Helper function to extract all sections from feature markdown
+  const extractFeatureSections = (features: string): Record<string, string> => {
+    const sections: Record<string, string> = {};
+    
+    if (!features || !features.includes('##')) {
+      return sections;
+    }
+    
+    // Split by section headers and process each section
+    const parts = features.split(/^## /m).filter(Boolean);
+    
+    parts.forEach(part => {
+      const lines = part.split('\n');
+      if (lines.length > 0) {
+        const sectionName = lines[0].trim();
+        const sectionContent = lines.slice(1).join('\n').trim();
+        if (sectionContent) {
+          sections[sectionName] = sectionContent;
+        }
+      }
+    });
+    
+    return sections;
+  };
+  
+  // Helper function to build markdown from sections
+  const buildFeaturesMarkdown = (sections: Record<string, string>): string => {
+    let markdown = '';
+    
+    // Standard sections order (if they exist)
+    const standardSections = [
+      'Performance & Handling',
+      'Exterior Details',
+      'Interior & Technology',
+      'Safety & Convenience',
+      'Other Features'
+    ];
+    
+    // Add standard sections first (in the predefined order)
+    standardSections.forEach(section => {
+      if (sections[section]) {
+        markdown += `## ${section}\n${sections[section]}\n\n`;
+        delete sections[section]; // Remove to avoid duplication
+      }
+    });
+    
+    // Add any remaining custom sections
+    Object.entries(sections).forEach(([section, content]) => {
+      markdown += `## ${section}\n${content}\n\n`;
+    });
+    
+    return markdown.trim();
+  };
+  
+  // Helper function to get custom categories (excludes standard ones)
+  const getCustomCategories = (features: string): string[] => {
+    const allSections = extractFeatureSections(features);
+    const standardSections = [
+      'Performance & Handling',
+      'Exterior Details',
+      'Interior & Technology',
+      'Safety & Convenience',
+      'Other Features'
+    ];
+    
+    return Object.keys(allSections).filter(
+      section => !standardSections.includes(section)
+    );
   };
   
   // Update hasSelectedItems when selections change
