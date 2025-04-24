@@ -101,14 +101,12 @@ export const inquiries = pgTable("inquiries", {
   vehicleId: integer("vehicle_id").references(() => vehicles.id, { onDelete: 'set null' }),
   status: text("status").default("new"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertInquirySchema = createInsertSchema(inquiries).omit({
   id: true,
   status: true,
   createdAt: true,
-  updatedAt: true,
 });
 
 export type InsertInquiry = z.infer<typeof insertInquirySchema>;
