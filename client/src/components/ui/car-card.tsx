@@ -58,7 +58,7 @@ export function CarCard({ vehicle }: CarCardProps) {
           <span className="text-xs text-gray-600">{images.length} Photos</span>
           <span className="text-gray-300">|</span>
           {status === 'sold' ? (
-            <span className="text-xs text-black font-semibold">Price Hidden</span>
+            <span className="text-xs text-black font-semibold">Sold</span>
           ) : (
             <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
           )}
