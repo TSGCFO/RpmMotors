@@ -675,42 +675,102 @@ export default function EmployeeInventoryManager() {
   }, [selectedVehicle]);
   
   // Form component for add/edit vehicle
-  const VehicleForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="make">Make</Label>
-          <Input id="make" name="make" value={formData.make} onChange={handleInputChange} required />
-        </div>
+  const VehicleForm = ({ isEdit = false }: { isEdit?: boolean }) => {
+    // Create local state to prevent parent re-rendering on every keystroke
+    const [localFormData, setLocalFormData] = useState({...formData});
+    
+    // Update local form data when selected vehicle changes
+    useEffect(() => {
+      if (isEdit && selectedVehicle) {
+        // Format features and images
+        let featuresValue = '';
+        let imagesValue = '';
+        
+        if (Array.isArray(selectedVehicle.features)) {
+          featuresValue = selectedVehicle.features.join(', ');
+        } else if (typeof selectedVehicle.features === 'string') {
+          featuresValue = selectedVehicle.features;
+        }
+        
+        if (Array.isArray(selectedVehicle.images)) {
+          imagesValue = selectedVehicle.images.join(', ');
+        } else if (typeof selectedVehicle.images === 'string') {
+          imagesValue = selectedVehicle.images;
+        }
+        
+        setLocalFormData({
+          ...selectedVehicle,
+          features: featuresValue,
+          images: imagesValue
+        });
+      } else {
+        setLocalFormData({...formData});
+      }
+    }, [isEdit, selectedVehicle, formData]);
+    
+    // Handle input changes locally
+    const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setLocalFormData(prev => ({
+        ...prev,
+        [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+      }));
+    };
+    
+    // Handle switch changes locally
+    const handleLocalSwitchChange = (checked: boolean) => {
+      setLocalFormData(prev => ({
+        ...prev,
+        isFeatured: checked
+      }));
+    };
+    
+    // Submit form with local data
+    const handleLocalSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (isEdit && selectedVehicle) {
+        updateVehicleMutation.mutate({ ...localFormData, id: selectedVehicle.id });
+      } else {
+        addVehicleMutation.mutate(localFormData);
+      }
+    };
+    
+    return (
+      <form onSubmit={handleLocalSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="make">Make</Label>
+            <Input id="make" name="make" value={localFormData.make} onChange={handleLocalInputChange} required />
+          </div>
         
         <div className="space-y-2">
           <Label htmlFor="model">Model</Label>
-          <Input id="model" name="model" value={formData.model} onChange={handleInputChange} required />
+          <Input id="model" name="model" value={localFormData.model} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="year">Year</Label>
-          <Input id="year" name="year" type="number" value={formData.year} onChange={handleInputChange} required />
+          <Input id="year" name="year" type="number" value={localFormData.year} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="price">Price ($)</Label>
-          <Input id="price" name="price" type="number" value={formData.price} onChange={handleInputChange} required />
+          <Input id="price" name="price" type="number" value={localFormData.price} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="mileage">Mileage</Label>
-          <Input id="mileage" name="mileage" type="number" value={formData.mileage} onChange={handleInputChange} required />
+          <Input id="mileage" name="mileage" type="number" value={localFormData.mileage} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="vin">VIN</Label>
-          <Input id="vin" name="vin" value={formData.vin} onChange={handleInputChange} required />
+          <Input id="vin" name="vin" value={localFormData.vin} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="fuelType">Fuel Type</Label>
-          <Select name="fuelType" value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
+          <Select name="fuelType" value={localFormData.fuelType} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, fuelType: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Select fuel type" />
             </SelectTrigger>
@@ -726,7 +786,7 @@ export default function EmployeeInventoryManager() {
         
         <div className="space-y-2">
           <Label htmlFor="transmission">Transmission</Label>
-          <Select name="transmission" value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+          <Select name="transmission" value={localFormData.transmission} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, transmission: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Select transmission" />
             </SelectTrigger>
@@ -742,12 +802,12 @@ export default function EmployeeInventoryManager() {
         
         <div className="space-y-2">
           <Label htmlFor="color">Color</Label>
-          <Input id="color" name="color" value={formData.color} onChange={handleInputChange} required />
+          <Input id="color" name="color" value={localFormData.color} onChange={handleLocalInputChange} required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
-          <Select name="category" value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+          <Select name="category" value={localFormData.category} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, category: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -766,7 +826,7 @@ export default function EmployeeInventoryManager() {
         
         <div className="space-y-2">
           <Label htmlFor="condition">Condition</Label>
-          <Select name="condition" value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+          <Select name="condition" value={localFormData.condition} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, condition: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Select condition" />
             </SelectTrigger>
@@ -780,15 +840,30 @@ export default function EmployeeInventoryManager() {
           </Select>
         </div>
         
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select name="status" value={localFormData.status || 'available'} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, status: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="sold">Sold</SelectItem>
+              <SelectItem value="reserved">Reserved</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="space-y-2 flex items-center pt-8">
-          <Switch id="isFeatured" checked={formData.isFeatured} onCheckedChange={handleSwitchChange} />
+          <Switch id="isFeatured" checked={!!localFormData.isFeatured} onCheckedChange={handleLocalSwitchChange} />
           <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
         </div>
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} rows={4} required />
+        <Textarea id="description" name="description" value={localFormData.description} onChange={handleLocalInputChange} rows={4} required />
       </div>
       
       <div className="space-y-2">
@@ -803,8 +878,8 @@ export default function EmployeeInventoryManager() {
             <Textarea 
               id="features" 
               name="features" 
-              value={formData.features} 
-              onChange={handleInputChange} 
+              value={localFormData.features} 
+              onChange={handleLocalInputChange} 
               rows={5} 
               required 
               placeholder="Leather Seats, Navigation System, Backup Camera, LED Headlights"
@@ -812,16 +887,16 @@ export default function EmployeeInventoryManager() {
             <div className="flex justify-between items-center mt-1">
               <p className="text-xs text-gray-500">Enter features separated by commas</p>
               
-              {formData.features && !formData.features.includes('##') && (
+              {localFormData.features && !localFormData.features.includes('##') && (
                 <Button 
                   type="button" 
                   variant="ghost" 
                   size="sm" 
                   className="text-xs"
                   onClick={() => {
-                    if (formData.features) {
+                    if (localFormData.features) {
                       // Auto-categorize comma-separated features into different sections
-                      const features = formData.features.split(',').map(f => f.trim()).filter(Boolean);
+                      const features = localFormData.features.split(',').map(f => f.trim()).filter(Boolean);
                       
                       // Define categories and their keywords
                       const categories = {
@@ -892,11 +967,11 @@ export default function EmployeeInventoryManager() {
                         }
                       });
                       
-                      // Update form data
-                      setFormData({
-                        ...formData,
+                      // Update local form data
+                      setLocalFormData(prev => ({
+                        ...prev,
                         features: markdownFeatures.trim()
-                      });
+                      }));
                       
                       // Switch to categorized tab
                       const tabsElement = document.querySelector('[data-state="active"][role="tablist"]');
@@ -2461,4 +2536,5 @@ export default function EmployeeInventoryManager() {
       </Dialog>
     </EmployeeLayout>
   );
+}
 }
