@@ -59,6 +59,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const options = parseVehicleQueryOptions(req);
       const paginated = req.query.paginated === 'true';
+      const includeAll = req.query.includeAll === 'true';
+      
+      // Check if this is an admin/employee request that should include sold vehicles
+      if (!includeAll && !options.filters) {
+        options.filters = { status: { not: 'sold' } };
+      } else if (!includeAll && options.filters && !options.filters.status) {
+        // If other filters exist but no status filter, add 'not sold' filter
+        options.filters.status = { not: 'sold' };
+      }
       
       if (paginated) {
         const result = await storage.getPaginatedVehicles(options);

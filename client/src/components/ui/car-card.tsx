@@ -57,7 +57,11 @@ export function CarCard({ vehicle }: CarCardProps) {
         <div className="flex justify-center space-x-2 pt-2 pb-3 bg-white">
           <span className="text-xs text-gray-600">{images.length} Photos</span>
           <span className="text-gray-300">|</span>
-          <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
+          {status === 'sold' ? (
+            <span className="text-xs text-black font-semibold">Price Hidden</span>
+          ) : (
+            <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
+          )}
         </div>
       </div>
       <CardContent className="p-6">

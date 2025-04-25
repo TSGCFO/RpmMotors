@@ -247,7 +247,17 @@ export default function VehicleDetails() {
               </p>
             </div>
             <div className="mt-4 md:mt-0">
-              <p className="text-3xl font-['Poppins'] font-bold text-[#E31837]">{formatCurrency(vehicle.price)}</p>
+              {vehicle.status === 'sold' ? (
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">PRICE</p>
+                  <p className="text-3xl font-['Poppins'] font-bold text-black">Price Hidden</p>
+                  <span className="inline-block mt-2 bg-black text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
+                    Sold
+                  </span>
+                </div>
+              ) : (
+                <p className="text-3xl font-['Poppins'] font-bold text-[#E31837]">{formatCurrency(vehicle.price)}</p>
+              )}
             </div>
           </div>
         </div>
@@ -334,8 +344,10 @@ export default function VehicleDetails() {
                 </a>
               </div>
 
-              {/* Financing Calculator */}
-              <FinancingCalculator vehiclePrice={vehicle.price} />
+              {/* Financing Calculator - Only show for available vehicles */}
+              {vehicle.status !== 'sold' && (
+                <FinancingCalculator vehiclePrice={vehicle.price} />
+              )}
             </div>
           </div>
         </div>
@@ -540,8 +552,10 @@ export default function VehicleDetails() {
                       <h3 className="text-lg font-['Poppins'] font-semibold mb-1">
                         {vehicle.year} {vehicle.make} {vehicle.model}
                       </h3>
-                      <p className="text-[#E31837] font-bold mb-2">
-                        {formatCurrency(vehicle.price)}
+                      <p className="font-bold mb-2">
+                        {vehicle.status === 'sold' ? 
+                         <span className="text-black">Price Hidden</span> : 
+                         <span className="text-[#E31837]">{formatCurrency(vehicle.price)}</span>}
                       </p>
                       <div className="text-sm text-gray-600">
                         <span>{formatNumber(vehicle.mileage)} km</span>
