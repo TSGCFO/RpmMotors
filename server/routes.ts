@@ -47,13 +47,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       filters.isFeatured = false;
     }
     
-    // Handle sold status filter
-    if (req.query.sold === 'true') {
-      filters.isSold = true;
-    } else if (req.query.sold === 'false') {
-      filters.isSold = false;
-    }
-    
     if (Object.keys(filters).length > 0) {
       options.filters = filters;
     }
@@ -208,22 +201,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid vehicle ID" });
       }
       
-      // Handle the sold date properly before validation
-      const updateData = { ...req.body };
-      
-      // If setting a vehicle as not sold, explicitly set soldDate to null
-      if (updateData.isSold === false) {
-        updateData.soldDate = null;
-      }
-      
-      // If setting a vehicle as sold without a date, default to current date
-      if (updateData.isSold === true && (!updateData.soldDate || updateData.soldDate === '')) {
-        updateData.soldDate = new Date();
-      }
-      
       // Partial validation of the update data
       const updateVehicleSchema = insertVehicleSchema.partial();
-      const validationResult = updateVehicleSchema.safeParse(updateData);
+      const validationResult = updateVehicleSchema.safeParse(req.body);
       
       if (!validationResult.success) {
         const errorMessage = fromZodError(validationResult.error).message;

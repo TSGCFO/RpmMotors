@@ -54,7 +54,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -119,7 +118,6 @@ interface FilterState {
   transmission: string;
   fuelType: string;
   featured: string;
-  sold: string;
 }
 
 // Define interface for sort state
@@ -159,10 +157,7 @@ export default function EmployeeInventoryManager() {
     isFeatured: false,
     features: '',
     images: '',
-    vin: '',
-    isSold: false,
-    soldPrice: 0,
-    soldDate: null as string | null
+    vin: ''
   });
   
   // Filter and sort states
@@ -177,8 +172,7 @@ export default function EmployeeInventoryManager() {
     condition: '',
     transmission: '',
     fuelType: '',
-    featured: '',
-    sold: ''
+    featured: ''
   });
   
   const [sort, setSort] = useState<SortState>({
@@ -428,56 +422,14 @@ export default function EmployeeInventoryManager() {
       });
     }
   });
-  
-  // Bulk action to toggle sold status
-  const bulkToggleSoldStatusMutation = useMutation({
-    mutationFn: async ({ ids, sold }: { ids: number[], sold: boolean }) => {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      const promises = ids.map(id => 
-        apiRequest('PUT', `/api/vehicles/${id}`, { 
-          isSold: sold,
-          // If marking as sold, set today's date as soldDate
-          soldPrice: 0,
-          soldDate: sold ? today : null
-        })
-      );
-      await Promise.all(promises);
-      return ids;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
-      setSelectedVehicles({});
-      setHasSelectedItems(false);
-      toast({
-        title: 'Success',
-        description: `Vehicles marked as ${variables.sold ? 'sold' : 'available'} successfully`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: `Failed to update sold status: ${error.message}`,
-        variant: 'destructive',
-      });
-    }
-  });
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    if (name === 'soldDate' && value === '') {
-      // Handle empty soldDate as null
-      setFormData({
-        ...formData,
-        soldDate: null
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: name === 'year' || name === 'price' || name === 'mileage' || name === 'soldPrice' ? Number(value) : value
-      });
-    }
+    setFormData({
+      ...formData,
+      [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+    });
   };
 
   const handleSwitchChange = (checked: boolean) => {
@@ -529,8 +481,7 @@ export default function EmployeeInventoryManager() {
       condition: '',
       transmission: '',
       fuelType: '',
-      featured: '',
-      sold: ''
+      featured: ''
     });
     setSearchQuery('');
     setPage(1);
@@ -574,17 +525,6 @@ export default function EmployeeInventoryManager() {
       bulkToggleFeaturedMutation.mutate({ ids, featured });
     }
   };
-  
-  // Handle bulk toggle sold status
-  const handleBulkToggleSoldStatus = (sold: boolean) => {
-    const ids = Object.entries(selectedVehicles)
-      .filter(([_, selected]) => selected)
-      .map(([id]) => parseInt(id));
-    
-    if (ids.length > 0) {
-      bulkToggleSoldStatusMutation.mutate({ ids, sold });
-    }
-  };
 
   // Reset form fields
   const resetForm = () => {
@@ -603,10 +543,7 @@ export default function EmployeeInventoryManager() {
       isFeatured: false,
       features: '',
       images: '',
-      vin: '',
-      isSold: false,
-      soldPrice: 0,
-      soldDate: null
+      vin: ''
     });
   };
   
@@ -815,54 +752,6 @@ export default function EmployeeInventoryManager() {
         <div className="space-y-2 flex items-center pt-8">
           <Switch id="isFeatured" checked={formData.isFeatured} onCheckedChange={handleSwitchChange} />
           <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
-        </div>
-        
-        <div className="space-y-4 col-span-3 border-t border-gray-200 pt-4 mt-2">
-          <h3 className="text-base font-medium text-gray-900">Sold Status</h3>
-          
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="isSold" 
-              checked={formData.isSold} 
-              onCheckedChange={(checked) => {
-                // Set today's date when marking as sold, null when unmarking
-                const today = new Date().toISOString().split('T')[0];
-                setFormData({
-                  ...formData, 
-                  isSold: checked,
-                  soldDate: checked ? today : null,
-                  soldPrice: checked ? formData.soldPrice : 0
-                });
-              }}
-            />
-            <Label htmlFor="isSold" className="ml-2">Vehicle is sold</Label>
-          </div>
-          
-          {formData.isSold && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="soldPrice">Sold Price ($)</Label>
-                <Input 
-                  id="soldPrice" 
-                  name="soldPrice" 
-                  type="number" 
-                  value={formData.soldPrice} 
-                  onChange={handleInputChange} 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="soldDate">Sold Date</Label>
-                <Input 
-                  id="soldDate" 
-                  name="soldDate" 
-                  type="date" 
-                  value={formData.soldDate || ''} 
-                  onChange={handleInputChange} 
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
       
@@ -1799,24 +1688,6 @@ export default function EmployeeInventoryManager() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="filter-sold">Sold Status</Label>
-                        <Select 
-                          name="sold" 
-                          value={filters.sold}
-                          onValueChange={(value) => setFilters({...filters, sold: value})}
-                        >
-                          <SelectTrigger id="filter-sold">
-                            <SelectValue placeholder="Any" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">All Vehicles</SelectItem>
-                            <SelectItem value="true">Sold Only</SelectItem>
-                            <SelectItem value="false">Available Only</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
                     </div>
                     
                     <div className="flex justify-end mt-4">
@@ -1859,16 +1730,6 @@ export default function EmployeeInventoryManager() {
                     <Star className="h-4 w-4 mr-2 text-gray-400" />
                     Unmark as Featured
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleBulkToggleSoldStatus(true)}>
-                    <Check className="h-4 w-4 mr-2" />
-                    Mark as Sold
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleBulkToggleSoldStatus(false)}>
-                    <X className="h-4 w-4 mr-2" />
-                    Mark as Available
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={handleBulkDelete}
                     className="text-red-600 focus:text-red-600"
@@ -2027,27 +1888,11 @@ export default function EmployeeInventoryManager() {
                               <div className="text-sm text-gray-500">{vehicle.vin}</div>
                             </TableCell>
                             <TableCell>{vehicle.year}</TableCell>
-                            <TableCell>
-                              {vehicle.isSold ? (
-                                <div className="flex flex-col">
-                                  <span className="line-through text-gray-500">${vehicle.price.toLocaleString()}</span>
-                                  <span className="font-semibold text-[#E31837]">
-                                    ${vehicle.soldPrice ? vehicle.soldPrice.toLocaleString() : vehicle.price.toLocaleString()}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span>${vehicle.price.toLocaleString()}</span>
-                              )}
-                            </TableCell>
+                            <TableCell>${vehicle.price.toLocaleString()}</TableCell>
                             <TableCell>{vehicle.mileage.toLocaleString()}</TableCell>
                             <TableCell>{vehicle.category}</TableCell>
                             <TableCell>
-                              {vehicle.isSold ? (
-                                <Badge variant="default" className="bg-black">
-                                  <Check className="h-3 w-3 mr-1" />
-                                  Sold
-                                </Badge>
-                              ) : vehicle.isFeatured ? (
+                              {vehicle.isFeatured ? (
                                 <Badge variant="default" className="bg-[#E31837]">
                                   <Star className="h-3 w-3 mr-1 fill-current" />
                                   Featured
@@ -2401,46 +2246,19 @@ export default function EmployeeInventoryManager() {
                     <h2 className="text-2xl font-bold">
                       {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
                     </h2>
-                    <div className="flex mt-1 space-x-2">
-                      {selectedVehicle.isSold && (
-                        <Badge className="bg-black">
-                          <Check className="h-3 w-3 mr-1" />
-                          Sold
-                        </Badge>
-                      )}
-                      {selectedVehicle.isFeatured && (
-                        <Badge className="bg-[#E31837]">
-                          <Star className="h-3 w-3 mr-1 fill-current" />
-                          Featured
-                        </Badge>
-                      )}
-                    </div>
+                    {selectedVehicle.isFeatured && (
+                      <Badge className="mt-1 bg-[#E31837]">
+                        <Star className="h-3 w-3 mr-1 fill-current" />
+                        Featured
+                      </Badge>
+                    )}
                   </div>
                   
-                  <div className="text-2xl font-bold">
-                    {selectedVehicle.isSold ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center">
-                          <span className="line-through text-gray-500 text-xl mr-2">List: ${selectedVehicle.price.toLocaleString()}</span>
-                        </div>
-                        <div className="text-[#E31837]">
-                          Sold: ${selectedVehicle.soldPrice ? selectedVehicle.soldPrice.toLocaleString() : selectedVehicle.price.toLocaleString()}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-[#E31837]">${selectedVehicle.price.toLocaleString()}</span>
-                    )}
+                  <div className="text-2xl font-bold text-[#E31837]">
+                    ${selectedVehicle.price.toLocaleString()}
                   </div>
                   
                   <div className="space-y-2">
-                    {selectedVehicle.isSold && selectedVehicle.soldDate && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Sold Date:</span>
-                        <span className="font-medium">
-                          {new Date(selectedVehicle.soldDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-500">VIN:</span>
                       <span className="font-medium">{selectedVehicle.vin}</span>

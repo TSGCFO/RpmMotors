@@ -19,7 +19,6 @@ export function CarCard({ vehicle }: CarCardProps) {
     transmission,
     color,
     condition,
-    isSold,
     features = [],
     images = []
   } = vehicle;
@@ -27,14 +26,9 @@ export function CarCard({ vehicle }: CarCardProps) {
   return (
     <Card className="bg-white rounded-lg overflow-hidden shadow-md group transition-all hover:shadow-xl">
       <div className="relative overflow-hidden">
-        {vehicle.isFeatured && !isSold && (
+        {vehicle.isFeatured && (
           <span className="absolute top-4 left-4 z-10 bg-[#E31837] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
             Featured
-          </span>
-        )}
-        {isSold && (
-          <span className="absolute top-4 left-4 z-10 bg-black text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
-            Sold
           </span>
         )}
         <img 
@@ -54,12 +48,8 @@ export function CarCard({ vehicle }: CarCardProps) {
         />
         <div className="flex justify-center space-x-2 pt-2 pb-3 bg-white">
           <span className="text-xs text-gray-600">{images.length} Photos</span>
-          {!isSold && (
-            <>
-              <span className="text-gray-300">|</span>
-              <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
-            </>
-          )}
+          <span className="text-gray-300">|</span>
+          <span className="text-xs text-[#E31837] font-semibold">{formatCurrency(price)}</span>
         </div>
       </div>
       <CardContent className="p-6">

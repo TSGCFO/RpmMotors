@@ -23,7 +23,6 @@ export interface VehicleFilters {
   category?: string;
   condition?: string;
   isFeatured?: boolean;
-  isSold?: boolean;
 }
 
 export interface PaginationOptions {
@@ -278,41 +277,9 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateVehicle(id: number, updates: Partial<Vehicle>): Promise<Vehicle | undefined> {
-    // Process the updates to ensure soldDate is properly handled
-    const processedUpdates = { ...updates };
-    
-    // Clean up any formatting issues with soldDate before updating
-    if (processedUpdates.soldDate !== undefined) {
-      // If it's null or empty string, set to null
-      if (processedUpdates.soldDate === null || 
-          (typeof processedUpdates.soldDate === 'string' && processedUpdates.soldDate === '')) {
-        processedUpdates.soldDate = null;
-      } 
-      // If it's a string date, format it properly for storage
-      else if (typeof processedUpdates.soldDate === 'string') {
-        try {
-          // Validate that it's a proper date
-          const dateObj = new Date(processedUpdates.soldDate);
-          if (!isNaN(dateObj.getTime())) {
-            // It's a valid date, format it as YYYY-MM-DD
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            processedUpdates.soldDate = `${year}-${month}-${day}`;
-          } else {
-            // Invalid date string, set to null
-            processedUpdates.soldDate = null;
-          }
-        } catch {
-          // Error parsing date, set to null
-          processedUpdates.soldDate = null;
-        }
-      }
-    }
-    
     const [updatedVehicle] = await db
       .update(vehicles)
-      .set(processedUpdates)
+      .set(updates)
       .where(eq(vehicles.id, id))
       .returning();
     return updatedVehicle || undefined;
@@ -512,10 +479,6 @@ export class DatabaseStorage implements IStorage {
     
     if (filters.isFeatured !== undefined) {
       conditions.push(eq(vehicles.isFeatured, filters.isFeatured));
-    }
-    
-    if (filters.isSold !== undefined) {
-      conditions.push(eq(vehicles.isSold, filters.isSold));
     }
     
     // Apply all conditions if there are any

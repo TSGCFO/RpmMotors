@@ -52,27 +52,15 @@ export const vehicles = pgTable("vehicles", {
   category: text("category").notNull(), // e.g., "Sports Cars", "Luxury Sedans", etc.
   condition: text("condition").notNull().default("Used"), // New, Used, Certified Pre-Owned
   isFeatured: boolean("is_featured").default(false),
-  isSold: boolean("is_sold").default(false),
-  soldPrice: integer("sold_price").default(0),
-  soldDate: text("sold_date"),
   features: json("features").$type<string[]>().notNull().default([]),
   images: json("images").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   vin: text("vin").notNull().unique(),
 });
 
-// Create a separate schema just for sold date validation to handle all cases
-const soldDateSchema = z.union([
-  z.string(),
-  z.null(),
-  z.undefined()
-]);
-
 export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   id: true,
   createdAt: true,
-}).extend({
-  soldDate: soldDateSchema,
 });
 
 export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
