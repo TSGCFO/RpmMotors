@@ -53,6 +53,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -80,7 +82,8 @@ import {
   Check,
   AlertCircle,
   ArrowUpDown,
-  Loader2
+  Loader2,
+  Tag
 } from 'lucide-react';
 import {
   Pagination,
