@@ -101,9 +101,9 @@ export default function Inventory() {
     }
   }, [location]);
 
-  // Fetch all vehicles
+  // Fetch all vehicles (including sold ones)
   const { data: allVehicles, isLoading } = useQuery<Vehicle[]>({
-    queryKey: ["/api/vehicles"],
+    queryKey: ["/api/vehicles?includeAll=true"],
   });
 
   // Filter vehicles based on selected filters
@@ -135,7 +135,7 @@ export default function Inventory() {
       }
     }
     
-    if (filters.status && vehicle.status !== filters.status) {
+    if (filters.status && filters.status !== 'all' && vehicle.status !== filters.status) {
       return false;
     }
     
