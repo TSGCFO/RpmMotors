@@ -614,10 +614,14 @@ export class DatabaseStorage implements IStorage {
             IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'phone') THEN
               ALTER TABLE "users" ADD COLUMN "phone" TEXT;
             END IF;
+            -- Add status column to vehicles table if it doesn't exist
+            IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'vehicles' AND column_name = 'status') THEN
+              ALTER TABLE "vehicles" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'available';
+            END IF;
           END
           $$;
         `);
-        console.log("Applied user table migration");
+        console.log("Applied database migrations");
       } catch (migrationError) {
         console.error("Migration error:", migrationError);
       }
@@ -666,13 +670,13 @@ export class DatabaseStorage implements IStorage {
         await db.execute(sql`
           INSERT INTO vehicles (
             make, model, year, price, mileage, fuel_type, transmission, 
-            color, description, category, condition, is_featured, 
+            color, description, category, condition, status, is_featured, 
             features, images, vin
           ) 
           VALUES (
             'Porsche', '911 GT3', 2023, 179900, 1500, 'Gasoline', 'Automatic',
             'GT Silver', '2023 Porsche 911 GT3 in pristine condition. This vehicle features a naturally aspirated 4.0L flat-six engine producing 502 horsepower. Includes track-focused suspension, carbon ceramic brakes, and Porsche''s PDK transmission.',
-            'Sports Cars', 'Excellent', TRUE,
+            'Sports Cars', 'Excellent', 'available', TRUE,
             '["Carbon Ceramic Brakes", "Sport Chrono Package", "PDK Transmission", "Track Package"]'::jsonb,
             '["https://images.unsplash.com/photo-1617814076668-4af3ff1dd40f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80", "https://images.unsplash.com/photo-1614162692292-7ac56d7f373e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80"]'::jsonb,
             'WP0AC2A99JS175960'

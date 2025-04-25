@@ -38,6 +38,7 @@ export default function Inventory() {
     priceMin: "",
     priceMax: "",
     category: "",
+    status: "",
     search: ""
   });
 
@@ -134,6 +135,10 @@ export default function Inventory() {
       }
     }
     
+    if (filters.status && vehicle.status !== filters.status) {
+      return false;
+    }
+    
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       return (
@@ -182,6 +187,7 @@ export default function Inventory() {
       priceMin: "",
       priceMax: "",
       category: "",
+      status: "",
       search: ""
     });
     
@@ -377,6 +383,25 @@ export default function Inventory() {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Status</label>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) => handleFilterChange("status", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Vehicles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Vehicles</SelectItem>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="sold">Sold</SelectItem>
+                      <SelectItem value="reserved">Reserved</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
@@ -471,6 +496,25 @@ export default function Inventory() {
                           <SelectItem value="suvs-crossovers">SUVs & Crossovers</SelectItem>
                           <SelectItem value="exotic-collection">Exotic Collection</SelectItem>
                           <SelectItem value="convertibles">Convertibles</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Status</label>
+                      <Select
+                        value={filters.status}
+                        onValueChange={(value) => handleFilterChange("status", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Vehicles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Vehicles</SelectItem>
+                          <SelectItem value="available">Available</SelectItem>
+                          <SelectItem value="sold">Sold</SelectItem>
+                          <SelectItem value="reserved">Reserved</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

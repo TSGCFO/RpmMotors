@@ -27,11 +27,18 @@ export function CarCard({ vehicle }: CarCardProps) {
   return (
     <Card className="bg-white rounded-lg overflow-hidden shadow-md group transition-all hover:shadow-xl">
       <div className="relative overflow-hidden">
-        {vehicle.isFeatured && (
-          <span className="absolute top-4 left-4 z-10 bg-[#E31837] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
-            Featured
-          </span>
-        )}
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+          {vehicle.isFeatured && (
+            <span className="bg-[#E31837] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
+              Featured
+            </span>
+          )}
+          {status === 'sold' && (
+            <span className="bg-black text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
+              Sold
+            </span>
+          )}
+        </div>
         <img 
           src={images && images.length > 0 
             ? (typeof images[0] === 'string' 
