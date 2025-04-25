@@ -422,6 +422,28 @@ export default function EmployeeInventoryManager() {
       });
     }
   });
+  
+  // Update vehicle status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number, status: string }) => {
+      const response = await apiRequest('PUT', `/api/vehicles/${id}/status`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle status updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update vehicle status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -563,6 +585,11 @@ export default function EmployeeInventoryManager() {
   const handleViewDetails = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
     setIsDetailsModalOpen(true);
+  };
+  
+  // Update vehicle status
+  const handleStatusUpdate = (vehicle: Vehicle, status: string) => {
+    updateStatusMutation.mutate({ id: vehicle.id, status });
   };
   
   // Toggle a vehicle selection for bulk actions
@@ -1892,17 +1919,51 @@ export default function EmployeeInventoryManager() {
                             <TableCell>{vehicle.mileage.toLocaleString()}</TableCell>
                             <TableCell>{vehicle.category}</TableCell>
                             <TableCell>
-                              {vehicle.isFeatured ? (
-                                <Badge variant="default" className="bg-[#E31837]">
-                                  <Star className="h-3 w-3 mr-1 fill-current" />
-                                  Featured
+                              <div className="flex flex-col space-y-1">
+                                {/* Status badge */}
+                                <Badge variant={
+                                  vehicle.status === 'sold' ? 'destructive' :
+                                  vehicle.status === 'reserved' ? 'secondary' :
+                                  vehicle.status === 'pending' ? 'outline' : 'default'
+                                }>
+                                  {vehicle.status ? vehicle.status.charAt(0).toUpperCase() + vehicle.status.slice(1) : 'Available'}
                                 </Badge>
-                              ) : (
-                                <Badge variant="outline">Standard</Badge>
-                              )}
+                                
+                                {/* Featured badge */}
+                                {vehicle.isFeatured && (
+                                  <Badge variant="default" className="bg-[#E31837]">
+                                    <Star className="h-3 w-3 mr-1 fill-current" />
+                                    Featured
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
+                                {/* Status dropdown menu */}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <Tag className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'available')}>
+                                      Available
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'sold')}>
+                                      Sold
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'reserved')}>
+                                      Reserved
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'pending')}>
+                                      Pending
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
