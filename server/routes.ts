@@ -61,12 +61,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paginated = req.query.paginated === 'true';
       const includeAll = req.query.includeAll === 'true';
       
-      // Check if this is an admin/employee request that should include sold vehicles
+      // Check if this is a request that should include sold vehicles
       if (!includeAll && !options.filters) {
-        options.filters = { status: { not: 'sold' } };
+        options.filters = { status: 'available' };
       } else if (!includeAll && options.filters && !options.filters.status) {
-        // If other filters exist but no status filter, add 'not sold' filter
-        options.filters.status = { not: 'sold' };
+        // If other filters exist but no status filter, add 'available' filter
+        options.filters.status = 'available';
       }
       
       if (paginated) {
@@ -85,7 +85,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vehicles/featured", async (req: Request, res: Response) => {
     try {
       const limit = parseInt(req.query.limit as string) || undefined;
-      const featuredVehicles = await storage.getFeaturedVehicles(limit);
+      const includeAll = req.query.includeAll === 'true';
+      
+      // Get featured vehicles
+      let featuredVehicles = await storage.getFeaturedVehicles(limit);
+      
+      // Filter out sold vehicles unless explicitly requested to include all
+      if (!includeAll) {
+        featuredVehicles = featuredVehicles.filter(vehicle => vehicle.status !== 'sold');
+      }
+      
       res.json(featuredVehicles);
     } catch (error) {
       console.error("Error fetching featured vehicles:", error);
