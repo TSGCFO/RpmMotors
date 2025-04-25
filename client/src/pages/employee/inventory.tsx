@@ -240,7 +240,8 @@ export default function EmployeeInventoryManager() {
       limit: limit.toString(),
       sort: sort.field,
       direction: sort.direction,
-      paginated: 'true'
+      paginated: 'true',
+      includeAll: 'true' // Always include all vehicles including sold ones for employee view
     };
     
     // Add search query if present

@@ -34,9 +34,9 @@ export default function AdminInventory() {
     condition: 'Used'
   });
   
-  // Fetch all vehicles
+  // Fetch all vehicles including sold ones
   const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
-    queryKey: ['/api/vehicles'],
+    queryKey: ['/api/vehicles?includeAll=true'],
   });
   
   // Add a new vehicle

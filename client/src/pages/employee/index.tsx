@@ -17,9 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 export default function EmployeeDashboard() {
-  // Fetch all vehicles
+  // Fetch all vehicles, including sold ones
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
-    queryKey: ['/api/vehicles'],
+    queryKey: ['/api/vehicles?includeAll=true'],
   });
   
   // Fetch all inquiries
