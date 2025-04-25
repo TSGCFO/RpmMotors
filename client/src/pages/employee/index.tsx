@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { Vehicle, Inquiry, Testimonial } from '@shared/schema';
-import EmployeeLayout from '@/components/employee/employee-layout';
+import { EmployeeLayout } from '@/components/employee/employee-layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Car, 

@@ -48,7 +48,7 @@ type NavItem = {
   description?: string;
 };
 
-export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
+export function EmployeeLayout({ children }: EmployeeLayoutProps) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -331,3 +331,5 @@ export default function EmployeeLayout({ children }: EmployeeLayoutProps) {
     </div>
   );
 }
+
+export default EmployeeLayout;

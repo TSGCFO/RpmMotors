@@ -1,0 +1,2792 @@
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Vehicle, InsertVehicle } from '@shared/schema';
+import EmployeeLayout from '@/components/employee/employee-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from '@/components/ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Car, 
+  Plus, 
+  PlusCircle,
+  Search, 
+  Filter, 
+  MoreVertical, 
+  Edit, 
+  Trash2, 
+  Star, 
+  Eye, 
+  X,
+  Check,
+  AlertCircle,
+  ArrowUpDown,
+  Loader2,
+  Tag
+} from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+{/* Tabs components already imported above */}
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+// Define interface for filter state
+interface FilterState {
+  make: string;
+  model: string;
+  category: string;
+  minYear: string;
+  maxYear: string;
+  minPrice: string;
+  maxPrice: string;
+  condition: string;
+  transmission: string;
+  fuelType: string;
+  featured: string;
+}
+
+// Define interface for sort state
+interface SortState {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+// Separate VehicleForm component to handle all form inputs
+interface VehicleFormProps {
+  initialData: {
+    make: string;
+    model: string;
+    year: number;
+    price: number;
+    mileage: number;
+    fuelType: string;
+    transmission: string;
+    color: string;
+    description: string;
+    category: string;
+    condition: string;
+    isFeatured: boolean;
+    features: string;
+    images: string;
+    vin: string;
+    status?: string;
+    id?: number;
+  };
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
+  isEdit?: boolean;
+  isPending?: boolean;
+}
+
+function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPending = false }: VehicleFormProps) {
+  const [formData, setFormData] = useState(initialData);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+    }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      isFeatured: checked
+    }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="make">Make</Label>
+          <Input id="make" name="make" value={formData.make} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="model">Model</Label>
+          <Input id="model" name="model" value={formData.model} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="year">Year</Label>
+          <Input id="year" name="year" type="number" value={formData.year} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="price">Price ($)</Label>
+          <Input id="price" name="price" type="number" value={formData.price} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="mileage">Mileage</Label>
+          <Input id="mileage" name="mileage" type="number" value={formData.mileage} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="vin">VIN</Label>
+          <Input id="vin" name="vin" value={formData.vin} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="fuelType">Fuel Type</Label>
+          <Select name="fuelType" value={formData.fuelType} onValueChange={(value) => handleSelectChange('fuelType', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select fuel type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Gasoline">Gasoline</SelectItem>
+              <SelectItem value="Diesel">Diesel</SelectItem>
+              <SelectItem value="Electric">Electric</SelectItem>
+              <SelectItem value="Hybrid">Hybrid</SelectItem>
+              <SelectItem value="Plug-in Hybrid">Plug-in Hybrid</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="transmission">Transmission</Label>
+          <Select name="transmission" value={formData.transmission} onValueChange={(value) => handleSelectChange('transmission', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select transmission" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Automatic">Automatic</SelectItem>
+              <SelectItem value="Manual">Manual</SelectItem>
+              <SelectItem value="Semi-Automatic">Semi-Automatic</SelectItem>
+              <SelectItem value="CVT">CVT</SelectItem>
+              <SelectItem value="DCT">DCT</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="color">Color</Label>
+          <Input id="color" name="color" value={formData.color} onChange={handleInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select name="category" value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Sports Cars">Sports Cars</SelectItem>
+              <SelectItem value="Luxury Cars">Luxury Cars</SelectItem>
+              <SelectItem value="SUVs">SUVs</SelectItem>
+              <SelectItem value="Sedans">Sedans</SelectItem>
+              <SelectItem value="Convertibles">Convertibles</SelectItem>
+              <SelectItem value="Exotics">Exotics</SelectItem>
+              <SelectItem value="Hatchbacks">Hatchbacks</SelectItem>
+              <SelectItem value="Wagons">Wagons</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="condition">Condition</Label>
+          <Select name="condition" value={formData.condition} onValueChange={(value) => handleSelectChange('condition', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select condition" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="New">New</SelectItem>
+              <SelectItem value="Excellent">Excellent</SelectItem>
+              <SelectItem value="Very Good">Very Good</SelectItem>
+              <SelectItem value="Good">Good</SelectItem>
+              <SelectItem value="Fair">Fair</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select name="status" value={formData.status || 'available'} onValueChange={(value) => handleSelectChange('status', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="sold">Sold</SelectItem>
+              <SelectItem value="reserved">Reserved</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2 flex items-center pt-8">
+          <Switch id="isFeatured" checked={!!formData.isFeatured} onCheckedChange={handleSwitchChange} />
+          <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} rows={4} required />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="features">Vehicle Features</Label>
+        <Textarea 
+          id="features" 
+          name="features" 
+          value={formData.features} 
+          onChange={handleInputChange} 
+          rows={5} 
+          placeholder="Enter features separated by commas or use markdown format for categorized features" 
+        />
+        <p className="text-xs text-gray-500">
+          Enter features separated by commas or use markdown format (## Category) for categorization
+        </p>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="images">Images</Label>
+        <Textarea
+          id="images"
+          name="images"
+          value={formData.images}
+          onChange={handleInputChange}
+          placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+          rows={2}
+        />
+        <p className="text-xs text-gray-500">Enter image URLs separated by commas</p>
+      </div>
+      
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>{isEdit ? 'Updating...' : 'Adding...'}</span>
+            </>
+          ) : (
+            <span>{isEdit ? 'Update Vehicle' : 'Add Vehicle'}</span>
+          )}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+export default function EmployeeInventoryManager() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [selectedVehicles, setSelectedVehicles] = useState<Record<number, boolean>>({});
+  const [hasSelectedItems, setHasSelectedItems] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  
+  // Form data state
+  const [formData, setFormData] = useState({
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
+    price: 0,
+    mileage: 0,
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
+    color: '',
+    description: '',
+    category: 'Sports Cars',
+    condition: 'Excellent',
+    isFeatured: false,
+    features: '',
+    images: '',
+    vin: ''
+  });
+  
+  // Filter and sort states
+  const [filters, setFilters] = useState<FilterState>({
+    make: '',
+    model: '',
+    category: '',
+    minYear: '',
+    maxYear: '',
+    minPrice: '',
+    maxPrice: '',
+    condition: '',
+    transmission: '',
+    fuelType: '',
+    featured: ''
+  });
+  
+  const [sort, setSort] = useState<SortState>({
+    field: 'createdAt',
+    direction: 'desc'
+  });
+  
+  const [showFilters, setShowFilters] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState('');
+  
+  // Helper function to extract feature sections from markdown
+  const extractFeatureSections = (markdown: string) => {
+    const sections: Record<string, string> = {};
+    
+    if (!markdown) return sections;
+    
+    // Split by ## headings
+    const sectionBlocks = markdown.split(/^## /m).filter(Boolean);
+    
+    // Process each section
+    sectionBlocks.forEach(block => {
+      const lines = block.split('\n');
+      const sectionName = lines[0].trim();
+      const content = lines.slice(1).join('\n').trim();
+      sections[sectionName] = content;
+    });
+    
+    return sections;
+  };
+  
+  // Helper function to build markdown from sections
+  const buildFeaturesMarkdown = (sections: Record<string, string>) => {
+    let markdown = '';
+    
+    Object.entries(sections).forEach(([section, content]) => {
+      if (content.trim()) {
+        markdown += `## ${section}\n${content.trim()}\n\n`;
+      }
+    });
+    
+    return markdown.trim();
+  };
+  
+  // Helper function to get custom categories
+  const getCustomCategories = (markdown: string) => {
+    const sections = extractFeatureSections(markdown);
+    const standardSections = [
+      'Performance & Handling',
+      'Exterior Details',
+      'Interior & Technology',
+      'Safety & Convenience',
+      'Other Features'
+    ];
+    
+    return Object.keys(sections).filter(section => !standardSections.includes(section));
+  };
+  
+  // Build query parameters for API request
+  const buildQueryParams = () => {
+    const params: Record<string, string> = {
+      page: page.toString(),
+      limit: limit.toString(),
+      sort: sort.field,
+      direction: sort.direction,
+      paginated: 'true',
+      includeAll: 'true' // Always include all vehicles including sold ones for employee view
+    };
+    
+    // Add search query if present
+    if (searchQuery) {
+      params.q = searchQuery;
+    }
+    
+    // Add filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        params[key] = value;
+      }
+    });
+    
+    return params;
+  };
+  
+  // Convert query params to URLSearchParams for fetch
+  const getQueryString = () => {
+    const params = buildQueryParams();
+    return new URLSearchParams(params).toString();
+  };
+  
+  // Fetch vehicles with pagination, search, filter, and sort
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['/api/vehicles', page, limit, searchQuery, filters, sort],
+    queryFn: async () => {
+      const queryString = getQueryString();
+      const res = await fetch(`/api/vehicles?${queryString}`);
+      if (!res.ok) throw new Error('Failed to fetch vehicles');
+      const data = await res.json();
+      
+      // Update total pages if paginated data
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+        return data;
+      }
+      
+      return { data, pagination: { total: data.length, page, limit, totalPages: 1 } };
+    }
+  });
+  
+  // Vehicle mutations
+  const addVehicleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Format the data (convert features and images to arrays)
+      const formattedData = {
+        ...data,
+        features: data.features.split(',').map((f: string) => f.trim()).filter(Boolean),
+        images: data.images.split(',').map((i: string) => i.trim()).filter(Boolean)
+      };
+      
+      const response = await apiRequest('POST', '/api/vehicles', formattedData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle added successfully',
+      });
+      setIsAddModalOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to add vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const updateVehicleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const id = data.id;
+      
+      // Format the data (convert features and images to arrays)
+      const formattedData = {
+        ...data,
+        features: typeof data.features === 'string' 
+          ? data.features.split(',').map((f: string) => f.trim()).filter(Boolean)
+          : data.features,
+        images: typeof data.images === 'string'
+          ? data.images.split(',').map((i: string) => i.trim()).filter(Boolean)
+          : data.images
+      };
+      
+      const response = await apiRequest('PUT', `/api/vehicles/${id}`, formattedData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle updated successfully',
+      });
+      setIsEditModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const deleteVehicleMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/vehicles/${id}`);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setIsDeleteModalOpen(false);
+      setSelectedVehicle(null);
+      toast({
+        title: 'Success',
+        description: 'Vehicle deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete vehicle: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Bulk action to delete multiple vehicles
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const promises = ids.map(id => 
+        apiRequest('DELETE', `/api/vehicles/${id}`)
+      );
+      await Promise.all(promises);
+      return ids;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setSelectedVehicles({});
+      setHasSelectedItems(false);
+      toast({
+        title: 'Success',
+        description: 'Selected vehicles deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete selected vehicles: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Bulk action to toggle featured status
+  const bulkToggleFeaturedMutation = useMutation({
+    mutationFn: async ({ ids, featured }: { ids: number[], featured: boolean }) => {
+      const promises = ids.map(id => 
+        apiRequest('PUT', `/api/vehicles/${id}`, { isFeatured: featured })
+      );
+      await Promise.all(promises);
+      return ids;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      setSelectedVehicles({});
+      setHasSelectedItems(false);
+      toast({
+        title: 'Success',
+        description: 'Featured status updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update featured status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Update vehicle status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number, status: string }) => {
+      const response = await apiRequest('PUT', `/api/vehicles/${id}/status`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+      toast({
+        title: 'Success',
+        description: 'Vehicle status updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update vehicle status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+    });
+  };
+
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData({
+      ...formData,
+      isFeatured: checked
+    });
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value
+    });
+    // Reset to first page when filters change
+    setPage(1);
+  };
+
+  // Handle sort changes
+  const handleSortChange = (field: string) => {
+    setSort({
+      field,
+      direction: sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc'
+    });
+    // Reset to first page when sort changes
+    setPage(1);
+  };
+  
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Reset to first page when searching
+    setPage(1);
+    refetch();
+  };
+  
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setFilters({
+      make: '',
+      model: '',
+      category: '',
+      minYear: '',
+      maxYear: '',
+      minPrice: '',
+      maxPrice: '',
+      condition: '',
+      transmission: '',
+      fuelType: '',
+      featured: ''
+    });
+    setSearchQuery('');
+    setPage(1);
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditModalOpen && selectedVehicle) {
+      updateVehicleMutation.mutate({ ...formData, id: selectedVehicle.id });
+    } else {
+      addVehicleMutation.mutate(formData);
+    }
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (selectedVehicle) {
+      deleteVehicleMutation.mutate(selectedVehicle.id);
+    }
+  };
+  
+  // Handle bulk delete confirmation
+  const handleBulkDelete = () => {
+    const ids = Object.entries(selectedVehicles)
+      .filter(([_, selected]) => selected)
+      .map(([id]) => parseInt(id));
+    
+    if (ids.length > 0) {
+      bulkDeleteMutation.mutate(ids);
+    }
+  };
+  
+  // Handle bulk toggle featured
+  const handleBulkToggleFeatured = (featured: boolean) => {
+    const ids = Object.entries(selectedVehicles)
+      .filter(([_, selected]) => selected)
+      .map(([id]) => parseInt(id));
+    
+    if (ids.length > 0) {
+      bulkToggleFeaturedMutation.mutate({ ids, featured });
+    }
+  };
+
+  // Reset form fields
+  const resetForm = () => {
+    setFormData({
+      make: '',
+      model: '',
+      year: new Date().getFullYear(),
+      price: 0,
+      mileage: 0,
+      fuelType: 'Gasoline',
+      transmission: 'Automatic',
+      color: '',
+      description: '',
+      category: 'Sports Cars',
+      condition: 'Excellent',
+      isFeatured: false,
+      features: '',
+      images: '',
+      vin: ''
+    });
+  };
+  
+  // Edit a vehicle
+  const handleEdit = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsEditModalOpen(true);
+  };
+  
+  // Delete a vehicle
+  const handleDelete = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsDeleteModalOpen(true);
+  };
+  
+  // View vehicle details
+  const handleViewDetails = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsDetailsModalOpen(true);
+  };
+  
+  // Update vehicle status
+  const handleStatusUpdate = (vehicle: Vehicle, status: string) => {
+    updateStatusMutation.mutate({ id: vehicle.id, status });
+  };
+  
+  // Toggle a vehicle selection for bulk actions
+  const toggleVehicleSelection = (id: number, checked: boolean) => {
+    setSelectedVehicles(prev => ({
+      ...prev,
+      [id]: checked
+    }));
+  };
+  
+  // Toggle all vehicle selections
+  const toggleAllSelection = (checked: boolean) => {
+    const newSelection: Record<number, boolean> = {};
+    if (data?.data) {
+      data.data.forEach(vehicle => {
+        newSelection[vehicle.id] = checked;
+      });
+    }
+    setSelectedVehicles(newSelection);
+  };
+  
+  // Check if a vehicle is selected
+  const isVehicleSelected = (id: number) => {
+    return !!selectedVehicles[id];
+  };
+  
+  // Count selected vehicles
+  const getSelectedCount = () => {
+    return Object.values(selectedVehicles).filter(Boolean).length;
+  };
+  
+  // This code has been moved to the getCustomCategories function above
+  
+  // Update hasSelectedItems when selections change
+  useEffect(() => {
+    setHasSelectedItems(getSelectedCount() > 0);
+  }, [selectedVehicles]);
+  
+  // Update form data when selectedVehicle changes
+  useEffect(() => {
+    if (selectedVehicle) {
+      // Handle features formatting
+      let featuresValue = '';
+      
+      if (Array.isArray(selectedVehicle.features)) {
+        // If it's a simple array, join with commas
+        featuresValue = selectedVehicle.features.join(', ');
+      } else if (typeof selectedVehicle.features === 'string') {
+        // If it's already a string, use it directly
+        featuresValue = selectedVehicle.features;
+      }
+      
+      // Handle images formatting
+      let imagesValue = '';
+      if (Array.isArray(selectedVehicle.images)) {
+        imagesValue = selectedVehicle.images.join(', ');
+      } else if (typeof selectedVehicle.images === 'string') {
+        imagesValue = selectedVehicle.images;
+      }
+      
+      setFormData({
+        ...selectedVehicle,
+        features: featuresValue,
+        images: imagesValue
+      });
+      
+      // Set default tab based on features format
+      // If features contain markdown headings, default to categorized tab
+      if (featuresValue.includes('## ')) {
+        const tabsElement = document.querySelector('[data-state="active"][role="tablist"]');
+        if (tabsElement) {
+          const categorizedTab = tabsElement.querySelector('[value="categorized"]') as HTMLButtonElement;
+          if (categorizedTab) {
+            categorizedTab.click();
+          }
+        }
+      }
+    }
+  }, [selectedVehicle]);
+  
+  // Form component for add/edit vehicle
+  const VehicleForm = ({ isEdit = false }: { isEdit?: boolean }) => {
+    // Create local state to prevent parent re-rendering on every keystroke
+    const [localFormData, setLocalFormData] = useState({...formData});
+    
+    // Update local form data when selected vehicle changes
+    useEffect(() => {
+      if (isEdit && selectedVehicle) {
+        // Format features and images
+        let featuresValue = '';
+        let imagesValue = '';
+        
+        if (Array.isArray(selectedVehicle.features)) {
+          featuresValue = selectedVehicle.features.join(', ');
+        } else if (typeof selectedVehicle.features === 'string') {
+          featuresValue = selectedVehicle.features;
+        }
+        
+        if (Array.isArray(selectedVehicle.images)) {
+          imagesValue = selectedVehicle.images.join(', ');
+        } else if (typeof selectedVehicle.images === 'string') {
+          imagesValue = selectedVehicle.images;
+        }
+        
+        setLocalFormData({
+          ...selectedVehicle,
+          features: featuresValue,
+          images: imagesValue
+        });
+      } else {
+        setLocalFormData({...formData});
+      }
+    }, [isEdit, selectedVehicle, formData]);
+    
+    // Handle input changes locally
+    const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setLocalFormData(prev => ({
+        ...prev,
+        [name]: name === 'year' || name === 'price' || name === 'mileage' ? Number(value) : value
+      }));
+    };
+    
+    // Handle switch changes locally
+    const handleLocalSwitchChange = (checked: boolean) => {
+      setLocalFormData(prev => ({
+        ...prev,
+        isFeatured: checked
+      }));
+    };
+    
+    // Submit form with local data
+    const handleLocalSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (isEdit && selectedVehicle) {
+        updateVehicleMutation.mutate({ ...localFormData, id: selectedVehicle.id });
+      } else {
+        addVehicleMutation.mutate(localFormData);
+      }
+    };
+    
+    return (
+      <form onSubmit={handleLocalSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="make">Make</Label>
+            <Input id="make" name="make" value={localFormData.make} onChange={handleLocalInputChange} required />
+          </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="model">Model</Label>
+          <Input id="model" name="model" value={localFormData.model} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="year">Year</Label>
+          <Input id="year" name="year" type="number" value={localFormData.year} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="price">Price ($)</Label>
+          <Input id="price" name="price" type="number" value={localFormData.price} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="mileage">Mileage</Label>
+          <Input id="mileage" name="mileage" type="number" value={localFormData.mileage} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="vin">VIN</Label>
+          <Input id="vin" name="vin" value={localFormData.vin} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="fuelType">Fuel Type</Label>
+          <Select name="fuelType" value={localFormData.fuelType} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, fuelType: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select fuel type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Gasoline">Gasoline</SelectItem>
+              <SelectItem value="Diesel">Diesel</SelectItem>
+              <SelectItem value="Electric">Electric</SelectItem>
+              <SelectItem value="Hybrid">Hybrid</SelectItem>
+              <SelectItem value="Plug-in Hybrid">Plug-in Hybrid</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="transmission">Transmission</Label>
+          <Select name="transmission" value={localFormData.transmission} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, transmission: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select transmission" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Automatic">Automatic</SelectItem>
+              <SelectItem value="Manual">Manual</SelectItem>
+              <SelectItem value="Semi-Automatic">Semi-Automatic</SelectItem>
+              <SelectItem value="CVT">CVT</SelectItem>
+              <SelectItem value="DCT">DCT</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="color">Color</Label>
+          <Input id="color" name="color" value={localFormData.color} onChange={handleLocalInputChange} required />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select name="category" value={localFormData.category} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, category: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Sports Cars">Sports Cars</SelectItem>
+              <SelectItem value="Luxury Cars">Luxury Cars</SelectItem>
+              <SelectItem value="SUVs">SUVs</SelectItem>
+              <SelectItem value="Sedans">Sedans</SelectItem>
+              <SelectItem value="Convertibles">Convertibles</SelectItem>
+              <SelectItem value="Exotics">Exotics</SelectItem>
+              <SelectItem value="Hatchbacks">Hatchbacks</SelectItem>
+              <SelectItem value="Wagons">Wagons</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="condition">Condition</Label>
+          <Select name="condition" value={localFormData.condition} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, condition: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select condition" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="New">New</SelectItem>
+              <SelectItem value="Excellent">Excellent</SelectItem>
+              <SelectItem value="Very Good">Very Good</SelectItem>
+              <SelectItem value="Good">Good</SelectItem>
+              <SelectItem value="Fair">Fair</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select name="status" value={localFormData.status || 'available'} onValueChange={(value) => setLocalFormData(prev => ({ ...prev, status: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="sold">Sold</SelectItem>
+              <SelectItem value="reserved">Reserved</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2 flex items-center pt-8">
+          <Switch id="isFeatured" checked={!!localFormData.isFeatured} onCheckedChange={handleLocalSwitchChange} />
+          <Label htmlFor="isFeatured" className="ml-2">Feature this vehicle</Label>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" name="description" value={localFormData.description} onChange={handleLocalInputChange} rows={4} required />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="features">Vehicle Features</Label>
+        <Tabs defaultValue="simple" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="simple">Simple List</TabsTrigger>
+            <TabsTrigger value="categorized">Categorized</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="simple" className="mt-2">
+            <Textarea 
+              id="features" 
+              name="features" 
+              value={localFormData.features} 
+              onChange={handleLocalInputChange} 
+              rows={5} 
+              required 
+              placeholder="Leather Seats, Navigation System, Backup Camera, LED Headlights"
+            />
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-gray-500">Enter features separated by commas</p>
+              
+              {localFormData.features && !localFormData.features.includes('##') && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs"
+                  onClick={() => {
+                    if (localFormData.features) {
+                      // Auto-categorize comma-separated features into different sections
+                      const features = localFormData.features.split(',').map(f => f.trim()).filter(Boolean);
+                      
+                      // Define categories and their keywords
+                      const categories = {
+                        "Performance & Handling": [
+                          "engine", "horsepower", "hp", "torque", "suspension", "brakes", "exhaust", 
+                          "transmission", "turbo", "supercharged", "performance", "handling", "sport mode",
+                          "driving mode", "awd", "4wd", "four-wheel", "differential", "sport package"
+                        ],
+                        "Exterior Details": [
+                          "led", "headlight", "taillight", "wheel", "rim", "tire", "panoramic", "sunroof", 
+                          "roof", "color", "paint", "exterior", "mirror", "fog light", "xenon", "hid", 
+                          "spoiler", "body kit", "carbon fiber", "aluminum", "alloy", "chrome", "grille"
+                        ],
+                        "Interior & Technology": [
+                          "leather", "seat", "heated", "ventilated", "cooled", "massage", "dashboard", 
+                          "infotainment", "touch", "screen", "display", "navigation", "navi", "gps", 
+                          "audio", "sound", "speaker", "bluetooth", "usb", "apple carplay", "android auto",
+                          "interior", "wood", "ambient", "lighting", "climate", "air conditioning", "ac"
+                        ],
+                        "Safety & Convenience": [
+                          "camera", "parking", "sensor", "blind spot", "lane", "assist", "cruise control", 
+                          "adaptive cruise", "emergency", "brake", "collision", "airbag", "safety", 
+                          "warning", "alarm", "keyless", "start", "entry", "remote", "power", "door", 
+                          "window", "trunk", "automatic", "rain", "wiper", "memory", "seat"
+                        ]
+                      };
+                      
+                      // Categorize features
+                      const categorizedFeatures: Record<string, string[]> = {
+                        "Performance & Handling": [],
+                        "Exterior Details": [],
+                        "Interior & Technology": [],
+                        "Safety & Convenience": [],
+                        "Other Features": []
+                      };
+                      
+                      features.forEach(feature => {
+                        const lowerFeature = feature.toLowerCase();
+                        let categorized = false;
+                        
+                        // Check each category
+                        for (const [category, keywords] of Object.entries(categories)) {
+                          for (const keyword of keywords) {
+                            if (lowerFeature.includes(keyword.toLowerCase())) {
+                              categorizedFeatures[category].push(feature);
+                              categorized = true;
+                              break;
+                            }
+                          }
+                          if (categorized) break;
+                        }
+                        
+                        // If not categorized, put in Other Features
+                        if (!categorized) {
+                          categorizedFeatures["Other Features"].push(feature);
+                        }
+                      });
+                      
+                      // Build markdown format
+                      let markdownFeatures = '';
+                      Object.entries(categorizedFeatures).forEach(([category, featList]) => {
+                        if (featList.length > 0) {
+                          markdownFeatures += `## ${category}\n`;
+                          featList.forEach(feat => {
+                            markdownFeatures += `- ${feat}\n`;
+                          });
+                          markdownFeatures += '\n';
+                        }
+                      });
+                      
+                      // Update local form data
+                      setLocalFormData(prev => ({
+                        ...prev,
+                        features: markdownFeatures.trim()
+                      }));
+                      
+                      // Switch to categorized tab
+                      const tabsElement = document.querySelector('[data-state="active"][role="tablist"]');
+                      if (tabsElement) {
+                        const categorizedTab = tabsElement.querySelector('[value="categorized"]') as HTMLButtonElement;
+                        if (categorizedTab) {
+                          categorizedTab.click();
+                        }
+                      }
+                    }
+                  }}
+                >
+                  Auto-Categorize
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="categorized" className="mt-2">
+            <div className="grid gap-4">
+              {/* Performance & Handling */}
+              <div className="space-y-2">
+                <Label htmlFor="performance">Performance & Handling</Label>
+                <Textarea 
+                  id="performance" 
+                  placeholder="- M Sport Suspension&#10;- Performance Brakes&#10;- Sport Exhaust" 
+                  rows={3}
+                  value={localFormData.features?.includes('## Performance & Handling') 
+                    ? localFormData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Performance section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Performance & Handling\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve other sections if they exist
+                    if (localFormData.features?.includes('## Exterior Details')) {
+                      const exteriorContent = localFormData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (localFormData.features?.includes('## Interior & Technology')) {
+                      const interiorContent = localFormData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (localFormData.features?.includes('## Safety & Convenience')) {
+                      const safetyContent = localFormData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    if (localFormData.features?.includes('## Other Features')) {
+                      const otherContent = localFormData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update local form data
+                    setLocalFormData(prev => ({
+                      ...prev,
+                      features: updatedFeatures.trim()
+                    }));
+                  }}
+                />
+              </div>
+              
+              {/* Exterior Details */}
+              <div className="space-y-2">
+                <Label htmlFor="exterior">Exterior Details</Label>
+                <Textarea 
+                  id="exterior" 
+                  placeholder="- LED Headlights&#10;- Panoramic Roof&#10;- 19-inch Alloy Wheels" 
+                  rows={3}
+                  value={formData.features.includes('## Exterior Details') 
+                    ? formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Exterior section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Exterior Details\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve other sections if they exist
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Interior & Technology */}
+              <div className="space-y-2">
+                <Label htmlFor="interior">Interior & Technology</Label>
+                <Textarea 
+                  id="interior" 
+                  placeholder="- Leather Seats&#10;- Navigation System&#10;- Premium Sound System" 
+                  rows={3}
+                  value={formData.features.includes('## Interior & Technology') 
+                    ? formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Interior section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Interior & Technology\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve Safety section if it exists
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Other section if it exists
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Safety & Convenience */}
+              <div className="space-y-2">
+                <Label htmlFor="safety">Safety & Convenience</Label>
+                <Textarea 
+                  id="safety" 
+                  placeholder="- Backup Camera&#10;- Parking Sensors&#10;- Blind Spot Monitoring" 
+                  rows={3}
+                  value={formData.features.includes('## Safety & Convenience') 
+                    ? formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Interior section if it exists
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Safety section
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Safety & Convenience\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve Other section if it exists
+                    if (formData.features.includes('## Other Features')) {
+                      const otherContent = formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (otherContent) {
+                        updatedFeatures += `## Other Features\n${otherContent}\n\n`;
+                      }
+                    }
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Other Features */}
+              <div className="space-y-2">
+                <Label htmlFor="other">Other Features</Label>
+                <Textarea 
+                  id="other" 
+                  placeholder="- One Owner&#10;- Service History&#10;- Warranty" 
+                  rows={3}
+                  value={formData.features.includes('## Other Features') 
+                    ? formData.features.split('## Other Features')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim()
+                    : ''
+                  }
+                  onChange={(e) => {
+                    // Build the complete markdown format with all categories
+                    let updatedFeatures = '';
+                    
+                    // Preserve Performance section if it exists
+                    if (formData.features.includes('## Performance & Handling')) {
+                      const perfContent = formData.features.split('## Performance & Handling')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (perfContent) {
+                        updatedFeatures += `## Performance & Handling\n${perfContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Exterior section if it exists
+                    if (formData.features.includes('## Exterior Details')) {
+                      const exteriorContent = formData.features.split('## Exterior Details')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (exteriorContent) {
+                        updatedFeatures += `## Exterior Details\n${exteriorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Interior section if it exists
+                    if (formData.features.includes('## Interior & Technology')) {
+                      const interiorContent = formData.features.split('## Interior & Technology')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (interiorContent) {
+                        updatedFeatures += `## Interior & Technology\n${interiorContent}\n\n`;
+                      }
+                    }
+                    
+                    // Preserve Safety section if it exists
+                    if (formData.features.includes('## Safety & Convenience')) {
+                      const safetyContent = formData.features.split('## Safety & Convenience')[1]
+                        .split(/(?=^## )/m)[0]
+                        .trim();
+                      if (safetyContent) {
+                        updatedFeatures += `## Safety & Convenience\n${safetyContent}\n\n`;
+                      }
+                    }
+                    
+                    // Other section - must come before custom categories
+                    if (e.target.value.trim()) {
+                      updatedFeatures += `## Other Features\n${e.target.value.trim()}\n\n`;
+                    }
+                    
+                    // Preserve any custom categories that might exist
+                    const featSections = extractFeatureSections(formData.features);
+                    const stdSections = [
+                      'Performance & Handling',
+                      'Exterior Details',
+                      'Interior & Technology',
+                      'Safety & Convenience',
+                      'Other Features'
+                    ];
+                    
+                    Object.entries(featSections).forEach(([section, content]) => {
+                      if (!stdSections.includes(section) && content.trim()) {
+                        updatedFeatures += `## ${section}\n${content}\n\n`;
+                      }
+                    });
+
+                    // Update form data
+                    setFormData({
+                      ...formData,
+                      features: updatedFeatures.trim()
+                    });
+                  }}
+                />
+              </div>
+              
+              {/* Custom Categories */}
+              <Collapsible className="space-y-2 pt-2 border-t mt-4">
+                <div className="flex items-center justify-between space-x-4">
+                  <h4 className="text-sm font-medium">Custom Categories</h4>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <PlusCircle className="h-4 w-4 mr-1" />
+                      Add Custom Category
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+                
+                <CollapsibleContent className="space-y-4">
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="customCategoryName" className="text-sm">Category Name</Label>
+                      <Input
+                        id="customCategoryName"
+                        value={customCategoryName}
+                        onChange={(e) => setCustomCategoryName(e.target.value)}
+                        placeholder="E.g., Premium Package Features"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={!customCategoryName.trim()}
+                      onClick={() => {
+                        if (!customCategoryName.trim()) return;
+                        
+                        // Create a new section for this custom category
+                        let updatedFeatures = formData.features || '';
+                        
+                        if (updatedFeatures && !updatedFeatures.endsWith('\n\n')) {
+                          updatedFeatures += '\n\n';
+                        }
+                        
+                        updatedFeatures += `## ${customCategoryName.trim()}\n- Add features here\n\n`;
+                        
+                        setFormData({
+                          ...formData,
+                          features: updatedFeatures.trim()
+                        });
+                        
+                        setCustomCategoryName('');
+                        
+                        // Show toast success
+                        toast({
+                          title: "Category Added",
+                          description: `Custom category "${customCategoryName.trim()}" has been added`,
+                        });
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {/* Display existing custom categories */}
+                  {getCustomCategories(formData.features).length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-sm font-medium">Existing Custom Categories</h4>
+                      <div className="space-y-3">
+                        {getCustomCategories(formData.features).map((category, index) => {
+                          const content = formData.features.includes(`## ${category}`)
+                            ? formData.features.split(`## ${category}`)[1]
+                                .split(/(?=^## )/m)[0]
+                                .trim()
+                            : '';
+                            
+                          return (
+                            <div key={index} className="space-y-2 border p-3 rounded-md">
+                              <div className="flex items-center justify-between">
+                                <Label className="font-medium">{category}</Label>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-7 text-xs px-2"
+                                  onClick={() => {
+                                    // Remove this category from features
+                                    const sections = extractFeatureSections(formData.features);
+                                    delete sections[category];
+                                    
+                                    setFormData({
+                                      ...formData,
+                                      features: buildFeaturesMarkdown(sections)
+                                    });
+                                    
+                                    toast({
+                                      title: "Category Removed",
+                                      description: `Custom category "${category}" has been removed`,
+                                    });
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                              <Textarea
+                                rows={3}
+                                value={content}
+                                placeholder={`- Add ${category} features here`}
+                                onChange={(e) => {
+                                  // Update just this category's content
+                                  const sections = extractFeatureSections(formData.features);
+                                  sections[category] = e.target.value.trim();
+                                  
+                                  setFormData({
+                                    ...formData,
+                                    features: buildFeaturesMarkdown(sections)
+                                  });
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+              
+              <div className="space-y-4 mt-4">
+                <Alert>
+                  <AlertDescription className="text-xs text-gray-500">
+                    Add features by category. Use bullet points (- Feature) for each item. Empty categories will be ignored.
+                  </AlertDescription>
+                </Alert>
+                
+                {formData.features.includes('##') && (
+                  <div className="border rounded-md p-4 bg-gray-50">
+                    <h4 className="text-sm font-medium mb-2">Preview:</h4>
+                    <div className="prose prose-sm max-w-none">
+                      {formData.features.split('##').map((section, index) => {
+                        if (index === 0) return null; // Skip the first empty part
+                        
+                        const sectionTitle = section.split('\n')[0].trim();
+                        const sectionContent = section.substring(section.indexOf('\n')).trim();
+                        
+                        if (!sectionContent) return null;
+                        
+                        return (
+                          <div key={index} className="mb-3">
+                            <h3 className="text-base font-semibold">{sectionTitle}</h3>
+                            <ul className="mt-1">
+                              {sectionContent.split('\n').map((feature, fIndex) => {
+                                if (!feature.trim()) return null;
+                                return (
+                                  <li key={fIndex} className="flex items-center gap-2">
+                                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                    <span>{feature.replace(/^-\s*/, '')}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="images">Images (comma separated URLs)</Label>
+        <Textarea id="images" name="images" value={formData.images} onChange={handleInputChange} rows={3} required />
+        <p className="text-xs text-gray-500">Example: /vehicles/bmw/image1.jpg, /vehicles/bmw/image2.jpg</p>
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={() => {
+          if (isEdit) {
+            setIsEditModalOpen(false);
+          } else {
+            setIsAddModalOpen(false);
+          }
+          resetForm();
+        }}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={addVehicleMutation.isPending || updateVehicleMutation.isPending}>
+          {(addVehicleMutation.isPending || updateVehicleMutation.isPending) ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>{isEdit ? 'Updating...' : 'Adding...'}</span>
+            </>
+          ) : (
+            <>
+              <span>{isEdit ? 'Update Vehicle' : 'Add Vehicle'}</span>
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+
+  // Main component return
+  return (
+    <EmployeeLayout>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
+            <p className="text-gray-600 mt-1">Manage your dealership's vehicle inventory</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Vehicle
+            </Button>
+          </div>
+        </div>
+        
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <form onSubmit={handleSearch} className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by make, model, or VIN..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button type="submit">Search</Button>
+              </form>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                className={showFilters ? 'bg-gray-100' : ''}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {Object.values(filters).some(v => v !== '') && (
+                  <Badge className="ml-2 bg-[#E31837]">
+                    {Object.values(filters).filter(v => v !== '').length}
+                  </Badge>
+                )}
+              </Button>
+              {Object.values(filters).some(v => v !== '') && (
+                <Button 
+                  variant="ghost" 
+                  onClick={handleClearFilters}
+                  size="icon"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="mt-4 border-t pt-4">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="filters">
+                  <AccordionTrigger>Advanced Filters</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-make">Make</Label>
+                        <Input 
+                          id="filter-make" 
+                          name="make" 
+                          value={filters.make} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any make"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-model">Model</Label>
+                        <Input 
+                          id="filter-model" 
+                          name="model" 
+                          value={filters.model} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any model"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-category">Category</Label>
+                        <Select 
+                          name="category" 
+                          value={filters.category}
+                          onValueChange={(value) => setFilters({...filters, category: value})}
+                        >
+                          <SelectTrigger id="filter-category">
+                            <SelectValue placeholder="Any category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any category</SelectItem>
+                            <SelectItem value="Sports Cars">Sports Cars</SelectItem>
+                            <SelectItem value="Luxury Cars">Luxury Cars</SelectItem>
+                            <SelectItem value="SUVs">SUVs</SelectItem>
+                            <SelectItem value="Sedans">Sedans</SelectItem>
+                            <SelectItem value="Convertibles">Convertibles</SelectItem>
+                            <SelectItem value="Exotics">Exotics</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-condition">Condition</Label>
+                        <Select 
+                          name="condition" 
+                          value={filters.condition}
+                          onValueChange={(value) => setFilters({...filters, condition: value})}
+                        >
+                          <SelectTrigger id="filter-condition">
+                            <SelectValue placeholder="Any condition" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any condition</SelectItem>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Excellent">Excellent</SelectItem>
+                            <SelectItem value="Very Good">Very Good</SelectItem>
+                            <SelectItem value="Good">Good</SelectItem>
+                            <SelectItem value="Fair">Fair</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-min-year">Min Year</Label>
+                        <Input 
+                          id="filter-min-year" 
+                          name="minYear" 
+                          type="number" 
+                          value={filters.minYear} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-max-year">Max Year</Label>
+                        <Input 
+                          id="filter-max-year" 
+                          name="maxYear" 
+                          type="number" 
+                          value={filters.maxYear} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-min-price">Min Price</Label>
+                        <Input 
+                          id="filter-min-price" 
+                          name="minPrice" 
+                          type="number"
+                          value={filters.minPrice} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-max-price">Max Price</Label>
+                        <Input 
+                          id="filter-max-price" 
+                          name="maxPrice" 
+                          type="number"
+                          value={filters.maxPrice} 
+                          onChange={handleFilterChange} 
+                          placeholder="Any"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-transmission">Transmission</Label>
+                        <Select 
+                          name="transmission" 
+                          value={filters.transmission}
+                          onValueChange={(value) => setFilters({...filters, transmission: value})}
+                        >
+                          <SelectTrigger id="filter-transmission">
+                            <SelectValue placeholder="Any transmission" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any transmission</SelectItem>
+                            <SelectItem value="Automatic">Automatic</SelectItem>
+                            <SelectItem value="Manual">Manual</SelectItem>
+                            <SelectItem value="Semi-Automatic">Semi-Automatic</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-fuel-type">Fuel Type</Label>
+                        <Select 
+                          name="fuelType" 
+                          value={filters.fuelType}
+                          onValueChange={(value) => setFilters({...filters, fuelType: value})}
+                        >
+                          <SelectTrigger id="filter-fuel-type">
+                            <SelectValue placeholder="Any fuel type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any fuel type</SelectItem>
+                            <SelectItem value="Gasoline">Gasoline</SelectItem>
+                            <SelectItem value="Diesel">Diesel</SelectItem>
+                            <SelectItem value="Electric">Electric</SelectItem>
+                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-featured">Featured</Label>
+                        <Select 
+                          name="featured" 
+                          value={filters.featured}
+                          onValueChange={(value) => setFilters({...filters, featured: value})}
+                        >
+                          <SelectTrigger id="filter-featured">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Any</SelectItem>
+                            <SelectItem value="true">Featured Only</SelectItem>
+                            <SelectItem value="false">Non-Featured Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button variant="outline" onClick={handleClearFilters} className="mr-2">
+                        Clear Filters
+                      </Button>
+                      <Button onClick={() => refetch()}>
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          )}
+        </div>
+        
+        {/* Bulk Actions Bar - only shown when items are selected */}
+        {hasSelectedItems && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <Check className="text-blue-500 h-5 w-5 mr-2" />
+              <span>
+                <strong>{getSelectedCount()}</strong> vehicles selected
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Bulk Actions
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleBulkToggleFeatured(true)}>
+                    <Star className="h-4 w-4 mr-2" />
+                    Mark as Featured
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleBulkToggleFeatured(false)}>
+                    <Star className="h-4 w-4 mr-2 text-gray-400" />
+                    Unmark as Featured
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleBulkDelete}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Selected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setSelectedVehicles({});
+                  setHasSelectedItems(false);
+                }}
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Main inventory table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Vehicle Inventory</CardTitle>
+            <CardDescription>
+              {data?.pagination?.total
+                ? `${data.pagination.total} vehicles found`
+                : 'Loading inventory...'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E31837]"></div>
+              </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                <h3 className="text-lg font-medium">Error Loading Inventory</h3>
+                <p className="text-gray-500 mt-2">There was a problem fetching vehicle data.</p>
+                <Button variant="outline" onClick={() => refetch()} className="mt-4">
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="relative overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[40px]">
+                          <Checkbox 
+                            checked={data?.data?.length > 0 && getSelectedCount() === data.data.length}
+                            onCheckedChange={(checked) => toggleAllSelection(!!checked)}
+                          />
+                        </TableHead>
+                        <TableHead className="w-[70px]">ID</TableHead>
+                        <TableHead className="w-[70px]">Image</TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('make')}>
+                            Make/Model
+                            {sort.field === 'make' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('year')}>
+                            Year
+                            {sort.field === 'year' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('price')}>
+                            Price
+                            {sort.field === 'price' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleSortChange('mileage')}>
+                            Mileage
+                            {sort.field === 'mileage' && (
+                              sort.direction === 'asc' ? 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" /> : 
+                                <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data?.data?.length ? (
+                        data.data.map((vehicle) => (
+                          <TableRow key={vehicle.id}>
+                            <TableCell>
+                              <Checkbox 
+                                checked={isVehicleSelected(vehicle.id)}
+                                onCheckedChange={(checked) => toggleVehicleSelection(vehicle.id, !!checked)}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{vehicle.id}</TableCell>
+                            <TableCell>
+                              <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden">
+                                {vehicle.images && (
+                                  <img 
+                                    src={
+                                      typeof vehicle.images === 'string' 
+                                        ? (() => {
+                                            const imgPath = vehicle.images.split(',')[0].trim();
+                                            return imgPath.startsWith('http') || imgPath.startsWith('/') 
+                                              ? imgPath 
+                                              : `/${imgPath}`;
+                                          })()
+                                        : Array.isArray(vehicle.images) && vehicle.images.length > 0
+                                          ? (() => {
+                                              const imgPath = vehicle.images[0].trim();
+                                              return imgPath.startsWith('http') || imgPath.startsWith('/') 
+                                                ? imgPath 
+                                                : `/${imgPath}`;
+                                            })()
+                                          : '/placeholder-car.jpg'
+                                    } 
+                                    alt={`${vehicle.make} ${vehicle.model}`}
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = '/placeholder-car.jpg';
+                                    }}
+                                  />
+                                )}
+                                {!vehicle.images && (
+                                  <div className="h-full w-full flex items-center justify-center">
+                                    <Car className="h-5 w-5 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{vehicle.make} {vehicle.model}</div>
+                              <div className="text-sm text-gray-500">{vehicle.vin}</div>
+                            </TableCell>
+                            <TableCell>{vehicle.year}</TableCell>
+                            <TableCell>${vehicle.price.toLocaleString()}</TableCell>
+                            <TableCell>{vehicle.mileage.toLocaleString()}</TableCell>
+                            <TableCell>{vehicle.category}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-col space-y-1">
+                                {/* Status badge */}
+                                <Badge variant={
+                                  vehicle.status === 'sold' ? 'destructive' :
+                                  vehicle.status === 'reserved' ? 'secondary' :
+                                  vehicle.status === 'pending' ? 'outline' : 'default'
+                                }>
+                                  {vehicle.status ? vehicle.status.charAt(0).toUpperCase() + vehicle.status.slice(1) : 'Available'}
+                                </Badge>
+                                
+                                {/* Featured badge */}
+                                {vehicle.isFeatured && (
+                                  <Badge variant="default" className="bg-[#E31837]">
+                                    <Star className="h-3 w-3 mr-1 fill-current" />
+                                    Featured
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                {/* Status dropdown menu */}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <Tag className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'available')}>
+                                      Available
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'sold')}>
+                                      Sold
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'reserved')}>
+                                      Reserved
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(vehicle, 'pending')}>
+                                      Pending
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleViewDetails(vehicle)}>
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>View Details</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleEdit(vehicle)}>
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Edit Vehicle</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button size="icon" variant="ghost" onClick={() => handleDelete(vehicle)}>
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Delete Vehicle</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={9} className="text-center py-16 text-gray-500">
+                            No vehicles found with the current filters.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                {/* Pagination */}
+                {data?.pagination && data.pagination.totalPages > 1 && (
+                  <div className="mt-4">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setPage(page > 1 ? page - 1 : 1)}
+                            disabled={page === 1}
+                            className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        
+                        {[...Array(data.pagination.totalPages)].map((_, i) => {
+                          const pageNum = i + 1;
+                          // Show first page, last page, current page, and pages around current page
+                          if (
+                            pageNum === 1 || 
+                            pageNum === data.pagination.totalPages ||
+                            (pageNum >= page - 1 && pageNum <= page + 1)
+                          ) {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  isActive={page === pageNum}
+                                  onClick={() => setPage(pageNum)}
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          } else if (
+                            (pageNum === 2 && page > 3) ||
+                            (pageNum === data.pagination.totalPages - 1 && page < data.pagination.totalPages - 2)
+                          ) {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+                          return null;
+                        })}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setPage(page < data.pagination.totalPages ? page + 1 : data.pagination.totalPages)}
+                            disabled={page === data.pagination.totalPages}
+                            className={page === data.pagination.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Add Vehicle Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Vehicle</DialogTitle>
+            <DialogDescription>
+              Fill out the form below to add a new vehicle to the inventory.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <VehicleForm 
+            initialData={formData}
+            onSubmit={(data) => {
+              addVehicleMutation.mutate(data);
+            }}
+            onCancel={() => setIsAddModalOpen(false)}
+            isPending={addVehicleMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Vehicle Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Vehicle</DialogTitle>
+            <DialogDescription>
+              Update the vehicle information below.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <VehicleForm 
+            initialData={selectedVehicle || formData}
+            onSubmit={(data) => {
+              if (selectedVehicle) {
+                updateVehicleMutation.mutate({ ...data, id: selectedVehicle.id });
+              }
+            }}
+            onCancel={() => setIsEditModalOpen(false)}
+            isEdit={true}
+            isPending={updateVehicleMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this vehicle? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedVehicle && (
+              <div className="flex items-center bg-gray-50 p-3 rounded">
+                <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden mr-3">
+                  {selectedVehicle.images ? (
+                    <img 
+                      src={
+                        typeof selectedVehicle.images === 'string' 
+                          ? selectedVehicle.images.split(',')[0]
+                          : Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 0
+                            ? selectedVehicle.images[0]
+                            : ''
+                      } 
+                      alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          // Create and append fallback elements instead of using innerHTML
+                          const fallbackDiv = document.createElement('div');
+                          fallbackDiv.className = 'h-full w-full flex items-center justify-center';
+                          
+                          const carIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                          carIcon.setAttribute('width', '20');
+                          carIcon.setAttribute('height', '20');
+                          carIcon.setAttribute('viewBox', '0 0 24 24');
+                          carIcon.setAttribute('fill', 'none');
+                          carIcon.setAttribute('stroke', 'currentColor');
+                          carIcon.setAttribute('stroke-width', '2');
+                          carIcon.setAttribute('stroke-linecap', 'round');
+                          carIcon.setAttribute('stroke-linejoin', 'round');
+                          carIcon.classList.add('h-5', 'w-5', 'text-gray-400');
+                          
+                          const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                          path1.setAttribute('d', 'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2');
+                          
+                          const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                          circle1.setAttribute('cx', '7');
+                          circle1.setAttribute('cy', '17');
+                          circle1.setAttribute('r', '2');
+                          
+                          const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                          path2.setAttribute('d', 'M9 17h6');
+                          
+                          const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                          circle2.setAttribute('cx', '17');
+                          circle2.setAttribute('cy', '17');
+                          circle2.setAttribute('r', '2');
+                          
+                          carIcon.appendChild(path1);
+                          carIcon.appendChild(circle1);
+                          carIcon.appendChild(path2);
+                          carIcon.appendChild(circle2);
+                          
+                          fallbackDiv.appendChild(carIcon);
+                          
+                          // Clear parent and append fallback
+                          while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                          }
+                          parent.appendChild(fallbackDiv);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Car className="h-5 w-5 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">{selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}</p>
+                  <p className="text-sm text-gray-500">ID: {selectedVehicle.id} | VIN: {selectedVehicle.vin}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteVehicleMutation.isPending}
+            >
+              {deleteVehicleMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete Vehicle</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Vehicle Details Modal */}
+      <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Vehicle Details</DialogTitle>
+            <DialogDescription>
+              Detailed information for this vehicle.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedVehicle && (
+            <div className="mt-4 space-y-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Main image */}
+                <div className="md:w-1/2 h-64 rounded-lg overflow-hidden bg-gray-100">
+                  {selectedVehicle.images ? (
+                    <img 
+                      src={
+                        typeof selectedVehicle.images === 'string' 
+                          ? selectedVehicle.images.split(',')[0]
+                          : Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 0
+                            ? selectedVehicle.images[0]
+                            : ''
+                      } 
+                      alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          // Create and append fallback elements instead of using innerHTML
+                          const fallbackDiv = document.createElement('div');
+                          fallbackDiv.className = 'h-full w-full flex items-center justify-center';
+                          
+                          const carIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                          carIcon.setAttribute('width', '48');
+                          carIcon.setAttribute('height', '48');
+                          carIcon.setAttribute('viewBox', '0 0 24 24');
+                          carIcon.setAttribute('fill', 'none');
+                          carIcon.setAttribute('stroke', 'currentColor');
+                          carIcon.setAttribute('stroke-width', '2');
+                          carIcon.setAttribute('stroke-linecap', 'round');
+                          carIcon.setAttribute('stroke-linejoin', 'round');
+                          carIcon.classList.add('h-12', 'w-12', 'text-gray-400');
+                          
+                          const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                          path1.setAttribute('d', 'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.6-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2');
+                          
+                          const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                          circle1.setAttribute('cx', '7');
+                          circle1.setAttribute('cy', '17');
+                          circle1.setAttribute('r', '2');
+                          
+                          const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                          path2.setAttribute('d', 'M9 17h6');
+                          
+                          const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                          circle2.setAttribute('cx', '17');
+                          circle2.setAttribute('cy', '17');
+                          circle2.setAttribute('r', '2');
+                          
+                          carIcon.appendChild(path1);
+                          carIcon.appendChild(circle1);
+                          carIcon.appendChild(path2);
+                          carIcon.appendChild(circle2);
+                          
+                          fallbackDiv.appendChild(carIcon);
+                          
+                          // Clear parent and append fallback
+                          while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                          }
+                          parent.appendChild(fallbackDiv);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Car className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Basic information */}
+                <div className="md:w-1/2 space-y-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+                    </h2>
+                    {selectedVehicle.isFeatured && (
+                      <Badge className="mt-1 bg-[#E31837]">
+                        <Star className="h-3 w-3 mr-1 fill-current" />
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="text-2xl font-bold text-[#E31837]">
+                    ${selectedVehicle.price.toLocaleString()}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">VIN:</span>
+                      <span className="font-medium">{selectedVehicle.vin}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Mileage:</span>
+                      <span className="font-medium">{selectedVehicle.mileage.toLocaleString()} miles</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Exterior Color:</span>
+                      <span className="font-medium">{selectedVehicle.color}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Transmission:</span>
+                      <span className="font-medium">{selectedVehicle.transmission}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Fuel Type:</span>
+                      <span className="font-medium">{selectedVehicle.fuelType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Condition:</span>
+                      <span className="font-medium">{selectedVehicle.condition}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Category:</span>
+                      <span className="font-medium">{selectedVehicle.category}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Image thumbnails */}
+              {selectedVehicle.images && (
+                Array.isArray(selectedVehicle.images) && selectedVehicle.images.length > 1 || 
+                (typeof selectedVehicle.images === 'string' && selectedVehicle.images.includes(','))
+              ) && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Images</h3>
+                  <div className="grid grid-cols-5 gap-2">
+                    {Array.isArray(selectedVehicle.images) 
+                      ? selectedVehicle.images.map((image, index) => (
+                        <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
+                          <img 
+                            src={typeof image === 'string' 
+                              ? (image.startsWith('http') || image.startsWith('/') 
+                                  ? image 
+                                  : `/${image}`) 
+                              : '/placeholder-car.jpg'} 
+                            alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/placeholder-car.jpg';
+                            }}
+                          />
+                        </div>
+                      ))
+                      : typeof selectedVehicle.images === 'string' && selectedVehicle.images.includes(',')
+                        ? selectedVehicle.images.split(',').map((image, index) => (
+                          <div key={index} className="h-16 rounded bg-gray-100 overflow-hidden">
+                            <img 
+                              src={image.trim().startsWith('http') || image.trim().startsWith('/') ? image.trim() : `/${image.trim()}`} 
+                              alt={`${selectedVehicle.make} ${selectedVehicle.model} view ${index + 1}`}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/placeholder-car.jpg';
+                              }}
+                            />
+                          </div>
+                        ))
+                        : null
+                    }
+                  </div>
+                </div>
+              )}
+              
+              {/* Description */}
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Description</h3>
+                <p className="text-gray-700">{selectedVehicle.description}</p>
+              </div>
+              
+              {/* Features */}
+              {selectedVehicle.features && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Features</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Array.isArray(selectedVehicle.features) 
+                      ? selectedVehicle.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-4 w-4 text-green-500 mr-2" />
+                          <span>{feature}</span>
+                        </div>
+                      ))
+                      : typeof selectedVehicle.features === 'string' && selectedVehicle.features.includes(',')
+                        ? selectedVehicle.features.split(',').map((feature, index) => (
+                          <div key={index} className="flex items-center">
+                            <Check className="h-4 w-4 text-green-500 mr-2" />
+                            <span>{feature.trim()}</span>
+                          </div>
+                        ))
+                        : typeof selectedVehicle.features === 'string'
+                          ? (
+                            <div className="flex items-center">
+                              <Check className="h-4 w-4 text-green-500 mr-2" />
+                              <span>{selectedVehicle.features}</span>
+                            </div>
+                          )
+                          : null
+                    }
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailsModalOpen(false)}>
+              Close
+            </Button>
+            <Button 
+              variant="default" 
+              onClick={() => {
+                setIsDetailsModalOpen(false);
+                handleEdit(selectedVehicle!);
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Vehicle
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </EmployeeLayout>
+  );
