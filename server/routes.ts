@@ -240,6 +240,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete vehicle" });
     }
   });
+  
+  // Update vehicle status endpoint
+  app.put("/api/vehicles/:id/status", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid vehicle ID" });
+      }
+      
+      const { status } = req.body;
+      if (!status || !['available', 'sold', 'reserved', 'pending'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value. Must be one of: available, sold, reserved, pending" });
+      }
+      
+      const updatedVehicle = await storage.updateVehicle(id, { status });
+      if (!updatedVehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+      
+      res.json(updatedVehicle);
+    } catch (error) {
+      console.error(`Error updating vehicle status ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to update vehicle status" });
+    }
+  });
 
   // Inquiry routes
   app.post("/api/inquiries", async (req: Request, res: Response) => {
