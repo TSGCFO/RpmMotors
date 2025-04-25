@@ -19,6 +19,7 @@ export function CarCard({ vehicle }: CarCardProps) {
     transmission,
     color,
     condition,
+    status,
     features = [],
     images = []
   } = vehicle;

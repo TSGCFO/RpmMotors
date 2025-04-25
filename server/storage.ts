@@ -22,6 +22,7 @@ export interface VehicleFilters {
   color?: string;
   category?: string;
   condition?: string;
+  status?: string;
   isFeatured?: boolean;
 }
 
@@ -477,6 +478,10 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(vehicles.condition, filters.condition));
     }
     
+    if (filters.status) {
+      conditions.push(eq(vehicles.status, filters.status));
+    }
+    
     if (filters.isFeatured !== undefined) {
       conditions.push(eq(vehicles.isFeatured, filters.isFeatured));
     }
@@ -505,6 +510,7 @@ export class DatabaseStorage implements IStorage {
       color: vehicles.color,
       category: vehicles.category,
       condition: vehicles.condition,
+      status: vehicles.status,
       createdAt: vehicles.createdAt
     };
     
