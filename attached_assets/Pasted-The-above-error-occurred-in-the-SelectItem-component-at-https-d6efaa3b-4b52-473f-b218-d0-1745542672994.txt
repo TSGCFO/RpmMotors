@@ -1,0 +1,45 @@
+The above error occurred in the <SelectItem> component:
+
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=75e3b11e:841:7
+    at _c11 (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/components/ui/select.tsx:207:13)
+    at div
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=75e3b11e:41:13
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:52:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:33:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=75e3b11e:98:15
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=75e3b11e:752:13
+    at div
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:52:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:33:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=75e3b11e:98:15
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=75e3b11e:38:15)
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=75e3b11e:296:58
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:52:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=75e3b11e:33:11
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=75e3b11e:41:13
+    at https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DPXLZWVB.js?v=75e3b11e:260:22
+    at SelectPortal
+    at _c7 (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/components/ui/select.tsx:122:12)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=75e3b11e:38:15)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=75e3b11e:28:15)
+    at CollectionProvider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=75e3b11e:89:13)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=75e3b11e:38:15)
+    at Provider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NBIVFTP4.js?v=75e3b11e:1915:15)
+    at Popper (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NBIVFTP4.js?v=75e3b11e:1972:11)
+    at Select (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=75e3b11e:84:5)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at main
+    at Inventory (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/pages/inventory.tsx:48:22)
+    at Route (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=75e3b11e:323:16)
+    at Switch (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=75e3b11e:379:17)
+    at Router (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/src/App.tsx?t=1745541813925&v=amx66hBdXk9GPHuXP6tK2:53:22)
+    at QueryClientProvider (https://d6efaa3b-4b52-473f-b218-d071dfd29158-00-3ksnf5h88k1v2.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=75e3b11e:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.

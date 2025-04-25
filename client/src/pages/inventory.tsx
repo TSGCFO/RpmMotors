@@ -394,7 +394,7 @@ export default function Inventory() {
                       <SelectValue placeholder="All Vehicles" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Vehicles</SelectItem>
+                      <SelectItem value="all">All Vehicles</SelectItem>
                       <SelectItem value="available">Available</SelectItem>
                       <SelectItem value="sold">Sold</SelectItem>
                       <SelectItem value="reserved">Reserved</SelectItem>
@@ -510,7 +510,7 @@ export default function Inventory() {
                           <SelectValue placeholder="All Vehicles" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Vehicles</SelectItem>
+                          <SelectItem value="all">All Vehicles</SelectItem>
                           <SelectItem value="available">Available</SelectItem>
                           <SelectItem value="sold">Sold</SelectItem>
                           <SelectItem value="reserved">Reserved</SelectItem>
