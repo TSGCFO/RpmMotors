@@ -14,7 +14,7 @@ export default function Contact() {
 
   // Prepare SEO metadata
   const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Woodbridge";
-  const pageDescription = "Contact RPM Auto's sales, financing, or service departments. Visit our luxury car dealership in Woodbridge, call us at (905) 264-1969, or send us a message online.";
+  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Woodbridge, call us at (905) 264-1969, or send us a message online.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -53,7 +53,7 @@ export default function Contact() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="contact RPM Auto, luxury car dealership, Woodbridge dealership, car sales, auto financing, vehicle service, Toronto luxury cars"
+        keywords="contact RPM Auto, luxury car dealership, Woodbridge dealership, car sales, vehicle service, Toronto luxury cars"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/contact"
@@ -100,13 +100,6 @@ export default function Contact() {
                 "telephone": "+1-905-264-1969 ext. 1",
                 "contactType": "sales",
                 "email": "sales@rpmauto.com",
-                "availableLanguage": ["English"]
-              },
-              {
-                "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 2",
-                "contactType": "finance",
-                "email": "finance@rpmauto.com",
                 "availableLanguage": ["English"]
               },
               {
@@ -245,7 +238,7 @@ export default function Contact() {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-['Poppins'] font-bold mb-8 text-center">Department Contacts</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <div className="text-[#E31837] mb-4 text-center">
                 <i className="fas fa-car text-4xl"></i>
@@ -258,21 +251,6 @@ export default function Contact() {
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
                 <a href="mailto:sales@rpmauto.com" className="hover:text-[#E31837] transition-colors">sales@rpmauto.com</a>
-              </div>
-            </div>
-            
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <div className="text-[#E31837] mb-4 text-center">
-                <i className="fas fa-money-check-alt text-4xl"></i>
-              </div>
-              <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Finance Department</h3>
-              <div className="flex items-center justify-center mb-2">
-                <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 2</a>
-              </div>
-              <div className="flex items-center justify-center">
-                <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:finance@rpmauto.com" className="hover:text-[#E31837] transition-colors">finance@rpmauto.com</a>
               </div>
             </div>
             

@@ -156,11 +156,6 @@ export default function Header() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/financing" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
-                    Financing
-                  </Link>
-                </li>
-                <li>
                   <Link href="/gallery" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/gallery') ? 'text-[#E31837]' : ''}`}>
                     Gallery
                   </Link>
@@ -196,11 +191,6 @@ export default function Header() {
                 <li>
                   <Link href="/services" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>
                     Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/financing" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
-                    Financing
                   </Link>
                 </li>
                 <li>
