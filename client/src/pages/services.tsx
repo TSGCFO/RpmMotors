@@ -121,7 +121,7 @@ export default function Services() {
           name: service.title,
           description: service.description,
           url: `https://rpmauto.com/services#${service.id}`,
-          image: `https://rpmauto.com/services-${service.id}.jpg`,
+          image: `https://rpmauto.com/services/${service.id}.svg`,
           provider: {
             name: "RPM Auto",
             url: "https://rpmauto.com"
@@ -204,15 +204,11 @@ export default function Services() {
               </div>
               
               <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
-                <div className="rounded-lg overflow-hidden shadow-xl">
+                <div className="rounded-lg overflow-hidden shadow-xl bg-white p-4">
                   <img 
-                    src={`/services/${service.id}.jpg`} 
+                    src={`/services/${service.id}.svg`} 
                     alt={service.title} 
-                    className="w-full h-auto object-cover"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/vehicles/bmw/bmw_image1.jpg";
-                    }}
+                    className="w-full h-auto"
                   />
                 </div>
               </div>
