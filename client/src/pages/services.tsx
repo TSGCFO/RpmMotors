@@ -206,9 +206,13 @@ export default function Services() {
               <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
                 <div className="rounded-lg overflow-hidden shadow-xl">
                   <img 
-                    src={`https://source.unsplash.com/featured/600x400?luxury,${service.title.toLowerCase().replace(/\s+/g, ',')},cars`} 
+                    src={`/services/${service.id}.jpg`} 
                     alt={service.title} 
                     className="w-full h-auto object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/vehicles/bmw/bmw_image1.jpg";
+                    }}
                   />
                 </div>
               </div>
