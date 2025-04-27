@@ -1,15 +1,15 @@
-import logoImage from "../../assets/rpm-auto-logo.png";
-
 interface LogoProps {
   className?: string;
 }
 
-export function RPMLogo({ className = "h-10" }: LogoProps) {
+export function RPMLogo({ className = "h-16" }: LogoProps) {
   return (
     <img
-      src={logoImage}
+      src="/logo/rpm-auto-logo.svg"
       alt="RPM Auto Logo"
       className={className}
+      width="240"
+      height="80"
     />
   );
 }

@@ -44,7 +44,7 @@ export default function Header() {
           {/* Logo Section */}
           <div className="logo-sect mb-3 md:mb-0">
             <Link href="/">
-              <RPMLogo className="h-16" />
+              <RPMLogo className="h-24 w-auto" />
             </Link>
           </div>
 
