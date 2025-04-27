@@ -123,7 +123,10 @@ export default function Header() {
         <div className="container mx-auto">
           {/* Mobile Menu Button */}
           <div className="md:hidden px-4 py-4 flex justify-between items-center">
-            <span className="font-semibold text-sm uppercase">Menu</span>
+            <span className="font-semibold text-sm uppercase flex items-center">
+              <RPMLogo className="h-8 w-auto mr-2" />
+              Menu
+            </span>
             <button 
               type="button" 
               className="text-white focus:outline-none" 

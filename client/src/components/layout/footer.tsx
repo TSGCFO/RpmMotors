@@ -9,7 +9,7 @@ export default function Footer() {
           {/* About Column */}
           <div>
             <div className="mb-6">
-              <RPMLogo className="h-12" />
+              <RPMLogo className="h-20 w-auto" />
             </div>
             <p className="text-gray-400 mb-6">
               RPM Auto specializes in premium and exotic vehicles, providing a curated selection of the world's most desirable automobiles.
