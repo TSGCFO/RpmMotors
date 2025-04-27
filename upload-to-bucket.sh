@@ -1,8 +1,15 @@
 
 #!/bin/bash
 
-# Path to upload from (local directory)
-SOURCE_DIR="client/public/vehicles"
+# Check if source directory is provided
+if [ -z "$1" ]; then
+  echo "Usage: ./upload-to-bucket.sh <source_directory> [target_path]"
+  echo "Example: ./upload-to-bucket.sh client/public/vehicles vehicles"
+  exit 1
+fi
+
+SOURCE_DIR="$1"
+TARGET_PATH="${2:-$1}"  # Use second argument as target path, or default to source path
 
 # Replace this with your actual upload script
 node -e "
@@ -38,7 +45,7 @@ async function uploadFolder(folderPath, bucketPath) {
 }
 
 // Start the upload process
-uploadFolder('$SOURCE_DIR', '$SOURCE_DIR')
+uploadFolder('$SOURCE_DIR', '$TARGET_PATH')
   .then(() => console.log('Upload completed!'))
   .catch(err => console.error('Upload failed:', err));
 "
