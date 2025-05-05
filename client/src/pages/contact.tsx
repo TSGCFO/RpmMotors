@@ -85,7 +85,7 @@ export default function Contact() {
             "@type": "AutoDealer",
             "name": "RPM Auto",
             "telephone": "+1-647-550-9590",
-            "email": "info@rpmauto.com",
+            "email": "fateh@rpmautosales.ca",
             "address": {
               "@type": "PostalAddress",
               "streetAddress": "By appointment only",
@@ -99,14 +99,14 @@ export default function Contact() {
                 "@type": "ContactPoint",
                 "telephone": "+1-647-550-9590 ext. 1",
                 "contactType": "sales",
-                "email": "sales@rpmauto.com",
+                "email": "fateh@rpmautosales.ca",
                 "availableLanguage": ["English"]
               },
               {
                 "@type": "ContactPoint",
                 "telephone": "+1-647-550-9590 ext. 3",
                 "contactType": "customer service",
-                "email": "service@rpmauto.com",
+                "email": "fateh@rpmautosales.ca",
                 "availableLanguage": ["English"]
               }
             ],
@@ -186,7 +186,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Email Us</h3>
-                    <p className="text-gray-600">info@rpmauto.com</p>
+                    <p className="text-gray-600">fateh@rpmautosales.ca</p>
                   </div>
                 </div>
                 
@@ -250,7 +250,7 @@ export default function Contact() {
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:sales@rpmauto.com" className="hover:text-[#E31837] transition-colors">sales@rpmauto.com</a>
+                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
               </div>
             </div>
             
@@ -265,7 +265,7 @@ export default function Contact() {
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:service@rpmauto.com" className="hover:text-[#E31837] transition-colors">service@rpmauto.com</a>
+                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
               </div>
             </div>
           </div>

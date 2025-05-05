@@ -113,7 +113,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <i className="fas fa-envelope mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">info@rpmauto.com</span>
+                <span className="text-gray-400">fateh@rpmautosales.ca</span>
               </li>
               <li className="flex items-start">
                 <i className="fas fa-clock mt-1 mr-3 text-[#E31837]"></i>
