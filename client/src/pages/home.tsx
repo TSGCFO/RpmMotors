@@ -33,7 +33,7 @@ export default function Home() {
     name: "RPM Auto",
     description: "RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
     url: "https://rpmauto.com",
-    telephone: "(905) 264-1969",
+    telephone: "(647) 550-9590",
     address: {
       streetAddress: "6260 Hwy 7 Unit 6",
       addressLocality: "Woodbridge",
@@ -142,7 +142,7 @@ export default function Home() {
           name: "RPM Auto",
           description: "Premium luxury and exotic car dealership in Woodbridge, Ontario offering a curated selection of high-end vehicles.",
           url: "https://rpmauto.com",
-          telephone: "(905) 264-1969",
+          telephone: "(647) 550-9590",
           address: {
             streetAddress: "6260 Hwy 7 Unit 6",
             addressLocality: "Woodbridge",
@@ -414,7 +414,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Call Us</h3>
-                    <p className="text-gray-600">(905) 264-1969</p>
+                    <p className="text-gray-600">(647) 550-9590</p>
                   </div>
                 </div>
                 

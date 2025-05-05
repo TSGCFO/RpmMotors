@@ -84,7 +84,7 @@ export default function Contact() {
           "mainEntity": {
             "@type": "AutoDealer",
             "name": "RPM Auto",
-            "telephone": "+1-905-264-1969",
+            "telephone": "+1-647-550-9590",
             "email": "info@rpmauto.com",
             "address": {
               "@type": "PostalAddress",
@@ -97,14 +97,14 @@ export default function Contact() {
             "contactPoint": [
               {
                 "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 1",
+                "telephone": "+1-647-550-9590 ext. 1",
                 "contactType": "sales",
                 "email": "sales@rpmauto.com",
                 "availableLanguage": ["English"]
               },
               {
                 "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 3",
+                "telephone": "+1-647-550-9590 ext. 3",
                 "contactType": "customer service",
                 "email": "service@rpmauto.com",
                 "availableLanguage": ["English"]
@@ -176,7 +176,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Call Us</h3>
-                    <p className="text-gray-600">(905) 264-1969</p>
+                    <p className="text-gray-600">(647) 550-9590</p>
                   </div>
                 </div>
                 
@@ -246,7 +246,7 @@ export default function Contact() {
               <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Sales Department</h3>
               <div className="flex items-center justify-center mb-2">
                 <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 1</a>
+                <a href="tel:+1-647-550-9590" className="hover:text-[#E31837] transition-colors">(647) 550-9590 ext. 1</a>
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
@@ -261,7 +261,7 @@ export default function Contact() {
               <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Service Department</h3>
               <div className="flex items-center justify-center mb-2">
                 <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 3</a>
+                <a href="tel:+1-647-550-9590" className="hover:text-[#E31837] transition-colors">(647) 550-9590 ext. 3</a>
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>

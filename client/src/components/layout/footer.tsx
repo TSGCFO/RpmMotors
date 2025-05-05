@@ -109,7 +109,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <i className="fas fa-phone-alt mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">(905) 264-1969</span>
+                <span className="text-gray-400">(647) 550-9590</span>
               </li>
               <li className="flex items-center">
                 <i className="fas fa-envelope mr-3 text-[#E31837]"></i>
