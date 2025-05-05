@@ -67,11 +67,11 @@ export default function Header() {
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
                 <li className="phone mb-2 md:mb-0 md:mr-4">
                   <a 
-                    href="tel:+1-123-456-7890" 
+                    href="tel:+1-647-550-9590" 
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-phone-dark mr-2"></i>
-                    <span>(123) 456-7890</span>
+                    <span>(647) 550-9590</span>
                   </a>
                 </li>
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
