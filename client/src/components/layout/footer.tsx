@@ -105,7 +105,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <i className="fas fa-map-marker-alt mt-1 mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</span>
+                <span className="text-gray-400">By appointment only, Vaughan, Ontario</span>
               </li>
               <li className="flex items-center">
                 <i className="fas fa-phone-alt mr-3 text-[#E31837]"></i>

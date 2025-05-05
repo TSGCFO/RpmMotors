@@ -35,10 +35,10 @@ export default function Home() {
     url: "https://rpmauto.com",
     telephone: "(647) 550-9590",
     address: {
-      streetAddress: "6260 Hwy 7 Unit 6",
-      addressLocality: "Woodbridge",
-      addressRegion: "ON",
-      postalCode: "L4H 4G3",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
+      addressRegion: "Ontario",
+      postalCode: "L4H 0A1",
       addressCountry: "CA"
     },
     geo: {
@@ -144,10 +144,9 @@ export default function Home() {
           url: "https://rpmauto.com",
           telephone: "(647) 550-9590",
           address: {
-            streetAddress: "6260 Hwy 7 Unit 6",
-            addressLocality: "Woodbridge",
-            addressRegion: "ON",
-            postalCode: "L4H 4G3",
+            streetAddress: "By appointment only",
+            addressLocality: "Vaughan",
+            addressRegion: "Ontario",
             addressCountry: "CA"
           },
           geo: {
@@ -404,7 +403,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</p>
+                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
                   </div>
                 </div>
                 

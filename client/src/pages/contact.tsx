@@ -88,10 +88,9 @@ export default function Contact() {
             "email": "info@rpmauto.com",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "6260 Hwy 7 Unit 6",
-              "addressLocality": "Woodbridge",
-              "addressRegion": "ON",
-              "postalCode": "L4H 4G3",
+              "streetAddress": "By appointment only",
+              "addressLocality": "Vaughan",
+              "addressRegion": "Ontario",
               "addressCountry": "CA"
             },
             "contactPoint": [
@@ -166,7 +165,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</p>
+                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
                   </div>
                 </div>
                 
