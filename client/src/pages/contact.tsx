@@ -13,8 +13,8 @@ export default function Contact() {
   }, []);
 
   // Prepare SEO metadata
-  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Woodbridge";
-  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Woodbridge, call us at (905) 264-1969, or send us a message online.";
+  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Vaughan";
+  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Vaughan, call us at (647) 550-9590, or send us a message online.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -27,12 +27,12 @@ export default function Contact() {
     name: "RPM Auto",
     description: "Premium automotive dealership specializing in luxury and exotic vehicles in the Greater Toronto Area.",
     url: "https://rpmauto.com",
-    telephone: "+1-905-264-1969",
+    telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "6260 Hwy 7 Unit 6",
-      addressLocality: "Woodbridge",
-      addressRegion: "ON",
-      postalCode: "L4H 4G3",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
+      addressRegion: "Ontario",
+      postalCode: "L4H 0A1",
       addressCountry: "CA"
     },
     geo: {
@@ -53,7 +53,7 @@ export default function Contact() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="contact RPM Auto, luxury car dealership, Woodbridge dealership, car sales, vehicle service, Toronto luxury cars"
+        keywords="contact RPM Auto, luxury car dealership, Vaughan dealership, car sales, vehicle service, Toronto luxury cars"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/contact"
@@ -91,6 +91,7 @@ export default function Contact() {
               "streetAddress": "By appointment only",
               "addressLocality": "Vaughan",
               "addressRegion": "Ontario",
+              "postalCode": "L4H 0A1",
               "addressCountry": "CA"
             },
             "contactPoint": [
