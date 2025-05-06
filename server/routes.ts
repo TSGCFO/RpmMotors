@@ -302,11 +302,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Format and send email notification
       const emailOptions = formatInquiryEmail(validationResult.data);
+      console.log("Preparing to send email notification for inquiry:", inquiry.id);
+      
+      // Include detailed information for debugging
+      console.log("Email recipient:", emailOptions.to || 'fateh@rpmautosales.ca');
+      console.log("Email subject:", emailOptions.subject);
+      
       sendEmail(emailOptions).then(success => {
         if (success) {
           console.log("Email notification sent successfully for inquiry:", inquiry.id);
         } else {
           console.error("Failed to send email notification for inquiry:", inquiry.id);
+          // Store the email delivery failure in the database for retry later if needed
+          // This could be enhanced in the future
         }
       }).catch(err => {
         console.error("Error sending email notification:", err);

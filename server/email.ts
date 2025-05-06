@@ -27,9 +27,10 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
   }
 
   try {
-    // Use the actual business email as requested
+    // The domain rpmautosales.ca has strict DMARC policies that prevent email spoofing
+    // We need to use a verified SendGrid domain that's allowed to send
     const defaultSender = {
-      email: 'fateh@rpmautosales.ca', // Use the actual business email
+      email: 'sendgrid@sendgrid.net', // Use a SendGrid domain that will pass DMARC
       name: 'RPM Auto Website'
     };
 
