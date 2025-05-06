@@ -64,7 +64,7 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
               className="w-full h-20 object-cover"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/placeholder-car.jpg';
+                e.currentTarget.src = '/placeholders/placeholder-car.svg';
               }}
             />
           </div>
@@ -112,7 +112,7 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/placeholder-car.jpg';
+                e.currentTarget.src = '/placeholders/placeholder-car.svg';
               }}
             />
             <div className="absolute bottom-4 left-0 right-0 text-center text-white">
