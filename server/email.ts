@@ -27,10 +27,9 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
   }
 
   try {
-    // Use a SendGrid-approved sender domain to avoid DMARC issues
-    // SendGrid dynamic templates require a verified sender
+    // Use the actual business email as requested
     const defaultSender = {
-      email: 'noreply@reply.sendgrid.net', // SendGrid's approved domain
+      email: 'fateh@rpmautosales.ca', // Use the actual business email
       name: 'RPM Auto Website'
     };
 
