@@ -90,9 +90,13 @@ export default function PersonalizedRecommendations() {
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer group">
                   <div className="h-48 bg-gray-200 overflow-hidden relative">
                     <img 
-                      src={(vehicle.images && vehicle.images.length > 0) ? vehicle.images[0] : `https://via.placeholder.com/400x300?text=${vehicle.make}+${vehicle.model}`}
+                      src={(vehicle.images && vehicle.images.length > 0) ? vehicle.images[0] : `/placeholders/placeholder-car.svg`}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} 
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/placeholders/placeholder-car.svg';
+                      }}
                     />
                     {hasConsent && (
                       <div className="absolute top-0 right-0 bg-[#E31837] text-white text-xs px-2 py-1">

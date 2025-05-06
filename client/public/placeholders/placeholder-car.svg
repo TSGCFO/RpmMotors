@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500' width='800' height='500'>
+  <rect width='800' height='500' fill='#f0f0f0'/>
+  <text x='400' y='250' font-family='Arial, sans-serif' font-size='24' text-anchor='middle' fill='#888'>Placeholder Car</text>
+  <path d='M580,280 Q580,260 560,260 L240,260 Q220,260 220,280 L220,320 Q220,340 240,340 L560,340 Q580,340 580,320 Z' fill='#ccc'/>
+  <circle cx='270' cy='350' r='25' fill='#aaa'/>
+  <circle cx='530' cy='350' r='25' fill='#aaa'/>
+  <path d='M220,300 L220,300 Q220,280 240,280 L280,280 L300,240 L500,240 L520,280 L560,280 Q580,280 580,300 L580,300 Z' fill='#aaa'/>
+</svg>

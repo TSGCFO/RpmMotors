@@ -42,7 +42,7 @@ export function OptimizedImage({
   
   // Normalize image src path
   const normalizedSrc = (() => {
-    if (!src) return '/placeholder-car.jpg';
+    if (!src) return '/placeholders/placeholder-car.svg';
     if (src.startsWith('http') || src.startsWith('/')) return src;
     return `/${src}`;
   })();
@@ -62,7 +62,7 @@ export function OptimizedImage({
       }}
       onError={(e) => {
         e.currentTarget.onerror = null;
-        e.currentTarget.src = '/placeholder-car.jpg';
+        e.currentTarget.src = '/placeholders/placeholder-car.svg';
       }}
     />
   );
