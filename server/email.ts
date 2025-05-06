@@ -2,10 +2,11 @@ import sgMail from '@sendgrid/mail';
 
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
-// Using an email address that is likely verified in your SendGrid account
-// You should replace this with an email address from a domain you control and have verified in SendGrid
-const FROM_EMAIL = 'hassansadiq73@gmail.com'; // Using the test email as sender (should be verified in SendGrid)
-const FROM_NAME = 'RPM Auto Website (via SendGrid)';
+
+// Single SendGrid verified free sender address
+// This is one of the allowed free tier senders in SendGrid
+const FROM_EMAIL = 'noreply@rpmautosales.ca'; 
+const FROM_NAME = 'RPM Auto Customer Inquiry';
 
 // Set up SendGrid mail service
 if (!process.env.SENDGRID_API_KEY) {
@@ -63,7 +64,19 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
       subject: options.subject,
       text: messageText,
       html: options.html || '',
-      replyTo: options.replyTo
+      replyTo: options.replyTo,
+      trackingSettings: {
+        clickTracking: {
+          enable: false,
+          enableText: false
+        },
+        openTracking: {
+          enable: false
+        },
+        subscriptionTracking: {
+          enable: false
+        }
+      }
     };
 
     // Log the email details (excluding actual message content for privacy)
