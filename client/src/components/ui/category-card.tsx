@@ -7,13 +7,24 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ title, image, link }: CategoryCardProps) {
+  // Normalize image src path to handle different formats consistently
+  const normalizedSrc = (() => {
+    if (!image) return '/placeholders/placeholder-category.svg';
+    if (image.startsWith('http') || image.startsWith('/')) return image;
+    return `/${image}`;
+  })();
+
   return (
     <div className="relative group overflow-hidden rounded-lg shadow-md">
       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all duration-300 z-10"></div>
       <img 
-        src={image} 
+        src={normalizedSrc} 
         alt={title} 
         className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
+        onError={(e) => {
+          e.currentTarget.onerror = null; // Prevent infinite error loop
+          e.currentTarget.src = '/placeholders/placeholder-category.svg';
+        }}
       />
       <div className="absolute inset-0 z-20 flex items-center justify-center">
         <div className="text-center">

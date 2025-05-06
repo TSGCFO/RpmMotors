@@ -43,7 +43,7 @@ export function VehicleGallery({ photos, vehicleName }: VehicleGalleryProps) {
           className="w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = '/placeholder-car.jpg';
+            e.currentTarget.src = '/placeholders/placeholder-car.svg';
           }}
         />
       </div>

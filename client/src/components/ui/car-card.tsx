@@ -45,13 +45,13 @@ export function CarCard({ vehicle }: CarCardProps) {
                 ? (images[0].startsWith('http') || images[0].startsWith('/') 
                     ? images[0] 
                     : `/${images[0]}`)
-                : '/placeholder-car.jpg')
-            : '/placeholder-car.jpg'} 
+                : '/placeholders/placeholder-car.svg')
+            : '/placeholders/placeholder-car.svg'} 
           alt={`${year} ${make} ${model}`} 
           className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = '/placeholder-car.jpg';
+            e.currentTarget.src = '/placeholders/placeholder-car.svg';
           }}
         />
         <div className="flex justify-center space-x-2 pt-2 pb-3 bg-white">
