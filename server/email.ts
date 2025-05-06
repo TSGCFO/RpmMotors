@@ -27,45 +27,38 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
   }
 
   try {
-    // Use SendGrid's default sender while delivering to the business email
+    // Use a SendGrid-approved sender domain to avoid DMARC issues
+    // SendGrid dynamic templates require a verified sender
     const defaultSender = {
-      email: 'noreply@sendgrid.net',
+      email: 'noreply@reply.sendgrid.net', // SendGrid's approved domain
       name: 'RPM Auto Website'
     };
 
-    // Format email data according to SendGrid requirements
-    const emailData = {
+    // Format email data according to SendGrid's v3 Mail Send API requirements
+    const emailData: any = {
       to: options.to || 'fateh@rpmautosales.ca',
       from: {
         email: defaultSender.email,
         name: defaultSender.name
       },
       subject: options.subject,
-      replyTo: options.replyTo || options.from || defaultSender.email,
-      // Convert text/html to SendGrid's content format
-      content: []
+      reply_to: {
+        email: options.replyTo || options.from || defaultSender.email,
+        name: "Customer"
+      }
     };
 
     // Add HTML content if available
     if (options.html) {
-      emailData.content.push({
-        type: 'text/html',
-        value: options.html
-      });
+      emailData.html = options.html;
     }
 
-    // Add text content if available or as a fallback
+    // Add text content if available
     if (options.text) {
-      emailData.content.push({
-        type: 'text/plain',
-        value: options.text
-      });
+      emailData.text = options.text;
     } else if (!options.html) {
       // Fallback if neither html nor text is provided
-      emailData.content.push({
-        type: 'text/plain',
-        value: 'Message from RPM Auto website (no content provided)'
-      });
+      emailData.text = 'Message from RPM Auto website (no content provided)';
     }
 
     await mailService.send(emailData);
