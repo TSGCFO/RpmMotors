@@ -55,8 +55,8 @@ export function ContactForm({ vehicleId = undefined }: { vehicleId?: number }) {
       await apiRequest("POST", "/api/inquiries", values);
       
       toast({
-        title: "Message Sent",
-        description: "Thank you! Your inquiry has been submitted successfully. We'll get back to you shortly.",
+        title: "Message Received",
+        description: "Thank you! Your inquiry has been submitted and saved securely. We'll review it and get back to you shortly via email or phone.",
       });
       
       form.reset();

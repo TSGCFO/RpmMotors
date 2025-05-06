@@ -297,28 +297,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the inquiry in the database
       const inquiry = await storage.createInquiry(validationResult.data);
       
-      // Import email service functions
-      const { sendEmail, formatInquiryEmail } = await import('./email');
+      // Instead of trying to send emails directly, we'll just store the inquiry
+      // and provide a way to view them in the admin panel
+      console.log("New inquiry received and stored in database:", inquiry.id);
+      console.log("From:", validationResult.data.name, "(", validationResult.data.email, ")");
+      console.log("Subject:", validationResult.data.subject);
+      console.log("Message:", validationResult.data.message);
       
-      // Format and send email notification
-      const emailOptions = formatInquiryEmail(validationResult.data);
-      console.log("Preparing to send email notification for inquiry:", inquiry.id);
-      
-      // Include detailed information for debugging
-      console.log("Email recipient:", emailOptions.to || 'fateh@rpmautosales.ca');
-      console.log("Email subject:", emailOptions.subject);
-      
-      sendEmail(emailOptions).then(success => {
-        if (success) {
-          console.log("Email notification sent successfully for inquiry:", inquiry.id);
-        } else {
-          console.error("Failed to send email notification for inquiry:", inquiry.id);
-          // Store the email delivery failure in the database for retry later if needed
-          // This could be enhanced in the future
-        }
-      }).catch(err => {
-        console.error("Error sending email notification:", err);
-      });
+      // For security, all inquiries will be stored in the database
+      // You can periodically check the /admin/inquiries page to see new messages
       
       res.status(201).json(inquiry);
     } catch (error) {
