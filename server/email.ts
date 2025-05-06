@@ -1,19 +1,15 @@
-import { MailService } from '@sendgrid/mail';
+import sgMail from '@sendgrid/mail';
 
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
-const FROM_EMAIL = 'noreply@sendgrid.net'; // Using SendGrid's generic domain that doesn't require separate verification
+const FROM_EMAIL = 'fateh@rpmautosales.ca'; // Using the same email as recipient (this must be verified in SendGrid)
 const FROM_NAME = 'RPM Auto Website';
 
 // Set up SendGrid mail service
 if (!process.env.SENDGRID_API_KEY) {
   console.error("Warning: SENDGRID_API_KEY environment variable is not set. Email functionality will not work.");
-}
-
-// Initialize SendGrid service
-const mailService = new MailService();
-if (process.env.SENDGRID_API_KEY) {
-  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
 // Interface for email options
@@ -58,12 +54,31 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
       replyTo: options.replyTo
     };
 
+    // Log the email details (excluding actual message content for privacy)
+    console.log('Sending email to:', msg.to);
+    console.log('From:', msg.from);
+    console.log('Subject:', msg.subject);
+    console.log('Reply-To:', msg.replyTo);
+
     // Send the email via SendGrid
-    await mailService.send(msg);
+    await sgMail.send(msg);
     console.log('Email sent successfully via SendGrid');
     return true;
   } catch (error) {
     console.error('Error sending email via SendGrid:', error);
+    
+    // Log more detailed information for 403 errors to help with debugging
+    if (error.code === 403) {
+      console.error('SendGrid 403 Forbidden error - This usually means:');
+      console.error('1. The sending email domain is not verified in your SendGrid account');
+      console.error('2. Your SendGrid account might need additional verification');
+      console.error('3. Your plan might restrict sending to certain domains');
+      
+      if (error.response && error.response.body && error.response.body.errors) {
+        console.error('Detailed errors:', JSON.stringify(error.response.body.errors, null, 2));
+      }
+    }
+    
     return false;
   }
 };
