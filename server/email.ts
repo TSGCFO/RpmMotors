@@ -3,10 +3,11 @@ import sgMail from '@sendgrid/mail';
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
 
-// Single SendGrid verified free sender address
-// This is one of the allowed free tier senders in SendGrid
-const FROM_EMAIL = 'noreply@rpmautosales.ca'; 
-const FROM_NAME = 'RPM Auto Customer Inquiry';
+// Use a verified sender from SendGrid
+// IMPORTANT: This must be a fully verified single sender in your SendGrid account
+// If using a free SendGrid account, you might need to use your personal email instead
+const FROM_EMAIL = 'fateh@rpmautosales.ca'; // Change this to your fully verified sender
+const FROM_NAME = 'RPM Auto Website';
 
 // Set up SendGrid mail service
 if (!process.env.SENDGRID_API_KEY) {
