@@ -2,8 +2,8 @@ import sgMail from '@sendgrid/mail';
 
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
-const FROM_EMAIL = 'fateh@rpmautosales.ca'; // Using the same email as recipient (this must be verified in SendGrid)
-const FROM_NAME = 'RPM Auto Website';
+const FROM_EMAIL = 'api@sendgrid.net'; // Using known working SendGrid's authenticated sending domain
+const FROM_NAME = 'RPM Auto Website - Contact Form';
 
 // Set up SendGrid mail service
 if (!process.env.SENDGRID_API_KEY) {
@@ -104,10 +104,10 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
 interface InquiryEmailData {
   name: string;
   email: string;
-  phone?: string;
+  phone?: string | null; // Accept null values from the database
   subject: string;
   message: string;
-  vehicleId?: number;
+  vehicleId?: number | null; // Accept null values from the database
   inquiryId?: number;
 }
 

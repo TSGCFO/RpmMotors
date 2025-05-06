@@ -303,7 +303,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Format email notification with inquiry data
       const emailOptions = formatInquiryEmail({
         ...validationResult.data,
-        inquiryId: inquiry.id // Include the inquiry ID in the email
+        inquiryId: inquiry.id, // Include the inquiry ID in the email
+        phone: validationResult.data.phone || undefined, // Ensure phone is string or undefined, not null
+        vehicleId: validationResult.data.vehicleId || null // Ensure vehicleId is number or null
       });
       
       console.log("Preparing to send email notification for inquiry:", inquiry.id);
