@@ -1,19 +1,15 @@
-import nodemailer from 'nodemailer';
+import { MailService } from '@sendgrid/mail';
 
-// Create a nodemailer transporter using Office 365 SMTP
-const transporter = nodemailer.createTransport({
-  host: 'smtp.office365.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER || 'fateh@rpmautosales.ca',
-    pass: process.env.EMAIL_PASSWORD || '' // This should be set in environment variables
-  },
-  tls: {
-    ciphers: 'SSLv3',
-    rejectUnauthorized: false
-  }
-});
+// Check if SendGrid API key is set
+if (!process.env.SENDGRID_API_KEY) {
+  console.warn("SENDGRID_API_KEY environment variable is not set. Email sending will not work.");
+}
+
+// Initialize SendGrid mail service
+const mailService = new MailService();
+if (process.env.SENDGRID_API_KEY) {
+  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 interface EmailOptions {
   to?: string;
@@ -25,20 +21,30 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error('SendGrid API Key not set. Cannot send email.');
+    return false;
+  }
+
   try {
     const defaultOptions = {
       to: 'fateh@rpmautosales.ca', // Default recipient
-      from: process.env.EMAIL_USER || 'fateh@rpmautosales.ca',
-      replyTo: options.replyTo || options.from
+      from: 'fateh@rpmautosales.ca', // Verified sender email in SendGrid
     };
 
-    const emailOptions = { ...defaultOptions, ...options };
-    
-    await transporter.sendMail(emailOptions);
-    console.log('Email sent successfully');
+    // Create email object for SendGrid
+    const emailData = { 
+      ...defaultOptions,
+      ...options,
+      // Handle reply-to properly
+      replyTo: options.replyTo || options.from || defaultOptions.from
+    };
+
+    await mailService.send(emailData);
+    console.log('Email sent successfully via SendGrid');
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending email with SendGrid:', error);
     return false;
   }
 };
