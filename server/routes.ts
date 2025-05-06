@@ -294,31 +294,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: errorMessage });
       }
       
-      // Create the inquiry in the database
+      // Create the inquiry in the database first so it's recorded even if email fails
       const inquiry = await storage.createInquiry(validationResult.data);
       
       // Import email service functions
       const { sendEmail, formatInquiryEmail } = await import('./email');
       
-      // Format and send email notification
-      const emailOptions = formatInquiryEmail(validationResult.data);
-      console.log("Preparing to send email notification for inquiry:", inquiry.id);
-      
-      sendEmail(emailOptions).then(success => {
-        if (success) {
-          console.log("Email notification sent successfully for inquiry:", inquiry.id);
-        } else {
-          console.error("Failed to send email notification for inquiry:", inquiry.id);
-          // We still have a backup - the inquiry is stored in the database
-        }
-      }).catch(err => {
-        console.error("Error sending email notification:", err);
+      // Format email notification with inquiry data
+      const emailOptions = formatInquiryEmail({
+        ...validationResult.data,
+        inquiryId: inquiry.id // Include the inquiry ID in the email
       });
       
-      res.status(201).json(inquiry);
+      console.log("Preparing to send email notification for inquiry:", inquiry.id);
+      
+      // Try to send the email asynchronously
+      // We don't want to block the API response on email delivery
+      sendEmail(emailOptions)
+        .then(success => {
+          if (success) {
+            console.log("Email notification sent successfully for inquiry:", inquiry.id);
+            
+            // Could update inquiry status to indicate email was sent
+            // Uncomment if you want to track email delivery status in the database
+            /*
+            storage.updateInquiryStatus(inquiry.id, "email-sent").catch(err => {
+              console.error("Failed to update inquiry status after email sent:", err);
+            });
+            */
+          } else {
+            console.error("Failed to send email notification for inquiry:", inquiry.id);
+            // Email sending failed but the inquiry is still stored in the database
+            // This could trigger an admin notification or retry mechanism
+          }
+        })
+        .catch(err => {
+          console.error(`Error sending email notification for inquiry ${inquiry.id}:`, err);
+          
+          // Log detailed error information for debugging
+          if (err.response && err.response.body) {
+            console.error("Email error details:", JSON.stringify(err.response.body, null, 2));
+          }
+        });
+      
+      // Return success response immediately without waiting for email to send
+      // We already saved the inquiry to the database
+      res.status(201).json({
+        ...inquiry,
+        message: "Thank you for your inquiry. Our team will contact you shortly."
+      });
     } catch (error) {
       console.error("Error creating inquiry:", error);
-      res.status(500).json({ message: "Failed to create inquiry" });
+      res.status(500).json({ message: "Failed to create inquiry. Please try again or contact us directly." });
     }
   });
 

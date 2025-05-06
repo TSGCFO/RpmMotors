@@ -22,6 +22,16 @@ interface EmailOptions {
   replyTo?: string;
 }
 
+// Error interface for typing errors properly
+interface SendGridError extends Error {
+  code?: number;
+  response?: {
+    body?: {
+      errors?: any[];
+    }
+  }
+}
+
 /**
  * Send an email using SendGrid email service
  */
@@ -65,44 +75,76 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
     console.log('Email sent successfully via SendGrid');
     return true;
   } catch (error) {
-    console.error('Error sending email via SendGrid:', error);
+    const sendgridError = error as SendGridError;
+    console.error('Error sending email via SendGrid:', sendgridError.message || 'Unknown error');
     
-    // Log more detailed information for 403 errors to help with debugging
-    if (error.code === 403) {
+    // Log more detailed information for specific error codes
+    if (sendgridError.code === 403) {
       console.error('SendGrid 403 Forbidden error - This usually means:');
       console.error('1. The sending email domain is not verified in your SendGrid account');
       console.error('2. Your SendGrid account might need additional verification');
       console.error('3. Your plan might restrict sending to certain domains');
       
-      if (error.response && error.response.body && error.response.body.errors) {
-        console.error('Detailed errors:', JSON.stringify(error.response.body.errors, null, 2));
+      if (sendgridError.response?.body?.errors) {
+        console.error('Detailed errors:', JSON.stringify(sendgridError.response.body.errors, null, 2));
       }
+    } else if (sendgridError.code === 401) {
+      console.error('SendGrid 401 Unauthorized error - This usually means:');
+      console.error('1. The API key is invalid or has been revoked');
+      console.error('2. The API key does not have permission to send emails');
+    } else if (sendgridError.code === 429) {
+      console.error('SendGrid 429 Rate Limit error - You have exceeded your account limits');
     }
     
     return false;
   }
 };
 
+// Extend the data interface to make it more type-safe
+interface InquiryEmailData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  vehicleId?: number;
+  inquiryId?: number;
+}
+
 /**
- * Format inquiry form data for submission
+ * Format inquiry form data for email submission
  */
-export const formatInquiryEmail = (data: any): EmailOptions => {
+export const formatInquiryEmail = (data: InquiryEmailData): EmailOptions => {
+  const inquiryReference = data.inquiryId ? `Inquiry Reference: #${data.inquiryId}` : '';
+  const vehicleReference = data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : '';
+  
   // Create a plain text formatted message
   const formattedMessage = `
 Name: ${data.name}
 Email: ${data.email}
 Phone: ${data.phone || 'Not provided'}
 Subject: ${data.subject}
+${inquiryReference ? `${inquiryReference}\n` : ''}
+${vehicleReference ? `${vehicleReference}\n` : ''}
 
 Message:
 ${data.message}
 
-${data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : ''}
-
 This inquiry was sent from the RPM Auto website contact form.
 `;
 
-  // Create HTML formatted version
+  // Get today's date formatted nicely
+  const today = new Date();
+  const dateOptions: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  const formattedDate = today.toLocaleDateString('en-US', dateOptions);
+
+  // Create HTML formatted version with improved styling
   const htmlMessage = `
 <!DOCTYPE html>
 <html>
@@ -112,10 +154,12 @@ This inquiry was sent from the RPM Auto website contact form.
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
     .header { background-color: #E31837; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; }
-    .footer { background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 12px; }
+    .footer { background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; }
     .field { margin-bottom: 15px; }
     .label { font-weight: bold; color: #555; }
     .message-box { background-color: #f9f9f9; padding: 15px; border-left: 3px solid #E31837; margin: 15px 0; }
+    .reference { background-color: #f5f5f5; padding: 10px; margin-top: 15px; border-radius: 4px; font-family: monospace; }
+    .date { color: #777; font-style: italic; margin-bottom: 15px; }
   </style>
 </head>
 <body>
@@ -123,6 +167,8 @@ This inquiry was sent from the RPM Auto website contact form.
     <h2>New Inquiry from RPM Auto Website</h2>
   </div>
   <div class="content">
+    <div class="date">Received on ${formattedDate}</div>
+    
     <div class="field">
       <span class="label">Name:</span> ${data.name}
     </div>
@@ -141,17 +187,27 @@ This inquiry was sent from the RPM Auto website contact form.
         ${data.message.replace(/\n/g, '<br>')}
       </div>
     </div>
-    ${data.vehicleId ? `<div class="field"><span class="label">Related Vehicle ID:</span> ${data.vehicleId}</div>` : ''}
+    
+    <div class="reference">
+      ${inquiryReference ? `<div>${inquiryReference}</div>` : ''}
+      ${vehicleReference ? `<div>${vehicleReference}</div>` : ''}
+    </div>
   </div>
   <div class="footer">
-    This inquiry was sent from the RPM Auto website contact form.
+    <p>This inquiry was sent from the RPM Auto website contact form.</p>
+    <p>You can reply directly to this email to respond to the customer.</p>
   </div>
 </body>
 </html>
 `;
 
+  // Include the reference number in the subject for easier email threading
+  const emailSubject = data.inquiryId 
+    ? `RPM Auto Inquiry #${data.inquiryId}: ${data.subject}` 
+    : `New RPM Auto Website Inquiry: ${data.subject}`;
+
   return {
-    subject: `New RPM Auto Website Inquiry: ${data.subject}`,
+    subject: emailSubject,
     text: formattedMessage,
     html: htmlMessage,
     replyTo: data.email, // Set reply-to as the customer's email
