@@ -211,8 +211,12 @@ export default function AdminDashboard() {
                       <div className="flex-shrink-0 h-12 w-12">
                         <img
                           className="h-12 w-12 rounded-md object-cover"
-                          src={vehicle.images[0] || 'https://via.placeholder.com/150'}
+                          src={vehicle.images[0] || '/placeholders/placeholder-car.svg'}
                           alt={`${vehicle.make} ${vehicle.model}`}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = '/placeholders/placeholder-car.svg';
+                          }}
                         />
                       </div>
                       <div className="ml-4 flex-1">
