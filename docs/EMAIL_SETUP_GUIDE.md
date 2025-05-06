@@ -1,87 +1,104 @@
-# Email Configuration Guide for RPM Auto Website
+# Email Setup Guide for RPM Auto Website
+
+This guide explains how to set up and maintain the email notification system for the RPM Auto website contact form.
 
 ## Overview
 
-This document provides detailed information on setting up and troubleshooting email notifications for the RPM Auto website contact form. The website uses SendGrid to deliver email notifications when customers submit inquiries through the contact form.
+The website uses SendGrid to deliver email notifications from customer inquiries submitted through the contact form. Due to Microsoft 365's strict email security policies, specific configuration is required to ensure reliable delivery.
 
-## Current Configuration
+## Current Setup
 
-The application is configured to:
-- Store all inquiries in the database (regardless of email delivery status)
-- Send email notifications via SendGrid to `fateh@rpmautosales.ca`
-- Track the email delivery status in the database (`email-sent`, `email-failed`, or `email-error`)
-- Log complete inquiry details if email delivery fails
+1. **Microsoft 365 Rules**: Rules have been created in Microsoft 365 to allow emails from SendGrid.
+2. **SendGrid Configuration**: The website is configured to send emails using a verified sender identity in SendGrid.
+3. **Fallback Mechanism**: If email delivery fails, inquiries are still saved in the database with an `email-failed` status.
 
-## SendGrid Domain Verification Issue
+## How to Configure
 
-The main issue we're encountering is with SendGrid's domain verification requirements. 
+### SendGrid Setup
 
-**Error Message:**
-```
-The from address does not match a verified Sender Identity. Mail cannot be sent until this error is resolved.
-```
+1. **API Key**:
+   - Log in to [SendGrid](https://app.sendgrid.com)
+   - Navigate to Settings → API Keys
+   - Create a new API key with "Mail Send" permissions
+   - Set the API key in the website's environment variables as `SENDGRID_API_KEY`
 
-This happens because:
+2. **Sender Verification**:
+   - In SendGrid, go to Settings → Sender Authentication
+   - Select "Verify a Single Sender"
+   - Complete the verification form using an existing email address (e.g., fateh@rpmautosales.ca)
+   - Follow the verification instructions sent to the email
+   - Make sure the sender email in the code matches the verified email
 
-1. SendGrid requires sender email domains to be verified to maintain high deliverability rates
-2. We're trying to send from an email domain that hasn't been verified in your SendGrid account
-3. Microsoft 365 (which hosts your rpmautosales.ca email) has strict DMARC policies that reject emails that appear to be from your domain but are sent through unauthorized servers
+3. **Domain Authentication** (Optional but recommended):
+   - In SendGrid, go to Settings → Sender Authentication
+   - Select "Authenticate a Domain"
+   - Follow the DNS setup instructions
+   - This improves email deliverability long-term
 
-## Solutions
+### Microsoft 365 Configuration
 
-### Option 1: Verify Your Domain in SendGrid (Recommended)
+1. **Connection Filter (Connector)**:
+   - Log in to [Microsoft 365 Admin Center](https://admin.microsoft.com)
+   - Go to Admin Centers → Exchange
+   - Navigate to Mail Flow → Connectors
+   - Create a new connector:
+     - From: Partner
+     - To: Office 365
+     - Connection method: IP addresses (use SendGrid's IP ranges)
+     - Require TLS: Yes
 
-1. Log in to your SendGrid account
-2. Go to Settings > Sender Authentication
-3. Click "Authenticate Your Domain"
-4. Follow the instructions to add DNS records to your domain
-5. Once verified, update the `FROM_EMAIL` in `server/email.ts` to use your domain
+2. **Anti-spam Rules**:
+   - In Exchange Admin Center, go to Protection → Threat policies → Anti-spam
+   - Edit the inbound policy
+   - Add SendGrid's IP ranges to the allowed IPs list
 
-This is the most professional and reliable solution that maintains your brand identity in emails.
+3. **DMARC Override Rule**:
+   - In Exchange Admin Center, go to Mail Flow → Rules
+   - Create a rule to bypass DMARC for SendGrid IPs
+   - Set the header "X-DMARC-Override" to "bypass"
 
-### Option 2: Use a SendGrid Verified Sender
+## Troubleshooting
 
-1. Log in to your SendGrid account
-2. Go to Settings > Sender Authentication
-3. Click "Create New Sender"
-4. Verify a personal email address you control (e.g., Gmail)
-5. Update the `FROM_EMAIL` in `server/email.ts` to use this verified email
+If emails are not being delivered:
 
-### Option 3: Use Single Sender Verification
+1. **Check Inquiry Status**:
+   - Log in to the admin interface
+   - View inquiries with "email-failed" status
+   - Use the retry functionality to attempt delivery again
 
-If you can't verify your domain, you can verify a single email address:
+2. **Verify Logs**:
+   - Check server logs for detailed SendGrid error messages
+   - Common issues include:
+     - Authentication failures (401)
+     - Sender verification issues (403)
+     - Rate limiting (429)
 
-1. Log in to your SendGrid account
-2. Go to Settings > Sender Authentication
-3. Click "Verify a Single Sender"
-4. Complete the verification process for your business email
-5. Update the `FROM_EMAIL` in `server/email.ts` to use this verified email
+3. **Test with New Inquiry**:
+   - Submit a test inquiry through the contact form
+   - Check logs for any errors
+   - Verify if the email arrives at the recipient address
 
-## Backup Mechanism
+## SendGrid IP Ranges
 
-In case of email delivery failures, we've implemented a robust backup system:
+For reference, here are SendGrid's IP ranges to add to Microsoft 365 rules:
 
-1. All inquiries are saved in the database, regardless of email notification status
-2. The inquiry status is updated to reflect the email delivery outcome
-3. Complete inquiry details are logged in the server console when email delivery fails
-4. You can view all inquiries through the admin interface, even if email notifications failed
+- 167.89.0.0/17
+- 208.117.48.0/20
+- 50.31.32.0/19
+- (Additional ranges might apply based on your SendGrid plan)
 
-## Testing Email Configuration
+## Contact for Support
 
-After implementing any of the solutions above, test your email configuration:
+If you encounter persistent email delivery issues:
 
-1. Submit a test inquiry through the contact form
-2. Check the server logs for email delivery status
-3. Verify the inquiry appears in the database with the correct status
-4. Confirm receipt of the email notification
+1. Check the [SendGrid Documentation](https://docs.sendgrid.com)
+2. Review Microsoft 365 [Anti-spam settings](https://docs.microsoft.com/en-us/exchange/antispam-and-antimalware/antispam-protection/antispam-protection)
+3. Contact your Microsoft 365 administrator or IT support
 
-## Support
+## Maintenance
 
-If you continue to experience issues with email delivery:
+Periodically check:
 
-1. Check your SendGrid API key and account status
-2. Review SendGrid's sending limits and restrictions
-3. Consult SendGrid's documentation: https://docs.sendgrid.com/
-4. Contact SendGrid support for assistance with domain verification
-
-For assistance with the website's email integration, please contact your web development team.
+1. SendGrid account status and API key validity
+2. Email delivery success rates in the admin dashboard
+3. Updates to Microsoft 365 security policies that might affect email delivery
