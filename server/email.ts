@@ -1,12 +1,20 @@
-import axios from 'axios';
+import { MailService } from '@sendgrid/mail';
 
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
+const FROM_EMAIL = 'noreply@sendgrid.net'; // Using SendGrid's generic domain that doesn't require separate verification
 const FROM_NAME = 'RPM Auto Website';
 
-// Formspree endpoint - free tier that doesn't require API keys
-// This reliable service will forward submissions directly to an email
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/meqyrqqw'; // A Formspree endpoint I created for this example
+// Set up SendGrid mail service
+if (!process.env.SENDGRID_API_KEY) {
+  console.error("Warning: SENDGRID_API_KEY environment variable is not set. Email functionality will not work.");
+}
+
+// Initialize SendGrid service
+const mailService = new MailService();
+if (process.env.SENDGRID_API_KEY) {
+  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Interface for email options
 interface EmailOptions {
@@ -19,12 +27,16 @@ interface EmailOptions {
 }
 
 /**
- * Send an email using Formspree - a reliable third-party service
- * that doesn't require SMTP authentication
+ * Send an email using SendGrid email service
  */
 export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error("Cannot send email: SENDGRID_API_KEY is not set");
+    return false;
+  }
+
   try {
-    console.log("Preparing to send form data via Formspree...");
+    console.log("Preparing to send email via SendGrid...");
     
     // Extract plain text from HTML if needed
     let messageText = options.text || '';
@@ -33,32 +45,25 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
       messageText = options.html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     }
     
-    // Set up form data for submission to Formspree
-    const formData = {
-      _subject: options.subject,
-      email: options.replyTo || 'website@rpmautosales.ca',
-      message: messageText,
-      name: FROM_NAME,
-      _replyto: options.replyTo || 'website@rpmautosales.ca'
+    // Prepare SendGrid email object
+    const msg = {
+      to: options.to || RECIPIENT_EMAIL,
+      from: {
+        email: options.from || FROM_EMAIL,
+        name: FROM_NAME
+      },
+      subject: options.subject,
+      text: messageText,
+      html: options.html || '',
+      replyTo: options.replyTo
     };
 
-    // Submit the form data to Formspree
-    const response = await axios.post(FORMSPREE_ENDPOINT, formData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    if (response.status === 200 || response.status === 201 || response.status === 202) {
-      console.log('Form submission successful via Formspree');
-      return true;
-    } else {
-      console.error('Formspree returned an unexpected status:', response.status);
-      return false;
-    }
+    // Send the email via SendGrid
+    await mailService.send(msg);
+    console.log('Email sent successfully via SendGrid');
+    return true;
   } catch (error) {
-    console.error('Error submitting form to Formspree:', error);
+    console.error('Error sending email via SendGrid:', error);
     return false;
   }
 };
@@ -67,7 +72,7 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
  * Format inquiry form data for submission
  */
 export const formatInquiryEmail = (data: any): EmailOptions => {
-  // Create a formatted message for Formspree
+  // Create a plain text formatted message
   const formattedMessage = `
 Name: ${data.name}
 Email: ${data.email}
@@ -82,9 +87,58 @@ ${data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : ''}
 This inquiry was sent from the RPM Auto website contact form.
 `;
 
+  // Create HTML formatted version
+  const htmlMessage = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+    .header { background-color: #E31837; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; }
+    .footer { background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 12px; }
+    .field { margin-bottom: 15px; }
+    .label { font-weight: bold; color: #555; }
+    .message-box { background-color: #f9f9f9; padding: 15px; border-left: 3px solid #E31837; margin: 15px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>New Inquiry from RPM Auto Website</h2>
+  </div>
+  <div class="content">
+    <div class="field">
+      <span class="label">Name:</span> ${data.name}
+    </div>
+    <div class="field">
+      <span class="label">Email:</span> <a href="mailto:${data.email}">${data.email}</a>
+    </div>
+    <div class="field">
+      <span class="label">Phone:</span> ${data.phone ? `<a href="tel:${data.phone}">${data.phone}</a>` : 'Not provided'}
+    </div>
+    <div class="field">
+      <span class="label">Subject:</span> ${data.subject}
+    </div>
+    <div class="field">
+      <span class="label">Message:</span>
+      <div class="message-box">
+        ${data.message.replace(/\n/g, '<br>')}
+      </div>
+    </div>
+    ${data.vehicleId ? `<div class="field"><span class="label">Related Vehicle ID:</span> ${data.vehicleId}</div>` : ''}
+  </div>
+  <div class="footer">
+    This inquiry was sent from the RPM Auto website contact form.
+  </div>
+</body>
+</html>
+`;
+
   return {
     subject: `New RPM Auto Website Inquiry: ${data.subject}`,
     text: formattedMessage,
+    html: htmlMessage,
     replyTo: data.email, // Set reply-to as the customer's email
   };
 };
