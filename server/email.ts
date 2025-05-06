@@ -27,18 +27,46 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
   }
 
   try {
-    const defaultOptions = {
-      to: 'fateh@rpmautosales.ca', // Default recipient
-      from: 'fateh@rpmautosales.ca', // Verified sender email in SendGrid
+    // Use SendGrid's default sender while delivering to the business email
+    const defaultSender = {
+      email: 'noreply@sendgrid.net',
+      name: 'RPM Auto Website'
     };
 
-    // Create email object for SendGrid
-    const emailData = { 
-      ...defaultOptions,
-      ...options,
-      // Handle reply-to properly
-      replyTo: options.replyTo || options.from || defaultOptions.from
+    // Format email data according to SendGrid requirements
+    const emailData = {
+      to: options.to || 'fateh@rpmautosales.ca',
+      from: {
+        email: defaultSender.email,
+        name: defaultSender.name
+      },
+      subject: options.subject,
+      replyTo: options.replyTo || options.from || defaultSender.email,
+      // Convert text/html to SendGrid's content format
+      content: []
     };
+
+    // Add HTML content if available
+    if (options.html) {
+      emailData.content.push({
+        type: 'text/html',
+        value: options.html
+      });
+    }
+
+    // Add text content if available or as a fallback
+    if (options.text) {
+      emailData.content.push({
+        type: 'text/plain',
+        value: options.text
+      });
+    } else if (!options.html) {
+      // Fallback if neither html nor text is provided
+      emailData.content.push({
+        type: 'text/plain',
+        value: 'Message from RPM Auto website (no content provided)'
+      });
+    }
 
     await mailService.send(emailData);
     console.log('Email sent successfully via SendGrid');
