@@ -2,8 +2,10 @@ import sgMail from '@sendgrid/mail';
 
 // Email configuration constants
 const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
-const FROM_EMAIL = 'api@sendgrid.net'; // Using known working SendGrid's authenticated sending domain
-const FROM_NAME = 'RPM Auto Website - Contact Form';
+// Using an email address that is likely verified in your SendGrid account
+// You should replace this with an email address from a domain you control and have verified in SendGrid
+const FROM_EMAIL = 'hassansadiq73@gmail.com'; // Using the test email as sender (should be verified in SendGrid)
+const FROM_NAME = 'RPM Auto Website (via SendGrid)';
 
 // Set up SendGrid mail service
 if (!process.env.SENDGRID_API_KEY) {
@@ -37,7 +39,7 @@ interface SendGridError extends Error {
  */
 export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
   if (!process.env.SENDGRID_API_KEY) {
-    console.error("Cannot send email: SENDGRID_API_KEY is not set");
+    console.error("Cannot send email: SENDGRID_API_KEY is not set. Check environment variables.");
     return false;
   }
 

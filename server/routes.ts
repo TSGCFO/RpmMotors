@@ -317,17 +317,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (success) {
             console.log("Email notification sent successfully for inquiry:", inquiry.id);
             
-            // Could update inquiry status to indicate email was sent
-            // Uncomment if you want to track email delivery status in the database
-            /*
+            // Update inquiry status to indicate email was sent
             storage.updateInquiryStatus(inquiry.id, "email-sent").catch(err => {
               console.error("Failed to update inquiry status after email sent:", err);
             });
-            */
           } else {
             console.error("Failed to send email notification for inquiry:", inquiry.id);
-            // Email sending failed but the inquiry is still stored in the database
-            // This could trigger an admin notification or retry mechanism
+            
+            // IMPORTANT: Email sending failed but the inquiry is still stored in the database
+            // Record that email sending failed to ensure this inquiry is not missed
+            storage.updateInquiryStatus(inquiry.id, "email-failed").catch(err => {
+              console.error("Failed to update inquiry status after email failure:", err);
+            });
+            
+            // Log the full inquiry data for manual recovery if needed
+            console.log("IMPORTANT - INQUIRY RECORD (EMAIL FAILED):", JSON.stringify({
+              id: inquiry.id,
+              name: validationResult.data.name,
+              email: validationResult.data.email,
+              phone: validationResult.data.phone,
+              subject: validationResult.data.subject,
+              message: validationResult.data.message,
+              vehicleId: validationResult.data.vehicleId,
+              createdAt: inquiry.createdAt
+            }, null, 2));
           }
         })
         .catch(err => {
@@ -337,6 +350,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (err.response && err.response.body) {
             console.error("Email error details:", JSON.stringify(err.response.body, null, 2));
           }
+          
+          // Update inquiry status to indicate email error
+          storage.updateInquiryStatus(inquiry.id, "email-error").catch(err => {
+            console.error("Failed to update inquiry status after email error:", err);
+          });
         });
       
       // Return success response immediately without waiting for email to send
@@ -358,6 +376,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching inquiries:", error);
       res.status(500).json({ message: "Failed to fetch inquiries" });
+    }
+  });
+  
+  // Add endpoint to retry sending email for a failed inquiry
+  app.post("/api/inquiries/:id/retry-email", async (req: Request, res: Response) => {
+    try {
+      const inquiryId = parseInt(req.params.id);
+      
+      if (isNaN(inquiryId)) {
+        return res.status(400).json({ message: "Invalid inquiry ID" });
+      }
+      
+      // Get the inquiry details
+      const inquiry = await storage.getInquiryById(inquiryId);
+      
+      if (!inquiry) {
+        return res.status(404).json({ message: "Inquiry not found" });
+      }
+      
+      console.log(`Retrying email notification for inquiry: ${inquiryId}`);
+      
+      // Import email service functions
+      const { sendEmail, formatInquiryEmail } = await import('./email');
+      
+      // Format email notification with inquiry data
+      const emailOptions = formatInquiryEmail({
+        ...inquiry,
+        phone: inquiry.phone || undefined,
+        vehicleId: inquiry.vehicleId || null
+      });
+      
+      // Try to send the email
+      const success = await sendEmail(emailOptions);
+      
+      if (success) {
+        console.log(`Email notification successfully resent for inquiry: ${inquiryId}`);
+        await storage.updateInquiryStatus(inquiryId, "email-sent");
+        res.status(200).json({ message: "Email notification resent successfully" });
+      } else {
+        console.error(`Failed to resend email notification for inquiry: ${inquiryId}`);
+        await storage.updateInquiryStatus(inquiryId, "email-failed");
+        res.status(500).json({ message: "Failed to resend email notification" });
+      }
+    } catch (error) {
+      console.error("Error retrying email notification:", error);
+      res.status(500).json({ message: "An error occurred while retrying email notification" });
     }
   });
 
