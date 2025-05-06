@@ -1,16 +1,30 @@
-import { MailService } from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 
-// Check if SendGrid API key is set
-if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY environment variable is not set. Email sending will not work.");
+// Email configuration constants
+const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
+const FROM_NAME = 'RPM Auto Website';
+
+// Check for required environment variables
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+  console.error("EMAIL_USER and EMAIL_PASSWORD environment variables must be set");
 }
 
-// Initialize SendGrid mail service
-const mailService = new MailService();
-if (process.env.SENDGRID_API_KEY) {
-  mailService.setApiKey(process.env.SENDGRID_API_KEY);
-}
+// Create a nodemailer transporter using Microsoft Office 365
+const transporter = nodemailer.createTransport({
+  host: 'smtp.office365.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    ciphers: 'SSLv3',
+    rejectUnauthorized: false // Allow self-signed certificates
+  }
+});
 
+// Interface for email options
 interface EmailOptions {
   to?: string;
   from?: string;
@@ -20,83 +34,87 @@ interface EmailOptions {
   replyTo?: string;
 }
 
+/**
+ * Send an email using nodemailer
+ */
 export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
-  if (!process.env.SENDGRID_API_KEY) {
-    console.error('SendGrid API Key not set. Cannot send email.');
+  // Verify environment variables are set
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error("Cannot send email, EMAIL_USER or EMAIL_PASSWORD not set");
     return false;
   }
 
   try {
-    // The domain rpmautosales.ca has strict DMARC policies that prevent email spoofing
-    // We need to use a verified SendGrid domain that's allowed to send
-    const defaultSender = {
-      email: 'sendgrid@sendgrid.net', // Use a SendGrid domain that will pass DMARC
-      name: 'RPM Auto Website'
-    };
-
-    // Format email data according to SendGrid's v3 Mail Send API requirements
-    const emailData: any = {
-      to: options.to || 'fateh@rpmautosales.ca',
-      from: {
-        email: defaultSender.email,
-        name: defaultSender.name
-      },
+    console.log("Preparing to send email via nodemailer...");
+    
+    // Set up email data
+    const mailOptions = {
+      from: `"${FROM_NAME}" <${process.env.EMAIL_USER}>`,
+      to: options.to || RECIPIENT_EMAIL,
       subject: options.subject,
-      reply_to: {
-        email: options.replyTo || options.from || defaultSender.email,
-        name: "Customer"
-      }
+      text: options.text || 'Message from RPM Auto website (no content provided)',
+      html: options.html,
+      replyTo: options.replyTo
     };
 
-    // Add HTML content if available
-    if (options.html) {
-      emailData.html = options.html;
-    }
-
-    // Add text content if available
-    if (options.text) {
-      emailData.text = options.text;
-    } else if (!options.html) {
-      // Fallback if neither html nor text is provided
-      emailData.text = 'Message from RPM Auto website (no content provided)';
-    }
-
-    await mailService.send(emailData);
-    console.log('Email sent successfully via SendGrid');
+    // Send the email
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully via nodemailer:', result.messageId);
     return true;
   } catch (error) {
-    console.error('Error sending email with SendGrid:', error);
+    console.error('Error sending email with nodemailer:', error);
     return false;
   }
 };
 
-// Function to format inquiry form data into an email
+/**
+ * Format inquiry form data into a professional email
+ */
 export const formatInquiryEmail = (data: any): EmailOptions => {
   return {
     subject: `New Website Inquiry: ${data.subject}`,
     html: `
-      <h2>New Inquiry from Website</h2>
-      <p><strong>Name:</strong> ${data.name}</p>
-      <p><strong>Email:</strong> ${data.email}</p>
-      <p><strong>Phone:</strong> ${data.phone || 'Not provided'}</p>
-      <p><strong>Subject:</strong> ${data.subject}</p>
-      <h3>Message:</h3>
-      <p>${data.message.replace(/\n/g, '<br>')}</p>
-      ${data.vehicleId ? `<p><strong>Related Vehicle ID:</strong> ${data.vehicleId}</p>` : ''}
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #E31837; margin: 0;">New Inquiry from RPM Auto Website</h2>
+        </div>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+          <p><strong style="color: #333;">Name:</strong> ${data.name}</p>
+          <p><strong style="color: #333;">Email:</strong> ${data.email}</p>
+          <p><strong style="color: #333;">Phone:</strong> ${data.phone || 'Not provided'}</p>
+          <p><strong style="color: #333;">Subject:</strong> ${data.subject}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">Message:</h3>
+          <p style="line-height: 1.5;">${data.message.replace(/\n/g, '<br>')}</p>
+          ${data.vehicleId ? `<p><strong>Related Vehicle ID:</strong> ${data.vehicleId}</p>` : ''}
+        </div>
+        
+        <div style="font-size: 12px; color: #777; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+          <p>This message was sent from the RPM Auto website contact form.</p>
+          <p>© ${new Date().getFullYear()} RPM Auto. All rights reserved.</p>
+        </div>
+      </div>
     `,
     text: `
-      New Inquiry from Website
-      
-      Name: ${data.name}
-      Email: ${data.email}
-      Phone: ${data.phone || 'Not provided'}
-      Subject: ${data.subject}
-      
-      Message:
-      ${data.message}
-      
-      ${data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : ''}
+New Inquiry from RPM Auto Website
+
+NAME: ${data.name}
+EMAIL: ${data.email}
+PHONE: ${data.phone || 'Not provided'}
+SUBJECT: ${data.subject}
+
+MESSAGE:
+${data.message}
+
+${data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : ''}
+
+---
+This message was sent from the RPM Auto website contact form.
+© ${new Date().getFullYear()} RPM Auto. All rights reserved.
     `,
-    replyTo: data.email // Set reply-to as the customer's email
+    replyTo: data.email // Set reply-to as the customer's email for easy replies
   };
 };
