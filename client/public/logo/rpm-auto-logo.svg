@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">
+  <g transform="translate(400, 150)">
+    <!-- Background for better logo visibility -->
+    <rect x="-400" y="-150" width="800" height="300" fill="black" opacity="0" />
+    
+    <!-- RPM text in red -->
+    <text x="-300" y="40" font-family="Arial, sans-serif" font-weight="bold" font-size="130" fill="#E31837">RPM</text>
+    
+    <!-- AUTO text in white -->
+    <text x="300" y="40" font-family="Arial, sans-serif" font-weight="bold" font-size="130" fill="white" text-anchor="end">AUTO</text>
+
+    <!-- Speedometer/gauge arc -->
+    <path
+      d="M-240,-60 A270,270 0 0,1 240,-60"
+      stroke="#888888"
+      stroke-width="16"
+      fill="none"
+      stroke-dasharray="16 10"
+    />
+
+    <!-- Needle -->
+    <g transform="rotate(-20)">
+      <line x1="0" y1="0" x2="0" y2="-200" stroke="#E31837" stroke-width="10" stroke-linecap="round" />
+      <circle cx="0" cy="0" r="18" fill="#444444" />
+      <circle cx="0" cy="0" r="12" fill="#333333" />
+    </g>
+
+    <!-- Sports Car Silhouette -->
+    <path 
+      d="M-280,70 C-230,50 -180,30 -130,20 C-80,10 -30,10 20,20 C70,30 120,50 170,70 C220,90 270,110 270,130 C270,150 220,150 170,140 C120,130 70,120 -30,120 C-130,120 -180,130 -230,140 C-280,150 -330,150 -330,130 C-330,110 -310,90 -280,70 Z" 
+      fill="none" 
+      stroke="#666666" 
+      stroke-width="3"
+    />
+
+    <!-- Wheels -->
+    <circle cx="-180" cy="120" r="20" fill="none" stroke="#666666" stroke-width="3" />
+    <circle cx="180" cy="120" r="20" fill="none" stroke="#666666" stroke-width="3" />
+    
+    <!-- Car Details -->
+    <path d="M-130,30 L0,30 L70,70" fill="none" stroke="#666666" stroke-width="2" />
+    <path d="M200,70 L240,40 L270,70" fill="none" stroke="#666666" stroke-width="2" />
+  </g>
+</svg>

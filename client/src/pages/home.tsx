@@ -31,14 +31,14 @@ export default function Home() {
   // Business data for structured data
   const businessData = {
     name: "RPM Auto",
-    description: "RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
+    description: "RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
     url: "https://rpmauto.com",
-    telephone: "(905) 264-1969",
+    telephone: "(647) 550-9590",
     address: {
-      streetAddress: "6260 Hwy 7 Unit 6",
-      addressLocality: "Woodbridge",
-      addressRegion: "ON",
-      postalCode: "L4H 4G3",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
+      addressRegion: "Ontario",
+      postalCode: "L4H 0A1",
       addressCountry: "CA"
     },
     geo: {
@@ -124,9 +124,9 @@ export default function Home() {
     <main>
       {/* SEO Components */}
       <PageMeta 
-        title="RPM Auto: New & Used Luxury Cars Dealer | Woodbridge, ON"
-        description="RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles with expert service."
-        keywords="luxury cars, exotic cars, premium vehicles, car dealership, Woodbridge, Toronto, Ontario, sports cars, SUVs, financing, auto service"
+        title="RPM Auto: New & Used Luxury Cars Dealer | Vaughan, Ontario"
+        description="RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles with expert service."
+        keywords="luxury cars, exotic cars, premium vehicles, car dealership, Vaughan, Toronto, Ontario, sports cars, SUVs, financing, auto service"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/"
@@ -140,14 +140,14 @@ export default function Home() {
       <JsonLdSchema
         schema={createBusinessSchema({
           name: "RPM Auto",
-          description: "Premium luxury and exotic car dealership in Woodbridge, Ontario offering a curated selection of high-end vehicles.",
+          description: "Premium luxury and exotic car dealership in Vaughan, Ontario offering a curated selection of high-end vehicles.",
           url: "https://rpmauto.com",
-          telephone: "(905) 264-1969",
+          telephone: "(647) 550-9590",
           address: {
-            streetAddress: "6260 Hwy 7 Unit 6",
-            addressLocality: "Woodbridge",
-            addressRegion: "ON",
-            postalCode: "L4H 4G3",
+            streetAddress: "By appointment only",
+            addressLocality: "Vaughan",
+            addressRegion: "Ontario",
+            postalCode: "L4H 0A1",
             addressCountry: "CA"
           },
           geo: {
@@ -404,7 +404,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</p>
+                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
                   </div>
                 </div>
                 
@@ -414,7 +414,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Call Us</h3>
-                    <p className="text-gray-600">(905) 264-1969</p>
+                    <p className="text-gray-600">(647) 550-9590</p>
                   </div>
                 </div>
                 

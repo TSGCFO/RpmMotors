@@ -294,7 +294,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: errorMessage });
       }
       
+      // Create the inquiry in the database
       const inquiry = await storage.createInquiry(validationResult.data);
+      
+      // Import email service functions
+      const { sendEmail, formatInquiryEmail } = await import('./email');
+      
+      // Format and send email notification
+      const emailOptions = formatInquiryEmail(validationResult.data);
+      sendEmail(emailOptions).then(success => {
+        if (success) {
+          console.log("Email notification sent successfully for inquiry:", inquiry.id);
+        } else {
+          console.error("Failed to send email notification for inquiry:", inquiry.id);
+        }
+      }).catch(err => {
+        console.error("Error sending email notification:", err);
+      });
+      
       res.status(201).json(inquiry);
     } catch (error) {
       console.error("Error creating inquiry:", error);

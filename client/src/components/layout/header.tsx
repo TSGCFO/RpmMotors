@@ -44,7 +44,7 @@ export default function Header() {
           {/* Logo Section */}
           <div className="logo-sect mb-3 md:mb-0">
             <Link href="/">
-              <RPMLogo className="h-16" />
+              <RPMLogo className="h-24 w-auto" />
             </Link>
           </div>
 
@@ -60,18 +60,18 @@ export default function Header() {
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-contact-icons-08 mr-2"></i>
-                    <span className="hidden md:inline">123 Main Street,<br />Toronto ON, M1M 1M1</span>
+                    <span className="hidden md:inline">By appointment only<br />Vaughan, Ontario</span>
                     <span className="md:hidden">Visit Us</span>
                   </a>
                 </li>
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
                 <li className="phone mb-2 md:mb-0 md:mr-4">
                   <a 
-                    href="tel:+1-123-456-7890" 
+                    href="tel:+1-647-550-9590" 
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-phone-dark mr-2"></i>
-                    <span>(123) 456-7890</span>
+                    <span>(647) 550-9590</span>
                   </a>
                 </li>
                 <li className="hidden md:block h-8 w-px bg-gray-700 mx-3"></li>
@@ -123,7 +123,10 @@ export default function Header() {
         <div className="container mx-auto">
           {/* Mobile Menu Button */}
           <div className="md:hidden px-4 py-4 flex justify-between items-center">
-            <span className="font-semibold text-sm uppercase">Menu</span>
+            <span className="font-semibold text-sm uppercase flex items-center">
+              <RPMLogo className="h-8 w-auto mr-2" />
+              Menu
+            </span>
             <button 
               type="button" 
               className="text-white focus:outline-none" 
@@ -153,11 +156,6 @@ export default function Header() {
                 <li>
                   <Link href="/services" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>
                     Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/financing" className={`block py-4 px-6 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
-                    Financing
                   </Link>
                 </li>
                 <li>
@@ -196,11 +194,6 @@ export default function Header() {
                 <li>
                   <Link href="/services" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/services') ? 'text-[#E31837]' : ''}`}>
                     Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/financing" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/financing') ? 'text-[#E31837]' : ''}`}>
-                    Financing
                   </Link>
                 </li>
                 <li>

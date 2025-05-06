@@ -7,7 +7,6 @@ import { formatCurrency, formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ContactForm } from "@/components/ui/contact-form";
 import { VehicleGallery } from "@/components/ui/vehicle-gallery";
-import { FinancingCalculator } from "@/components/ui/financing-calculator";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
@@ -343,11 +342,6 @@ export default function VehicleDetails() {
                   <i className="fas fa-envelope mr-2"></i> Inquire Now
                 </a>
               </div>
-
-              {/* Financing Calculator - Only show for available vehicles */}
-              {vehicle.status !== 'sold' && (
-                <FinancingCalculator vehiclePrice={vehicle.price} />
-              )}
             </div>
           </div>
         </div>

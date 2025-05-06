@@ -29,13 +29,6 @@ export default function Services() {
       details: "Our professional appraisers will evaluate your vehicle based on its condition, market value, and demand. We pride ourselves on offering fair and competitive trade-in values. Trade-ins can be applied directly toward your new purchase, simplifying the transaction and potentially reducing sales tax implications. We handle all paperwork and make the process as efficient as possible."
     },
     {
-      id: "financing",
-      icon: "fas fa-money-check-alt",
-      title: "Financing Solutions",
-      description: "Customize your payment plan with our flexible financing options for all credit situations.",
-      details: "We work with multiple financial institutions to provide competitive rates and flexible terms. Our finance specialists will guide you through the available options and help you select the plan that best fits your budget and needs. We offer lease and purchase financing, extended term options, and financing for international clients."
-    },
-    {
       id: "inspection",
       icon: "fas fa-clipboard-check",
       title: "Vehicle Inspection",
@@ -60,7 +53,7 @@ export default function Services() {
 
   // Prepare SEO metadata
   const pageTitle = "Luxury Car Services | RPM Auto";
-  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, financing, inspections, warranties and consignment at RPM Auto in Woodbridge, ON.";
+  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, inspections, warranties and consignment at RPM Auto in Woodbridge, ON.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -99,7 +92,7 @@ export default function Services() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury car services, vehicle sourcing, trade-in, financing, vehicle inspection, extended warranty, consignment, luxury cars, Woodbridge, Toronto"
+        keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Woodbridge, Toronto"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/services"
@@ -128,7 +121,7 @@ export default function Services() {
           name: service.title,
           description: service.description,
           url: `https://rpmauto.com/services#${service.id}`,
-          image: `https://rpmauto.com/services-${service.id}.jpg`,
+          image: `https://rpmauto.com/services/${service.id}.svg`,
           provider: {
             name: "RPM Auto",
             url: "https://rpmauto.com"
@@ -211,11 +204,11 @@ export default function Services() {
               </div>
               
               <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
-                <div className="rounded-lg overflow-hidden shadow-xl">
+                <div className="rounded-lg overflow-hidden shadow-xl bg-white p-4">
                   <img 
-                    src={`https://source.unsplash.com/featured/600x400?luxury,${service.title.toLowerCase().replace(/\s+/g, ',')},cars`} 
+                    src={`/services/${service.id}.svg`} 
                     alt={service.title} 
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto"
                   />
                 </div>
               </div>

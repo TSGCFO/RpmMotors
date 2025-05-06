@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#F8F9FA"/>
+  <g transform="translate(300,170)">
+    <!-- Car Silhouette -->
+    <g transform="translate(-80,0) scale(0.5)">
+      <path d="M-100,40 L-40,40 L-30,0 L-110,-5 L-100,40" fill="#E31837" />
+      <path d="M-110,-5 L-30,0 L100,0 L100,-5 L-110,-5" fill="#E31837" />
+      <path d="M100,-5 L100,0 L110,40 L170,40 L160,-5 L100,-5" fill="#E31837" />
+      <circle cx="-70" cy="40" r="15" fill="#333" />
+      <circle cx="-70" cy="40" r="7" fill="#666" />
+      <circle cx="130" cy="40" r="15" fill="#333" />
+      <circle cx="130" cy="40" r="7" fill="#666" />
+      <rect x="-30" y="-40" width="130" height="40" fill="#E31837" rx="10" />
+      <rect x="-20" y="-30" width="110" height="25" fill="#F8F9FA" rx="5" />
+    </g>
+    
+    <!-- Handshake -->
+    <g transform="translate(70, 0)">
+      <!-- Left Hand -->
+      <path d="M-80,0 C-60,-20 -50,-20 -40,-10 L-10,20 L10,0 L-20,-30 C-40,-50 -70,-40 -90,-20 Z" fill="#666"/>
+      
+      <!-- Right Hand -->
+      <path d="M-10,20 L20,50 C30,60 60,50 70,40 L90,20 C70,0 60,0 40,20 L10,0 Z" fill="#E31837"/>
+      
+      <!-- Sleeve Left -->
+      <path d="M-90,-20 C-100,-10 -110,0 -115,20 C-90,10 -85,5 -80,0 Z" fill="#333"/>
+      
+      <!-- Sleeve Right -->
+      <path d="M90,20 C100,10 110,0 115,20 C90,30 75,30 70,40 Z" fill="#111"/>
+    </g>
+    
+    <!-- Dollar Sign -->
+    <g transform="translate(0,-70)">
+      <circle cx="0" cy="0" r="40" fill="#E31837" opacity="0.2"/>
+      <path d="M0,-25 L0,25" stroke="#333" stroke-width="5"/>
+      <path d="M-15,-15 C-15,-25 15,-25 15,-15 C15,-5 -15,-5 -15,5 C-15,15 15,15 15,5" stroke="#333" stroke-width="5" fill="none"/>
+    </g>
+  </g>
+  <text x="300" y="275" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#333">Consignment Service</text>
+  <text x="300" y="305" text-anchor="middle" font-family="Arial" font-size="14" fill="#666">We sell your vehicle for you</text>
+</svg>

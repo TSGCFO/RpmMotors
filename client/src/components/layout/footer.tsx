@@ -9,7 +9,7 @@ export default function Footer() {
           {/* About Column */}
           <div>
             <div className="mb-6">
-              <RPMLogo className="h-12" />
+              <RPMLogo className="h-20 w-auto" />
             </div>
             <p className="text-gray-400 mb-6">
               RPM Auto specializes in premium and exotic vehicles, providing a curated selection of the world's most desirable automobiles.
@@ -47,11 +47,6 @@ export default function Footer() {
               <li>
                 <Link href="/services" className="text-gray-400 hover:text-[#E31837] transition-colors">
                   Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/financing" className="text-gray-400 hover:text-[#E31837] transition-colors">
-                  Financing
                 </Link>
               </li>
               <li>
@@ -110,15 +105,15 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <i className="fas fa-map-marker-alt mt-1 mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</span>
+                <span className="text-gray-400">By appointment only, Vaughan, Ontario</span>
               </li>
               <li className="flex items-center">
                 <i className="fas fa-phone-alt mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">(905) 264-1969</span>
+                <span className="text-gray-400">(647) 550-9590</span>
               </li>
               <li className="flex items-center">
                 <i className="fas fa-envelope mr-3 text-[#E31837]"></i>
-                <span className="text-gray-400">info@rpmauto.com</span>
+                <span className="text-gray-400">fateh@rpmautosales.ca</span>
               </li>
               <li className="flex items-start">
                 <i className="fas fa-clock mt-1 mr-3 text-[#E31837]"></i>

@@ -13,8 +13,8 @@ export default function Contact() {
   }, []);
 
   // Prepare SEO metadata
-  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Woodbridge";
-  const pageDescription = "Contact RPM Auto's sales, financing, or service departments. Visit our luxury car dealership in Woodbridge, call us at (905) 264-1969, or send us a message online.";
+  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Vaughan";
+  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Vaughan, call us at (647) 550-9590, or send us a message online.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -27,12 +27,12 @@ export default function Contact() {
     name: "RPM Auto",
     description: "Premium automotive dealership specializing in luxury and exotic vehicles in the Greater Toronto Area.",
     url: "https://rpmauto.com",
-    telephone: "+1-905-264-1969",
+    telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "6260 Hwy 7 Unit 6",
-      addressLocality: "Woodbridge",
-      addressRegion: "ON",
-      postalCode: "L4H 4G3",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
+      addressRegion: "Ontario",
+      postalCode: "L4H 0A1",
       addressCountry: "CA"
     },
     geo: {
@@ -53,7 +53,7 @@ export default function Contact() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="contact RPM Auto, luxury car dealership, Woodbridge dealership, car sales, auto financing, vehicle service, Toronto luxury cars"
+        keywords="contact RPM Auto, luxury car dealership, Vaughan dealership, car sales, vehicle service, Toronto luxury cars"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/contact"
@@ -84,36 +84,29 @@ export default function Contact() {
           "mainEntity": {
             "@type": "AutoDealer",
             "name": "RPM Auto",
-            "telephone": "+1-905-264-1969",
-            "email": "info@rpmauto.com",
+            "telephone": "+1-647-550-9590",
+            "email": "fateh@rpmautosales.ca",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "6260 Hwy 7 Unit 6",
-              "addressLocality": "Woodbridge",
-              "addressRegion": "ON",
-              "postalCode": "L4H 4G3",
+              "streetAddress": "By appointment only",
+              "addressLocality": "Vaughan",
+              "addressRegion": "Ontario",
+              "postalCode": "L4H 0A1",
               "addressCountry": "CA"
             },
             "contactPoint": [
               {
                 "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 1",
+                "telephone": "+1-647-550-9590 ext. 1",
                 "contactType": "sales",
-                "email": "sales@rpmauto.com",
+                "email": "fateh@rpmautosales.ca",
                 "availableLanguage": ["English"]
               },
               {
                 "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 2",
-                "contactType": "finance",
-                "email": "finance@rpmauto.com",
-                "availableLanguage": ["English"]
-              },
-              {
-                "@type": "ContactPoint",
-                "telephone": "+1-905-264-1969 ext. 3",
+                "telephone": "+1-647-550-9590 ext. 3",
                 "contactType": "customer service",
-                "email": "service@rpmauto.com",
+                "email": "fateh@rpmautosales.ca",
                 "availableLanguage": ["English"]
               }
             ],
@@ -173,7 +166,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</p>
+                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
                   </div>
                 </div>
                 
@@ -183,7 +176,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Call Us</h3>
-                    <p className="text-gray-600">(905) 264-1969</p>
+                    <p className="text-gray-600">(647) 550-9590</p>
                   </div>
                 </div>
                 
@@ -193,7 +186,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Email Us</h3>
-                    <p className="text-gray-600">info@rpmauto.com</p>
+                    <p className="text-gray-600">fateh@rpmautosales.ca</p>
                   </div>
                 </div>
                 
@@ -245,7 +238,7 @@ export default function Contact() {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-['Poppins'] font-bold mb-8 text-center">Department Contacts</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <div className="text-[#E31837] mb-4 text-center">
                 <i className="fas fa-car text-4xl"></i>
@@ -253,26 +246,11 @@ export default function Contact() {
               <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Sales Department</h3>
               <div className="flex items-center justify-center mb-2">
                 <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 1</a>
+                <a href="tel:+1-647-550-9590" className="hover:text-[#E31837] transition-colors">(647) 550-9590 ext. 1</a>
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:sales@rpmauto.com" className="hover:text-[#E31837] transition-colors">sales@rpmauto.com</a>
-              </div>
-            </div>
-            
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <div className="text-[#E31837] mb-4 text-center">
-                <i className="fas fa-money-check-alt text-4xl"></i>
-              </div>
-              <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Finance Department</h3>
-              <div className="flex items-center justify-center mb-2">
-                <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 2</a>
-              </div>
-              <div className="flex items-center justify-center">
-                <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:finance@rpmauto.com" className="hover:text-[#E31837] transition-colors">finance@rpmauto.com</a>
+                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
               </div>
             </div>
             
@@ -283,11 +261,11 @@ export default function Contact() {
               <h3 className="text-xl font-['Poppins'] font-semibold mb-4 text-center">Service Department</h3>
               <div className="flex items-center justify-center mb-2">
                 <i className="fas fa-phone-alt mr-2 text-[#E31837]"></i>
-                <a href="tel:+1-905-264-1969" className="hover:text-[#E31837] transition-colors">(905) 264-1969 ext. 3</a>
+                <a href="tel:+1-647-550-9590" className="hover:text-[#E31837] transition-colors">(647) 550-9590 ext. 3</a>
               </div>
               <div className="flex items-center justify-center">
                 <i className="fas fa-envelope mr-2 text-[#E31837]"></i>
-                <a href="mailto:service@rpmauto.com" className="hover:text-[#E31837] transition-colors">service@rpmauto.com</a>
+                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
               </div>
             </div>
           </div>

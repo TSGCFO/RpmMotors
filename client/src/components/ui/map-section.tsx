@@ -6,7 +6,7 @@ export function MapSection() {
       <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg">
           <h3 className="font-['Poppins'] font-bold text-2xl mb-4">Find Us</h3>
-          <p className="text-gray-600 mb-4">6260 Hwy 7 Unit 6, Woodbridge ON, L4H 4G3</p>
+          <p className="text-gray-600 mb-4">By appointment only, Vaughan, Ontario</p>
           <a 
             href="https://maps.google.com/maps?ll=43.775688,-79.62554&z=13&t=m&hl=en&gl=CA&mapclient=embed&cid=4836009631269035094" 
             target="_blank" 
