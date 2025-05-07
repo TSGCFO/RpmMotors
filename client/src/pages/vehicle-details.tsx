@@ -335,7 +335,7 @@ export default function VehicleDetails() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                <a href={`tel:+1-905-264-1969`} className="flex items-center justify-center bg-black hover:bg-opacity-80 text-white py-3 px-6 rounded font-['Poppins'] font-semibold transition">
+                <a href={`tel:+1-647-550-9590`} className="flex items-center justify-center bg-black hover:bg-opacity-80 text-white py-3 px-6 rounded font-['Poppins'] font-semibold transition">
                   <i className="fas fa-phone-alt mr-2"></i> Call Us
                 </a>
                 <a href="#inquiry-form" className="flex items-center justify-center bg-[#E31837] hover:bg-opacity-90 text-white py-3 px-6 rounded font-['Poppins'] font-semibold transition">
