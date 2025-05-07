@@ -16,19 +16,17 @@ console.log("Connecting to PostgreSQL database...");
 const isProduction = process.env.NODE_ENV === 'production';
 const isRenderDeploy = !!process.env.RENDER || isProduction;
 
-// Connection parameters - use SSL for production and Render deployments
+// Connection parameters - use SSL for all connections
+// Replit's PostgreSQL requires SSL
 const connectionOptions = {
   max: 10, // Connection pool size
-  ssl: isRenderDeploy ? { rejectUnauthorized: false } : false, // Use SSL in production and on Render
+  ssl: { rejectUnauthorized: false }, // Always use SSL with self-signed cert support
   idle_timeout: 30,
   connect_timeout: 10
 };
 
-if (isRenderDeploy) {
-  console.log("Using SSL for database connection (production/Render environment)");
-} else {
-  console.log("Development mode: SSL disabled for database connection");
-}
+// Always using SSL for database connections
+console.log("Using SSL for database connection");
 
 // Create the postgres client
 const client = postgres(dbUrl, connectionOptions);
