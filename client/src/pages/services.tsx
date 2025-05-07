@@ -128,7 +128,7 @@ export default function Services() {
           },
           serviceType: "AutomotiveServices",
           areaServed: {
-            addressLocality: "Woodbridge",
+            addressLocality: "Vaughan",
             addressRegion: "ON",
             postalCode: "L4H 0A1",
             addressCountry: "CA"
