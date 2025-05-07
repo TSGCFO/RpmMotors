@@ -102,10 +102,10 @@ export default function PrivacyPolicy() {
             </p>
             <p>
               RPM Auto<br />
-              6260 Hwy 7 Unit 6<br />
-              Woodbridge, ON L4H 4G3<br />
-              Email: privacy@rpmauto.com<br />
-              Phone: (905) 264-1969
+              By appointment only<br />
+              Vaughan, ON L4H 0A1<br />
+              Email: info@rpmauto.com<br />
+              Phone: (647) 550-9590
             </p>
             
             <p className="mt-8 text-sm text-gray-600">

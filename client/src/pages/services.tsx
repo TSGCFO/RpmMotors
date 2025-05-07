@@ -92,7 +92,7 @@ export default function Services() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Woodbridge, Toronto"
+        keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Vaughan, Toronto"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/services"
