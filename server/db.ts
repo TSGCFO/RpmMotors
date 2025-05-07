@@ -1,15 +1,23 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// Get database connection details from environment
+// For Render deployment
+const dbUrl = process.env.DATABASE_URL || 'postgresql://rpm_auto_user:x0nth4SNq4DqSzyRtI839S9IE5WE5TG6@dpg-d0dtgaidbo4c739abnv0-a/rpm_auto';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
+console.log("Connecting to PostgreSQL database...");
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// Create the postgres client
+const client = postgres(dbUrl, {
+  max: 10, // Connection pool size
+  ssl: process.env.NODE_ENV === 'production', // Use SSL in production
+  idle_timeout: 30,
+  connect_timeout: 10
+});
+
+// Initialize Drizzle ORM with the postgres-js client
+export const db = drizzle(client, { schema });
+
+// Export the client for transaction support
+export const sql = client;
