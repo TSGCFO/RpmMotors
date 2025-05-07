@@ -3,20 +3,32 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from "@shared/schema";
 
 // Get database connection details from environment
-// For Render deployment
-const dbUrl = process.env.DATABASE_URL || 'postgresql://rpm_auto_user:x0nth4SNq4DqSzyRtI839S9IE5WE5TG6@dpg-d0dtgaidbo4c739abnv0-a/rpm_auto';
+const dbUrl = process.env.DATABASE_URL;
+
+// Ensure DATABASE_URL is defined
+if (!dbUrl) {
+  throw new Error("DATABASE_URL environment variable is required. Please set it before starting the application.");
+}
 
 console.log("Connecting to PostgreSQL database...");
 
-// Connection parameters
+// Determine if we need SSL (needed for Render and production)
+const isProduction = process.env.NODE_ENV === 'production';
+const isRenderDeploy = !!process.env.RENDER || isProduction;
+
+// Connection parameters - use SSL for production and Render deployments
 const connectionOptions = {
   max: 10, // Connection pool size
-  ssl: { rejectUnauthorized: false }, // Always use SSL with self-signed cert support
+  ssl: isRenderDeploy ? { rejectUnauthorized: false } : false, // Use SSL in production and on Render
   idle_timeout: 30,
   connect_timeout: 10
 };
 
-console.log("Using SSL for database connection");
+if (isRenderDeploy) {
+  console.log("Using SSL for database connection (production/Render environment)");
+} else {
+  console.log("Development mode: SSL disabled for database connection");
+}
 
 // Create the postgres client
 const client = postgres(dbUrl, connectionOptions);

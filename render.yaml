@@ -1,9 +1,20 @@
 services:
+  # Main web service for the RPM Auto Dealership application
   - type: web
     name: rpm-auto-dealership
     env: node
+    plan: starter
     buildCommand: npm install && npm run build
     startCommand: npm start
+    # Standard health check path for Express.js application
+    healthCheckPath: /api/health
+    # Auto-deploy on push to main branch
+    autoDeploy: true
+    # Disk requirement for storing vehicle images
+    disk:
+      name: rpm-auto-files
+      mountPath: /var/data/uploads
+      sizeGB: 5
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,8 +24,17 @@ services:
           property: connectionString
       - key: PORT
         value: 10000
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      # Email configuration - will be supplied through the Render dashboard
+      - key: EMAIL_FROM
+        sync: false # Allows for setting this in the Render dashboard
+      - key: SENDGRID_API_KEY
+        sync: false # Allows for setting this in the Render dashboard
 
 databases:
+  # PostgreSQL database for vehicle inventory and user data
   - name: rpm-auto-db
     databaseName: rpm_auto
     plan: starter
+    ipAllowList: [] # Leaving empty means allow from anywhere

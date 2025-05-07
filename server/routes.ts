@@ -6,6 +6,18 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Render.com
+  app.get("/api/health", async (_req: Request, res: Response) => {
+    try {
+      // Check database connection
+      await storage.getVehicles({ pagination: { page: 1, limit: 1 } });
+      res.status(200).json({ status: "healthy", time: new Date().toISOString() });
+    } catch (error) {
+      console.error("Health check failed:", error);
+      res.status(500).json({ status: "unhealthy", error: "Database connection failed" });
+    }
+  });
+  
   // Helper to parse pagination, sorting, and filter parameters
   const parseVehicleQueryOptions = (req: Request) => {
     const options: any = {};
