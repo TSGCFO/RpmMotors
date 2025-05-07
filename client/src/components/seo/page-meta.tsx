@@ -10,12 +10,12 @@ interface PageMetaProps {
 }
 
 export default function PageMeta({
-  title = 'RPM Auto: New & Used Luxury Cars Dealer | Woodbridge, ON',
-  description = 'RPM Auto in Woodbridge has New and Used Luxury Cars and SUVs for sale. Call (905) 264-1969 for RPM Auto Specials and Promotions.',
+  title = 'RPM Auto: New & Used Luxury Cars Dealer | Vaughan, Ontario',
+  description = 'RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Call (647) 550-9590 for RPM Auto Specials and Promotions.',
   canonical = 'https://rpmauto.com/',
   ogType = 'website',
   ogImage = '/RPM Auto.png',
-  keywords = 'luxury cars, exotic cars, premium vehicles, car dealership, Woodbridge, Toronto, Ontario'
+  keywords = 'luxury cars, exotic cars, premium vehicles, car dealership, Vaughan, Toronto, Ontario'
 }: PageMetaProps) {
   useEffect(() => {
     // Update title
@@ -65,7 +65,7 @@ export default function PageMeta({
     
     // Clean up (optional)
     return () => {
-      document.title = 'RPM Auto: New & Used Luxury Cars Dealer | Woodbridge, ON';
+      document.title = 'RPM Auto: New & Used Luxury Cars Dealer | Vaughan, Ontario';
     };
   }, [title, description, canonical, ogType, ogImage, keywords]);
   
