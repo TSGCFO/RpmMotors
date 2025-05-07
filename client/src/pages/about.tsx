@@ -63,10 +63,10 @@ export default function About() {
     name: "RPM Auto",
     description: "A premier destination for luxury and exotic vehicles in the Greater Toronto Area, providing exceptional service and an unparalleled selection of premium automobiles.",
     url: "https://rpmauto.com",
-    telephone: "+1-905-264-1969",
+    telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "123 Main Street",
-      addressLocality: "Woodbridge",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
       addressRegion: "ON",
       postalCode: "L4H 0A1",
       addressCountry: "CA"
@@ -89,7 +89,7 @@ export default function About() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury car dealership, exotic cars, Toronto, Woodbridge, premium vehicles, luxury automotive"
+        keywords="luxury car dealership, exotic cars, Toronto, Vaughan, premium vehicles, luxury automotive"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://rpmauto.com/about"
@@ -128,8 +128,8 @@ export default function About() {
             },
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "123 Main Street",
-              "addressLocality": "Woodbridge",
+              "streetAddress": "By appointment only",
+              "addressLocality": "Vaughan",
               "addressRegion": "ON",
               "postalCode": "L4H 0A1",
               "addressCountry": "CA"
@@ -188,7 +188,7 @@ export default function About() {
               <div className="relative">
                 <OptimizedImage 
                   src="https://images.unsplash.com/photo-1547038577-da80abbc4f19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1752&q=80" 
-                  alt="RPM Auto Dealership - Our luxury car showroom in Woodbridge, Ontario" 
+                  alt="RPM Auto Dealership - Our luxury car showroom in Vaughan, Ontario" 
                   className="w-full h-auto rounded-lg shadow-xl"
                   width={1752}
                   height={980}
