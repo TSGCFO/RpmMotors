@@ -53,7 +53,7 @@ export default function Services() {
 
   // Prepare SEO metadata
   const pageTitle = "Luxury Car Services | RPM Auto";
-  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, inspections, warranties and consignment at RPM Auto in Woodbridge, ON.";
+  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, inspections, warranties and consignment at RPM Auto in Vaughan, Ontario.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -66,10 +66,10 @@ export default function Services() {
     name: "RPM Auto",
     description: "Premium automotive services for luxury and exotic vehicles in the Greater Toronto Area.",
     url: "https://rpmauto.com",
-    telephone: "+1-905-264-1969",
+    telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "123 Main Street",
-      addressLocality: "Woodbridge",
+      streetAddress: "By appointment only",
+      addressLocality: "Vaughan",
       addressRegion: "ON",
       postalCode: "L4H 0A1",
       addressCountry: "CA"
