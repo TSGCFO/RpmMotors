@@ -8,10 +8,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Serve uploaded files from the uploads directory if not in Replit
-if (!process.env.REPL_ID) {
-  app.use('/uploads', express.static(getUploadDir()));
-}
+// Serve uploaded files from the uploads directory
+// Works on both Replit and Render environments
+app.use('/uploads', express.static(getUploadDir()));
+console.log(`Serving static files from: ${getUploadDir()}`);
 
 app.use((req, res, next) => {
   const start = Date.now();
