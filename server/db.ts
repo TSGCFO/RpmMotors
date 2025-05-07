@@ -8,13 +8,18 @@ const dbUrl = process.env.DATABASE_URL || 'postgresql://rpm_auto_user:x0nth4SNq4
 
 console.log("Connecting to PostgreSQL database...");
 
-// Create the postgres client
-const client = postgres(dbUrl, {
+// Connection parameters
+const connectionOptions = {
   max: 10, // Connection pool size
-  ssl: process.env.NODE_ENV === 'production', // Use SSL in production
+  ssl: { rejectUnauthorized: false }, // Always use SSL with self-signed cert support
   idle_timeout: 30,
   connect_timeout: 10
-});
+};
+
+console.log("Using SSL for database connection");
+
+// Create the postgres client
+const client = postgres(dbUrl, connectionOptions);
 
 // Initialize Drizzle ORM with the postgres-js client
 export const db = drizzle(client, { schema });

@@ -626,30 +626,35 @@ export class DatabaseStorage implements IStorage {
         console.error("Migration error:", migrationError);
       }
       
-      // Now check the columns again after migration attempt
-      const existingColumns = await db.execute(sql`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'users' 
-        AND table_schema = 'public'
-      `);
-      
-      const columnNames = existingColumns.rows.map(row => row.column_name);
-      console.log("Available user columns (after migration):", columnNames);
-      
-      // Check if users table exists before trying to query it
+      // Check if the table exists and has required columns
       try {
-        const allUsers = await db.execute(sql`
-          SELECT * FROM users LIMIT 1
-        `);
+        // Safe check if users table exists
+        const tableCheck = await sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            AND table_name = 'users'
+          )`;
         
-        if (allUsers.rows.length === 0) {
-          // Use raw SQL to ensure we only insert fields that exist
-          await db.execute(sql`
-            INSERT INTO users (username, password) 
-            VALUES ('admin', 'rpmauto2025')
-          `);
-          console.log("Created default admin user with minimal fields");
+        const tableExists = tableCheck[0]?.exists;
+        
+        if (!tableExists) {
+          console.log("Users table doesn't exist, skipping admin creation");
+          return;
+        }
+        
+        // Now check if we have any users
+        const existingUsers = await db.select().from(users).limit(1);
+        if (existingUsers.length === 0) {
+          // No users exist, create the default admin
+          await db.insert(users).values({
+            username: 'admin',
+            password: 'rpmauto2025',
+            role: 'admin'
+          });
+          console.log("Created default admin user");
+        } else {
+          console.log("Admin user already exists, skipping");
         }
       } catch (usersError) {
         console.error("Error checking for users:", usersError);
