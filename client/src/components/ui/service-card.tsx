@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 interface ServiceCardProps {
   icon: string;
@@ -8,14 +8,42 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ icon, title, description, link }: ServiceCardProps) {
-  // Function to handle smooth scrolling to the section
+  const [location] = useLocation();
+  
+  // Function to handle navigation and scrolling
   const handleLearnMoreClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    const targetId = link.replace('#', '');
-    const targetElement = document.getElementById(targetId);
     
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth' });
+    // Check if link is an anchor or full path
+    const isAnchorOnly = link.startsWith('#');
+    const hasAnchor = link.includes('#');
+    
+    if (isAnchorOnly && location === '/services') {
+      // If we're already on the services page and the link is just an anchor
+      const targetId = link.replace('#', '');
+      const targetElement = document.getElementById(targetId);
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (hasAnchor) {
+      // If link contains an anchor but is a full path (e.g., "/services#vehicle-sourcing")
+      const path = link.split('#')[0];
+      const anchor = link.split('#')[1];
+      
+      // If we're already on the correct page, just scroll
+      if (location === path) {
+        const targetElement = document.getElementById(anchor);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to the page with anchor
+        window.location.href = link;
+      }
+    } else {
+      // Regular navigation for links without anchors
+      window.location.href = link;
     }
   };
   

@@ -95,12 +95,6 @@ export default function Home() {
       link: "/services#trade-in"
     },
     {
-      icon: "fas fa-money-check-alt",
-      title: "Financing Solutions",
-      description: "Customize your payment plan with our flexible financing options for all credit situations.",
-      link: "/financing"
-    },
-    {
       icon: "fas fa-clipboard-check",
       title: "Vehicle Inspection",
       description: "Each vehicle undergoes a comprehensive inspection to ensure premium quality and performance.",
@@ -180,16 +174,16 @@ export default function Home() {
             answer: "RPM Auto specializes in premium and exotic vehicles, including luxury sedans, sports cars, SUVs, and collectible exotic cars from top manufacturers."
           },
           {
-            question: "Does RPM Auto offer financing options?",
-            answer: "Yes, we offer customized financing solutions for all credit situations. Our finance experts work with multiple lenders to find the best rates and terms."
-          },
-          {
             question: "Can RPM Auto help me find a specific vehicle?",
             answer: "Absolutely! Our vehicle sourcing service can help you locate specific makes and models tailored to your preferences and requirements."
           },
           {
             question: "Does RPM Auto accept trade-ins?",
             answer: "Yes, we offer competitive trade-in evaluations. Get the best value for your current vehicle with our trade-in program."
+          },
+          {
+            question: "Does RPM Auto offer vehicle inspection services?",
+            answer: "Yes, each vehicle undergoes a comprehensive inspection to ensure premium quality and performance before being added to our inventory."
           }
         ])}
       />
