@@ -6,6 +6,47 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication endpoint
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      // Get user from database
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user) {
+        return res.status(401).json({ 
+          authenticated: false,
+          message: "Invalid username or password" 
+        });
+      }
+      
+      // In a real application, we would hash and compare passwords
+      // For this demo, we're using plain text comparison
+      if (user.password !== password) {
+        return res.status(401).json({ 
+          authenticated: false,
+          message: "Invalid username or password" 
+        });
+      }
+      
+      // Authentication successful
+      res.json({ 
+        authenticated: true,
+        role: user.role,
+        username: user.username,
+        userId: user.id
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "An error occurred during login" });
+    }
+  });
+
   // Health check endpoint for Render.com
   app.get("/api/health", async (_req: Request, res: Response) => {
     try {

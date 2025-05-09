@@ -67,23 +67,41 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
     setIsAuthenticating(false);
   }, []);
   
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple credentials check - in a real app this would use a server API endpoint with proper authentication
-    // Using a simplified approach here for demonstration
-    if ((username === 'admin' && password === 'rpmauto2025') || 
-        (username === 'employee' && password === 'employee2025')) {
-      sessionStorage.setItem('employee_authenticated', 'true');
-      sessionStorage.setItem('employee_username', username);
-      setIsAuthenticated(true);
-      setError('');
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${username}!`,
+    try {
+      // Make an API call to authenticate the user
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
-    } else {
-      setError('Invalid username or password. Please try again.');
+      
+      const data = await response.json();
+      
+      if (response.ok && data.authenticated && data.role === 'admin') {
+        // Only allow admin users to access the employee portal
+        sessionStorage.setItem('employee_authenticated', 'true');
+        sessionStorage.setItem('employee_username', username);
+        sessionStorage.setItem('employee_role', data.role);
+        setIsAuthenticated(true);
+        setError('');
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${username}!`,
+        });
+      } else if (response.ok && data.authenticated && data.role !== 'admin') {
+        // User is authenticated but doesn't have admin role
+        setError('Access denied. You do not have permission to access the employee portal.');
+      } else {
+        setError('Invalid username or password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
     }
   };
   
