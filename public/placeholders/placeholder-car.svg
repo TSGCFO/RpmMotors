@@ -1,0 +1,27 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#F0F0F0"/>
+  
+  <!-- Car Silhouette -->
+  <g transform="translate(200, 150) scale(1.5)">
+    <!-- Car Body -->
+    <path d="M40,120 L40,180 L80,180 L90,200 L250,200 L260,180 L300,180 L300,120 C300,70 250,70 250,70 L90,70 C90,70 40,70 40,120 Z" fill="#D0D0D0"/>
+    
+    <!-- Windows -->
+    <path d="M90,70 L90,120 L250,120 L250,70 Z" fill="#E8E8E8"/>
+    
+    <!-- Wheels -->
+    <circle cx="100" cy="200" r="30" fill="#A3A3A3"/>
+    <circle cx="100" cy="200" r="15" fill="#828282"/>
+    <circle cx="240" cy="200" r="30" fill="#A3A3A3"/>
+    <circle cx="240" cy="200" r="15" fill="#828282"/>
+    
+    <!-- Headlights -->
+    <rect x="40" y="130" width="20" height="20" rx="5" fill="#E8E8E8"/>
+    <rect x="280" y="130" width="20" height="20" rx="5" fill="#E8E8E8"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#4A4A4A">Vehicle Image</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#4A4A4A">No image available</text>
+</svg>

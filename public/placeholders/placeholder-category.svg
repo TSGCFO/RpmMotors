@@ -1,0 +1,17 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#E6E6E6"/>
+  
+  <!-- Car Icon -->
+  <g transform="translate(350, 150)">
+    <path d="M57.124 47H90.876C96.3776 47 100.876 42.5015 100.876 37V24.9998C100.876 23.2622 100.291 21.5772 99.2092 20.1863L84.9592 1.03665C83.1742 -1.34536 79.9259 -0.322228 79.4796 2.63326L76.876 20H71.124L68.5203 2.63326C68.074 -0.322228 64.8258 -1.34536 63.0408 1.03665L48.7908 20.1863C47.7092 21.5772 47.124 23.2622 47.124 24.9998V37C47.124 42.5015 51.6224 47 57.124 47Z" fill="#A3A3A3" transform="scale(2)"/>
+    <circle cx="60" cy="75" r="15" fill="#7C7C7C"/>
+    <circle cx="60" cy="75" r="7" fill="#5A5A5A"/>
+    <circle cx="140" cy="75" r="15" fill="#7C7C7C"/>
+    <circle cx="140" cy="75" r="7" fill="#5A5A5A"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="400" y="280" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#4A4A4A">Category Image</text>
+  <text x="400" y="320" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#4A4A4A">Please select a category image</text>
+</svg>
