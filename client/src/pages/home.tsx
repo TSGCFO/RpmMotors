@@ -35,15 +35,15 @@ export default function Home() {
     url: "https://rpmauto.com",
     telephone: "(647) 550-9590",
     address: {
-      streetAddress: "By appointment only",
+      streetAddress: "6750 Langstaff Road",
       addressLocality: "Vaughan",
       addressRegion: "Ontario",
-      postalCode: "L4H 0A1",
+      postalCode: "L4H 5K2",
       addressCountry: "CA"
     },
     geo: {
-      latitude: 43.7856,
-      longitude: -79.5857
+      latitude: 43.8316392,
+      longitude: -79.5286182
     },
     openingHours: [
       "Monday 9:00-19:00",
