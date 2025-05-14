@@ -6,7 +6,7 @@ export function MapSection() {
       <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg">
           <h3 className="font-['Poppins'] font-bold text-2xl mb-4">Find Us</h3>
-          <p className="text-gray-600 mb-4">6750 Langstaff Road, Vaughan, Ontario L4H 5K2</p>
+          <p className="text-gray-600 mb-4">By appointment only, Vaughan, Ontario</p>
           <a 
             href="https://maps.google.com/maps?daddr=6750+Langstaff+Road,+Vaughan,+Ontario+L4H+5K2" 
             target="_blank" 
