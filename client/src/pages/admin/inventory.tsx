@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from "@/lib/queryClient";
 import DashboardLayout from '@/components/admin/dashboard-layout';
 import { Vehicle, InsertVehicle } from '@shared/schema';
-import { Edit, Trash2, Plus, Search, X } from 'lucide-react';
+import { Edit, Trash2, Plus, Search, X, Upload, Image } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { ImageUploadSection } from '@/components/admin/image-upload-section';
 
 export default function AdminInventory() {
   const queryClient = useQueryClient();
