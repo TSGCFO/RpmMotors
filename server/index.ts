@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { getUploadDir } from "./storage-adapter";
+import uploadRouter from "./upload";
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,9 @@ app.use(express.urlencoded({ extended: false }));
 // Works on both Replit and Render environments
 app.use('/uploads', express.static(getUploadDir()));
 console.log(`Serving static files from: ${getUploadDir()}`);
+
+// Use the upload router for file uploads
+app.use(uploadRouter);
 
 app.use((req, res, next) => {
   const start = Date.now();
