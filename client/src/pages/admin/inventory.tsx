@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from "@/lib/queryClient";
 import DashboardLayout from '@/components/admin/dashboard-layout';
 import { Vehicle, InsertVehicle } from '@shared/schema';
-import { Edit, Trash2, Plus, Search, X, Upload, Image } from 'lucide-react';
+import { Edit, Trash2, Plus, Search, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { ImageUploadSection } from '@/components/admin/image-upload-section';
@@ -119,7 +119,7 @@ export default function AdminInventory() {
       description: '',
       category: 'SUV',
       features: '',
-      images: [''],
+      images: [],
       isFeatured: false,
       condition: 'Used'
     });
@@ -457,7 +457,7 @@ export default function AdminInventory() {
                   
                   <div>
                     <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                      Price ($) *
+                      Price *
                     </label>
                     <input
                       type="number"
@@ -465,7 +465,6 @@ export default function AdminInventory() {
                       name="price"
                       required
                       min="0"
-                      step="1"
                       value={formData.price || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
@@ -532,8 +531,8 @@ export default function AdminInventory() {
                     >
                       <option value="Automatic">Automatic</option>
                       <option value="Manual">Manual</option>
+                      <option value="Semi-Automatic">Semi-Automatic</option>
                       <option value="CVT">CVT</option>
-                      <option value="Dual Clutch">Dual Clutch</option>
                     </select>
                   </div>
                   
@@ -574,8 +573,9 @@ export default function AdminInventory() {
                       <option value="Coupe">Coupe</option>
                       <option value="Truck">Truck</option>
                       <option value="Convertible">Convertible</option>
+                      <option value="Sports Cars">Sports Cars</option>
                       <option value="Luxury">Luxury</option>
-                      <option value="Sport">Sport</option>
+                      <option value="Electric Vehicles">Electric Vehicles</option>
                     </select>
                   </div>
                   
@@ -594,23 +594,36 @@ export default function AdminInventory() {
                       <option value="New">New</option>
                       <option value="Used">Used</option>
                       <option value="Certified Pre-Owned">Certified Pre-Owned</option>
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
                     </select>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="isFeatured"
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 text-[#E31837] focus:ring-[#E31837] border-gray-300 rounded"
+                    />
+                    <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+                      Featured Vehicle
+                    </label>
                   </div>
                 </div>
                 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                      Description *
-                    </label>
-                    <span className="text-xs text-gray-500">Min 20 characters</span>
-                  </div>
+                <div className="space-y-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description *
+                  </label>
                   <textarea
                     id="description"
                     name="description"
                     required
-                    minLength={20}
-                    rows={4}
+                    rows={3}
                     value={formData.description}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
@@ -619,7 +632,7 @@ export default function AdminInventory() {
                 
                 <div>
                   <label htmlFor="features" className="block text-sm font-medium text-gray-700 mb-1">
-                    Features (comma-separated) *
+                    Features (comma separated) *
                   </label>
                   <textarea
                     id="features"
@@ -634,57 +647,19 @@ export default function AdminInventory() {
                 </div>
                 
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Images (URLs) *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={addImageField}
-                      className="text-sm text-blue-600 hover:text-blue-800"
-                    >
-                      + Add More
-                    </button>
-                  </div>
-                  
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <input
-                        type="url"
-                        required
-                        value={image}
-                        onChange={(e) => handleImageChange(e, index)}
-                        placeholder="https://example.com/image.jpg"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
-                      />
-                      {formData.images.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeImageField(index)}
-                          className="ml-2 text-red-600 hover:text-red-800"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="isFeatured"
-                    name="isFeatured"
-                    checked={formData.isFeatured}
-                    onChange={handleCheckboxChange}
-                    className="h-4 w-4 text-[#E31837] focus:ring-[#E31837] border-gray-300 rounded"
+                  <ImageUploadSection 
+                    images={formData.images}
+                    onAddImage={(url) => {
+                      setFormData({
+                        ...formData,
+                        images: [...formData.images, url]
+                      });
+                    }}
+                    onRemoveImage={removeImageField}
                   />
-                  <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-700">
-                    Featured Vehicle (will appear on homepage)
-                  </label>
                 </div>
                 
-                <div className="flex justify-end gap-3 pt-4 border-t">
+                <div className="flex justify-end space-x-4 mt-6">
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
@@ -694,8 +669,8 @@ export default function AdminInventory() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#E31837] text-white rounded-md hover:bg-opacity-90"
                     disabled={addVehicleMutation.isPending}
+                    className="px-4 py-2 bg-[#E31837] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50"
                   >
                     {addVehicleMutation.isPending ? "Adding..." : "Add Vehicle"}
                   </button>
@@ -720,15 +695,14 @@ export default function AdminInventory() {
               </div>
               
               <form onSubmit={handleEditSubmit} className="space-y-6">
-                {/* Same form fields as Add Modal, but with values from selectedVehicle */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="edit-make" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="make" className="block text-sm font-medium text-gray-700 mb-1">
                       Make *
                     </label>
                     <input
                       type="text"
-                      id="edit-make"
+                      id="make"
                       name="make"
                       required
                       value={formData.make}
@@ -738,12 +712,12 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-model" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
                       Model *
                     </label>
                     <input
                       type="text"
-                      id="edit-model"
+                      id="model"
                       name="model"
                       required
                       value={formData.model}
@@ -753,12 +727,12 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-year" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
                       Year *
                     </label>
                     <input
                       type="number"
-                      id="edit-year"
+                      id="year"
                       name="year"
                       required
                       min="1900"
@@ -770,16 +744,15 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-price" className="block text-sm font-medium text-gray-700 mb-1">
-                      Price ($) *
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                      Price *
                     </label>
                     <input
                       type="number"
-                      id="edit-price"
+                      id="price"
                       name="price"
                       required
                       min="0"
-                      step="1"
                       value={formData.price || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
@@ -787,12 +760,12 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-mileage" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="mileage" className="block text-sm font-medium text-gray-700 mb-1">
                       Mileage *
                     </label>
                     <input
                       type="number"
-                      id="edit-mileage"
+                      id="mileage"
                       name="mileage"
                       required
                       min="0"
@@ -803,12 +776,12 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-vin" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="vin" className="block text-sm font-medium text-gray-700 mb-1">
                       VIN *
                     </label>
                     <input
                       type="text"
-                      id="edit-vin"
+                      id="vin"
                       name="vin"
                       required
                       value={formData.vin}
@@ -818,12 +791,12 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-color" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
                       Color *
                     </label>
                     <input
                       type="text"
-                      id="edit-color"
+                      id="color"
                       name="color"
                       required
                       value={formData.color}
@@ -833,11 +806,11 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-transmission" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="transmission" className="block text-sm font-medium text-gray-700 mb-1">
                       Transmission *
                     </label>
                     <select
-                      id="edit-transmission"
+                      id="transmission"
                       name="transmission"
                       required
                       value={formData.transmission}
@@ -846,17 +819,17 @@ export default function AdminInventory() {
                     >
                       <option value="Automatic">Automatic</option>
                       <option value="Manual">Manual</option>
+                      <option value="Semi-Automatic">Semi-Automatic</option>
                       <option value="CVT">CVT</option>
-                      <option value="Dual Clutch">Dual Clutch</option>
                     </select>
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-fuelType" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="fuelType" className="block text-sm font-medium text-gray-700 mb-1">
                       Fuel Type *
                     </label>
                     <select
-                      id="edit-fuelType"
+                      id="fuelType"
                       name="fuelType"
                       required
                       value={formData.fuelType}
@@ -872,11 +845,11 @@ export default function AdminInventory() {
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-category" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                       Category *
                     </label>
                     <select
-                      id="edit-category"
+                      id="category"
                       name="category"
                       required
                       value={formData.category}
@@ -888,17 +861,18 @@ export default function AdminInventory() {
                       <option value="Coupe">Coupe</option>
                       <option value="Truck">Truck</option>
                       <option value="Convertible">Convertible</option>
+                      <option value="Sports Cars">Sports Cars</option>
                       <option value="Luxury">Luxury</option>
-                      <option value="Sport">Sport</option>
+                      <option value="Electric Vehicles">Electric Vehicles</option>
                     </select>
                   </div>
                   
                   <div>
-                    <label htmlFor="edit-condition" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-1">
                       Condition *
                     </label>
                     <select
-                      id="edit-condition"
+                      id="condition"
                       name="condition"
                       required
                       value={formData.condition}
@@ -908,23 +882,36 @@ export default function AdminInventory() {
                       <option value="New">New</option>
                       <option value="Used">Used</option>
                       <option value="Certified Pre-Owned">Certified Pre-Owned</option>
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
                     </select>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="isFeatured"
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 text-[#E31837] focus:ring-[#E31837] border-gray-300 rounded"
+                    />
+                    <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+                      Featured Vehicle
+                    </label>
                   </div>
                 </div>
                 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 mb-1">
-                      Description *
-                    </label>
-                    <span className="text-xs text-gray-500">Min 20 characters</span>
-                  </div>
+                <div className="space-y-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description *
+                  </label>
                   <textarea
-                    id="edit-description"
+                    id="description"
                     name="description"
                     required
-                    minLength={20}
-                    rows={4}
+                    rows={3}
                     value={formData.description}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
@@ -932,11 +919,11 @@ export default function AdminInventory() {
                 </div>
                 
                 <div>
-                  <label htmlFor="edit-features" className="block text-sm font-medium text-gray-700 mb-1">
-                    Features (comma-separated) *
+                  <label htmlFor="features" className="block text-sm font-medium text-gray-700 mb-1">
+                    Features (comma separated) *
                   </label>
                   <textarea
-                    id="edit-features"
+                    id="features"
                     name="features"
                     required
                     rows={2}
@@ -948,57 +935,19 @@ export default function AdminInventory() {
                 </div>
                 
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Images (URLs) *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={addImageField}
-                      className="text-sm text-blue-600 hover:text-blue-800"
-                    >
-                      + Add More
-                    </button>
-                  </div>
-                  
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <input
-                        type="url"
-                        required
-                        value={image}
-                        onChange={(e) => handleImageChange(e, index)}
-                        placeholder="https://example.com/image.jpg"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E31837]"
-                      />
-                      {formData.images.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeImageField(index)}
-                          className="ml-2 text-red-600 hover:text-red-800"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="edit-isFeatured"
-                    name="isFeatured"
-                    checked={formData.isFeatured}
-                    onChange={handleCheckboxChange}
-                    className="h-4 w-4 text-[#E31837] focus:ring-[#E31837] border-gray-300 rounded"
+                  <ImageUploadSection 
+                    images={formData.images}
+                    onAddImage={(url) => {
+                      setFormData({
+                        ...formData,
+                        images: [...formData.images, url]
+                      });
+                    }}
+                    onRemoveImage={removeImageField}
                   />
-                  <label htmlFor="edit-isFeatured" className="ml-2 block text-sm text-gray-700">
-                    Featured Vehicle (will appear on homepage)
-                  </label>
                 </div>
                 
-                <div className="flex justify-end gap-3 pt-4 border-t">
+                <div className="flex justify-end space-x-4 mt-6">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
@@ -1008,10 +957,10 @@ export default function AdminInventory() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#E31837] text-white rounded-md hover:bg-opacity-90"
                     disabled={updateVehicleMutation.isPending}
+                    className="px-4 py-2 bg-[#E31837] text-white rounded-md hover:bg-opacity-90 disabled:opacity-50"
                   >
-                    {updateVehicleMutation.isPending ? "Saving..." : "Save Changes"}
+                    {updateVehicleMutation.isPending ? "Updating..." : "Update Vehicle"}
                   </button>
                 </div>
               </form>
@@ -1020,7 +969,7 @@ export default function AdminInventory() {
         </div>
       )}
       
-      {/* Delete Confirmation Modal */}
+      {/* Delete Vehicle Modal */}
       {isDeleteModalOpen && selectedVehicle && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
@@ -1033,35 +982,26 @@ export default function AdminInventory() {
                 </button>
               </div>
               
-              <div className="space-y-4">
-                <p className="text-gray-700">
-                  Are you sure you want to delete the following vehicle? This action cannot be undone.
-                </p>
-                
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium text-gray-900">
-                    {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
-                  </h3>
-                  <p className="text-sm text-gray-500">VIN: {selectedVehicle.vin}</p>
-                </div>
-                
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteSubmit}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                    disabled={deleteVehicleMutation.isPending}
-                  >
-                    {deleteVehicleMutation.isPending ? "Deleting..." : "Delete Vehicle"}
-                  </button>
-                </div>
+              <p className="text-gray-500 mb-6">
+                Are you sure you want to delete the vehicle "{selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}"? This action cannot be undone.
+              </p>
+              
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteSubmit}
+                  disabled={deleteVehicleMutation.isPending}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleteVehicleMutation.isPending ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </div>
           </div>
