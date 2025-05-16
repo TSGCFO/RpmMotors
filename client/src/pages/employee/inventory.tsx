@@ -43,26 +43,8 @@ import {
 
 // Simplified form component
 interface VehicleFormProps {
-  initialData: {
-    make: string;
-    model: string;
-    year: number;
-    price: number;
-    mileage: number;
-    fuelType: string;
-    transmission: string;
-    color: string;
-    description: string;
-    category: string;
-    condition: string;
-    isFeatured: boolean;
-    features: string;
-    images: string[] | string; // Accept both string and string[] for compatibility
-    vin: string;
-    status?: string;
-    id?: number;
-  };
-  onSubmit: (data: any) => void;
+  initialData: FormDataType;
+  onSubmit: (data: FormDataType) => void;
   onCancel: () => void;
   isEdit?: boolean;
   isPending?: boolean;
@@ -82,7 +64,7 @@ interface FormDataType {
   category: string;
   condition: string;
   isFeatured: boolean;
-  features: string;
+  features: string[] | string; // Can be either array or string in the form for compatibility
   images: string[]; // Always an array in the form state
   vin: string;
   status?: string;
@@ -345,7 +327,8 @@ export default function EmployeeInventoryManager() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  // Use FormDataType for editing to ensure type compatibility
+  const [editingVehicle, setEditingVehicle] = useState<FormDataType | null>(null);
   const [deletingVehicleId, setDeletingVehicleId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   
@@ -538,16 +521,37 @@ export default function EmployeeInventoryManager() {
     }
   };
   
+  // Function to convert Vehicle to FormDataType
+  const convertVehicleToFormData = (vehicle: Vehicle): FormDataType => {
+    return {
+      id: vehicle.id,
+      make: vehicle.make,
+      model: vehicle.model,
+      year: vehicle.year,
+      price: vehicle.price,
+      mileage: vehicle.mileage,
+      fuelType: vehicle.fuelType,
+      transmission: vehicle.transmission,
+      color: vehicle.color,
+      description: vehicle.description,
+      category: vehicle.category,
+      condition: vehicle.condition,
+      isFeatured: !!vehicle.isFeatured,
+      // Keep the original format of features
+      features: vehicle.features,
+      // Make sure images is always an array
+      images: Array.isArray(vehicle.images) ? vehicle.images : [],
+      vin: vehicle.vin,
+      status: vehicle.status || 'available'
+    };
+  };
+
   // Handle opening edit modal
   const handleOpenEditModal = (vehicle: Vehicle) => {
-    // Make sure images is an array and isFeatured is a boolean
-    const processedVehicle = {
-      ...vehicle,
-      images: Array.isArray(vehicle.images) ? vehicle.images : [],
-      isFeatured: !!vehicle.isFeatured
-    };
+    // Convert Vehicle to FormDataType
+    const formData = convertVehicleToFormData(vehicle);
     
-    setEditingVehicle(processedVehicle);
+    setEditingVehicle(formData);
     setIsEditModalOpen(true);
   };
   
@@ -700,7 +704,8 @@ export default function EmployeeInventoryManager() {
             <VehicleForm
               initialData={{
                 ...editingVehicle,
-                images: Array.isArray(editingVehicle.images) ? editingVehicle.images.join(', ') : '',
+                // No need to convert to string, our FormDataType now handles arrays
+                isFeatured: !!editingVehicle.isFeatured
               }}
               onSubmit={handleEditVehicle}
               onCancel={() => {
