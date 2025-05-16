@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import EmployeeLayout from '@/components/employee/employee-layout';
@@ -29,6 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Pencil, Trash2, Car, Check, X, AlertTriangle } from 'lucide-react';
 import { Vehicle } from '@shared/schema';
+import { ImageUploadSection } from '@/components/admin/image-upload-section';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +57,7 @@ interface VehicleFormProps {
     condition: string;
     isFeatured: boolean;
     features: string;
-    images: string;
+    images: string[] | string; // Accept both string and string[] for compatibility
     vin: string;
     status?: string;
     id?: number;
@@ -67,8 +68,48 @@ interface VehicleFormProps {
   isPending?: boolean;
 }
 
+// Interface for our form data with the correct types
+interface FormDataType {
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  mileage: number;
+  fuelType: string;
+  transmission: string;
+  color: string;
+  description: string;
+  category: string;
+  condition: string;
+  isFeatured: boolean;
+  features: string;
+  images: string[]; // Always an array in the form state
+  vin: string;
+  status?: string;
+  id?: number;
+}
+
 function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPending = false }: VehicleFormProps) {
-  const [formData, setFormData] = useState(initialData);
+  const [formData, setFormData] = useState<FormDataType>(() => {
+    // Process initial data to ensure images is an array and isFeatured is a boolean
+    const processedData = { ...initialData } as FormDataType;
+    
+    // Convert images to array if it's a string
+    if (typeof initialData.images === 'string') {
+      processedData.images = initialData.images 
+        ? initialData.images.split(',').map((url: string) => url.trim()) 
+        : [];
+    } else if (Array.isArray(initialData.images)) {
+      processedData.images = [...initialData.images];
+    } else {
+      processedData.images = [];
+    }
+    
+    // Ensure isFeatured is a boolean
+    processedData.isFeatured = !!initialData.isFeatured;
+    
+    return processedData;
+  });
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -89,6 +130,20 @@ function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPendin
     setFormData((prev: any) => ({
       ...prev,
       isFeatured: checked
+    }));
+  };
+
+  const handleAddImage = (url: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      images: [...prev.images, url]
+    }));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      images: prev.images.filter((_: string, i: number) => i !== index)
     }));
   };
   
@@ -243,18 +298,11 @@ function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPendin
         </p>
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="images">Images</Label>
-        <Textarea
-          id="images"
-          name="images"
-          value={formData.images}
-          onChange={handleInputChange}
-          placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-          rows={2}
-        />
-        <p className="text-xs text-gray-500">Enter image URLs separated by commas</p>
-      </div>
+      <ImageUploadSection 
+        images={formData.images}
+        onAddImage={handleAddImage}
+        onRemoveImage={handleRemoveImage}
+      />
       
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onCancel}>
