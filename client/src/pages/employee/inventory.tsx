@@ -67,28 +67,27 @@ interface FormDataType {
   features: string[] | string; // Can be either array or string in the form for compatibility
   images: string[]; // Always an array in the form state
   vin: string;
-  status?: string;
-  id?: number;
+  status: string;
+  id: number;
 }
 
 function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPending = false }: VehicleFormProps) {
   const [formData, setFormData] = useState<FormDataType>(() => {
-    // Process initial data to ensure images is an array and isFeatured is a boolean
-    const processedData = { ...initialData } as FormDataType;
+    // The initialData should already be a FormDataType, but we'll verify it just in case
+    const processedData = { ...initialData };
     
-    // Convert images to array if it's a string
-    if (typeof initialData.images === 'string') {
-      processedData.images = initialData.images 
-        ? initialData.images.split(',').map((url: string) => url.trim()) 
-        : [];
-    } else if (Array.isArray(initialData.images)) {
-      processedData.images = [...initialData.images];
-    } else {
+    // Ensure images is an array
+    if (!Array.isArray(processedData.images)) {
       processedData.images = [];
     }
     
+    // Ensure features is either a string or array
+    if (!processedData.features) {
+      processedData.features = [];
+    }
+    
     // Ensure isFeatured is a boolean
-    processedData.isFeatured = !!initialData.isFeatured;
+    processedData.isFeatured = !!processedData.isFeatured;
     
     return processedData;
   });
@@ -484,10 +483,11 @@ export default function EmployeeInventoryManager() {
     category: 'Sports Cars',
     condition: 'Excellent',
     isFeatured: false,
-    features: '',
+    features: [],
     images: [], // Initialize as empty array
     vin: '',
-    status: 'available'
+    status: 'available',
+    id: 0 // This will be replaced by the server when a new vehicle is created
   };
   
   // Handle add vehicle
