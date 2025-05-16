@@ -488,7 +488,7 @@ export default function EmployeeInventoryManager() {
   });
   
   // Default form data 
-  const defaultFormData = {
+  const defaultFormData: FormDataType = {
     make: '',
     model: '',
     year: new Date().getFullYear(),
@@ -502,17 +502,16 @@ export default function EmployeeInventoryManager() {
     condition: 'Excellent',
     isFeatured: false,
     features: '',
-    images: '',
+    images: [], // Initialize as empty array
     vin: '',
     status: 'available'
   };
   
   // Handle add vehicle
-  const handleAddVehicle = (data: any) => {
-    // Convert images string to array
+  const handleAddVehicle = (data: FormDataType) => {
+    // No need to convert images string to array as it's already an array in FormDataType
     const processedData = {
       ...data,
-      images: data.images ? data.images.split(',').map((url: string) => url.trim()) : [],
       features: data.features || '',
     };
     
@@ -520,15 +519,12 @@ export default function EmployeeInventoryManager() {
   };
   
   // Handle edit vehicle
-  const handleEditVehicle = (data: any) => {
+  const handleEditVehicle = (data: FormDataType) => {
     if (!editingVehicle) return;
     
-    // Convert images string to array if it's a string
+    // No need to convert images string to array as it's already an array in FormDataType
     const processedData = {
       ...data,
-      images: typeof data.images === 'string' ? 
-        data.images.split(',').map((url: string) => url.trim()) : 
-        data.images,
       features: data.features || '',
     };
     
@@ -544,13 +540,14 @@ export default function EmployeeInventoryManager() {
   
   // Handle opening edit modal
   const handleOpenEditModal = (vehicle: Vehicle) => {
-    // Convert images array to string for editing
-    const vehicleWithImagesString = {
+    // Make sure images is an array and isFeatured is a boolean
+    const processedVehicle = {
       ...vehicle,
-      images: Array.isArray(vehicle.images) ? vehicle.images.join(', ') : '',
+      images: Array.isArray(vehicle.images) ? vehicle.images : [],
+      isFeatured: !!vehicle.isFeatured
     };
     
-    setEditingVehicle(vehicle);
+    setEditingVehicle(processedVehicle);
     setIsEditModalOpen(true);
   };
   
