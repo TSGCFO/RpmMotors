@@ -1,31 +1,19 @@
-# www.robotstxt.org/
-# Allow crawling of all content
 User-agent: *
 Allow: /
 
-# Block specific areas
-Disallow: /admin/
-Disallow: /*?category=*
-Disallow: /*?make=*
-Disallow: /*?model=*
-Disallow: /*?year=*
-Disallow: /*?price=*
-Disallow: /*?sort=*
-
-# Block specific bots from heavy resources
-User-agent: Googlebot-Image
-Allow: /public/images/
-Allow: /inventory/
-Allow: /gallery/
-Disallow: /public/documents/
-
-# Allow Google to crawl everything
-User-agent: Googlebot
-Allow: /
-
-# Allow Bing to crawl everything
-User-agent: Bingbot
-Allow: /
-
-# Sitemap location
+# Sitemap
 Sitemap: https://rpmauto.com/sitemap.xml
+
+# Crawl-delay for search engines
+Crawl-delay: 1
+
+# Disallow admin areas (if any are added later)
+Disallow: /admin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /inventory
+Allow: /services
+Allow: /contact
