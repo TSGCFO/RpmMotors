@@ -2,7 +2,8 @@ import {
   User, InsertUser, users,
   Vehicle, InsertVehicle, vehicles,
   Inquiry, InsertInquiry, inquiries,
-  Testimonial, InsertTestimonial, testimonials
+  Testimonial, InsertTestimonial, testimonials,
+  BlogPost, InsertBlogPost, blogPosts
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
@@ -96,6 +97,11 @@ export interface IStorage {
   createTestimonial(testimonial: InsertTestimonial): Promise<Testimonial>;
   approveTestimonial(id: number): Promise<Testimonial | undefined>;
   deleteTestimonial(id: number): Promise<boolean>;
+  
+  // Blog methods for SEO content marketing
+  getPublishedBlogPosts(): Promise<BlogPost[]>;
+  getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
+  createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -715,6 +721,34 @@ export class DatabaseStorage implements IStorage {
         console.error("Error creating sample testimonial:", error);
       }
     }
+  }
+
+  // Blog methods for SEO content marketing
+  async getPublishedBlogPosts(): Promise<BlogPost[]> {
+    const posts = await db.select()
+      .from(blogPosts)
+      .where(eq(blogPosts.published, true))
+      .orderBy(desc(blogPosts.publishedAt));
+    return posts;
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+    const [post] = await db.select()
+      .from(blogPosts)
+      .where(and(
+        eq(blogPosts.slug, slug),
+        eq(blogPosts.published, true)
+      ))
+      .limit(1);
+    return post || undefined;
+  }
+
+  async createBlogPost(insertBlogPost: InsertBlogPost): Promise<BlogPost> {
+    const [blogPost] = await db
+      .insert(blogPosts)
+      .values(insertBlogPost)
+      .returning();
+    return blogPost;
   }
 }
 
