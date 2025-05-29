@@ -73,7 +73,7 @@ export default function Gallery() {
         keywords="luxury car gallery, exotic car photos, premium auto gallery, vehicle images, RPM Auto gallery, car photography"
         ogType="website"
         ogImage={allImages.length > 0 ? allImages[0] : "/RPM Auto.png"}
-        canonical="https://rpmautosales.ca/gallery"
+        canonical="https://www.rpmautosales.ca/gallery"
       />
       
       {/* ImageGallery Schema */}

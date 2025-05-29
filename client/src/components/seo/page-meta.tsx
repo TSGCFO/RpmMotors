@@ -12,7 +12,7 @@ interface PageMetaProps {
 export default function PageMeta({
   title = 'RPM Auto: New & Used Luxury Cars Dealer | Vaughan, Ontario',
   description = 'RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Call (647) 550-9590 for RPM Auto Specials and Promotions.',
-  canonical = 'https://rpmautosales.ca/',
+  canonical = 'https://www.rpmautosales.ca/',
   ogType = 'website',
   ogImage = '/RPM Auto.png',
   keywords = 'luxury cars, exotic cars, premium vehicles, car dealership, Vaughan, Toronto, Ontario'

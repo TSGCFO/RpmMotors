@@ -26,7 +26,7 @@ export default function Contact() {
   const businessData = {
     name: "RPM Auto",
     description: "Premium automotive dealership specializing in luxury and exotic vehicles in the Greater Toronto Area.",
-    url: "https://rpmautosales.ca",
+    url: "https://www.rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
       streetAddress: "By appointment only",
@@ -43,7 +43,7 @@ export default function Contact() {
       "Mo-Fr 09:00-19:00",
       "Sa 10:00-17:00"
     ],
-    image: "https://rpmautosales.ca/RPM Auto.png",
+    image: "https://www.rpmautosales.ca/RPM Auto.png",
     priceRange: "$$$$"
   };
   
@@ -56,7 +56,7 @@ export default function Contact() {
         keywords="contact RPM Auto, luxury car dealership, Vaughan dealership, car sales, vehicle service, Toronto luxury cars"
         ogType="website"
         ogImage="/RPM Auto.png"
-        canonical="https://rpmautosales.ca/contact"
+        canonical="https://www.rpmautosales.ca/contact"
       />
       <CanonicalUrl path="/contact" />
       
