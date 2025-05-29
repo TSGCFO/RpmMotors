@@ -1,0 +1,9 @@
+./client/src/components/layout/footer.tsx:116:                <span className="text-gray-400">fateh@rpmautosales.ca</span>
+./client/src/pages/contact.tsx:88:            "email": "fateh@rpmautosales.ca",
+./client/src/pages/contact.tsx:102:                "email": "fateh@rpmautosales.ca",
+./client/src/pages/contact.tsx:109:                "email": "fateh@rpmautosales.ca",
+./client/src/pages/contact.tsx:189:                    <p className="text-gray-600">fateh@rpmautosales.ca</p>
+./client/src/pages/contact.tsx:253:                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
+./client/src/pages/contact.tsx:268:                <a href="mailto:fateh@rpmautosales.ca" className="hover:text-[#E31837] transition-colors">fateh@rpmautosales.ca</a>
+./server/email.ts:4:const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
+./server/email.ts:9:const FROM_EMAIL = 'fateh@rpmautosales.ca'; // Change this to your fully verified sender
