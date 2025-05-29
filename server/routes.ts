@@ -558,31 +558,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://rpmauto.com/</loc>
+    <loc>https://rpmautosales.ca/</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://rpmauto.com/about</loc>
+    <loc>https://rpmautosales.ca/about</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://rpmauto.com/inventory</loc>
+    <loc>https://rpmautosales.ca/inventory</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://rpmauto.com/services</loc>
+    <loc>https://rpmautosales.ca/services</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://rpmauto.com/contact</loc>
+    <loc>https://rpmautosales.ca/contact</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       featuredVehicles.forEach(vehicle => {
         sitemap += `
   <url>
-    <loc>https://rpmauto.com/vehicle/${vehicle.id}</loc>
+    <loc>https://rpmautosales.ca/vehicle/${vehicle.id}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -604,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!vehicle.isFeatured) {
           sitemap += `
   <url>
-    <loc>https://rpmauto.com/vehicle/${vehicle.id}</loc>
+    <loc>https://rpmautosales.ca/vehicle/${vehicle.id}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
