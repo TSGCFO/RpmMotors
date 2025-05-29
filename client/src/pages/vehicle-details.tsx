@@ -149,7 +149,7 @@ export default function VehicleDetails() {
       engineType: "Internal combustion",
       fuelType: vehicle.fuelType
     },
-    url: `https://rpmauto.com/inventory/${vehicle.id}`,
+    url: `https://rpmautosales.ca/inventory/${vehicle.id}`,
     mileageFromOdometer: {
       value: vehicle.mileage,
       unitCode: "KMT"
@@ -163,7 +163,7 @@ export default function VehicleDetails() {
       price: vehicle.price,
       priceCurrency: "CAD",
       availability: "https://schema.org/InStock",
-      url: `https://rpmauto.com/inventory/${vehicle.id}`
+      url: `https://rpmautosales.ca/inventory/${vehicle.id}`
     }
   };
   
@@ -176,7 +176,7 @@ export default function VehicleDetails() {
         keywords={`${vehicle.make}, ${vehicle.model}, used cars, luxury cars, ${vehicle.category}, Woodbridge, Toronto, Ontario`}
         ogType="product"
         ogImage={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ''}
-        canonical={`https://rpmauto.com/inventory/${vehicle.id}`}
+        canonical={`https://rpmautosales.ca/inventory/${vehicle.id}`}
       />
       <CanonicalUrl path={`/inventory/${vehicle.id}`} />
       <StructuredData
@@ -195,7 +195,7 @@ export default function VehicleDetails() {
             engineType: "Internal combustion",
             fuelType: vehicle.fuelType
           },
-          url: `https://rpmauto.com/inventory/${vehicle.id}`,
+          url: `https://rpmautosales.ca/inventory/${vehicle.id}`,
           mileageFromOdometer: {
             value: vehicle.mileage,
             unitCode: "KMT"
@@ -209,16 +209,16 @@ export default function VehicleDetails() {
             price: vehicle.price,
             priceCurrency: "CAD",
             availability: "https://schema.org/InStock",
-            url: `https://rpmauto.com/inventory/${vehicle.id}`
+            url: `https://rpmautosales.ca/inventory/${vehicle.id}`
           }
         })}
       />
       {/* Breadcrumb structured data */}
       <JsonLdSchema
         schema={createBreadcrumbSchema([
-          { name: "Home", item: "https://rpmauto.com/" },
-          { name: "Inventory", item: "https://rpmauto.com/inventory" },
-          { name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`, item: `https://rpmauto.com/inventory/${vehicle.id}` }
+          { name: "Home", item: "https://rpmautosales.ca/" },
+          { name: "Inventory", item: "https://rpmautosales.ca/inventory" },
+          { name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`, item: `https://rpmautosales.ca/inventory/${vehicle.id}` }
         ])}
       />
       
