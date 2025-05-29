@@ -1,6 +1,6 @@
 grep -rni "rpm.*\.com" . --exclude="*.md" --exclude="*.txt" --exclude="*.sql" --exclude-dir=".*" --exclude-dir="node_modules" --exclude-dir=".git" > search_results.txt
 
-grep -rni "rpmautosales\." . --exclude="*.md" --exclude="*.sql" --exclude-dir=".*" --exclude-dir="node_modules" --exclude-dir=".git" > verify_ca_domains.txt
+grep -rni "rpmautosales\." . --exclude="*.md" --exclude=".txt" --exclude="*.sql" --exclude-dir=".config" --exclude-dir="node_modules" --exclude-dir=".git" > verify_ca_domains.txt
 
 grep -rniE "(rpm.*\.com|rmp.*\.com|rpm.*dotcom)" . --exclude="*.md" --exclude="*.sql" --exclude-dir=".*" --exclude-dir="node_modules" --exclude-dir=".git" > comprehensive_search.txt
 
