@@ -32,7 +32,7 @@ export default function Home() {
   const businessData = {
     name: "RPM Auto",
     description: "RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
-    url: "https://rpmauto.com",
+    url: "https://rpmautosales.ca",
     telephone: "(647) 550-9590",
     address: {
       streetAddress: "By appointment only",
@@ -123,7 +123,7 @@ export default function Home() {
         keywords="luxury cars, exotic cars, premium vehicles, car dealership, Vaughan, Toronto, Ontario, sports cars, SUVs, financing, auto service"
         ogType="website"
         ogImage="/RPM Auto.png"
-        canonical="https://rpmauto.com/"
+        canonical="https://rpmautosales.ca/"
       />
       <CanonicalUrl path="/" />
       <StructuredData 
@@ -135,7 +135,7 @@ export default function Home() {
         schema={createBusinessSchema({
           name: "RPM Auto",
           description: "Premium luxury and exotic car dealership in Vaughan, Ontario offering a curated selection of high-end vehicles.",
-          url: "https://rpmauto.com",
+          url: "https://rpmautosales.ca",
           telephone: "(647) 550-9590",
           address: {
             streetAddress: "By appointment only",
@@ -157,7 +157,7 @@ export default function Home() {
             "Saturday 10:00-17:00",
             "Sunday 11:00-16:00"
           ],
-          image: "https://rpmauto.com/RPM Auto.png",
+          image: "https://rpmautosales.ca/RPM Auto.png",
           priceRange: "$$$$",
           sameAs: [
             "https://www.facebook.com/rpmauto",
@@ -418,7 +418,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Email Us</h3>
-                    <p className="text-gray-600">info@rpmauto.com</p>
+                    <p className="text-gray-600">info@rpmautosales.ca</p>
                   </div>
                 </div>
                 
