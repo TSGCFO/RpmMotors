@@ -15,7 +15,7 @@ export default function Terms() {
         title="Terms & Conditions | RPM Auto"
         description="The terms and conditions governing your use of RPM Auto's website and services. Learn about our policies regarding vehicle purchases, financing, and more."
         keywords="terms and conditions, legal terms, user agreement, RPM Auto terms"
-        canonical="https://rpmauto.com/terms"
+        canonical="https://rpmautosales.ca/terms"
       />
       <CanonicalUrl path="/terms" />
       
@@ -119,7 +119,7 @@ export default function Terms() {
               RPM Auto<br />
               By appointment only<br />
               Vaughan, ON L4H 0A1<br />
-              Email: info@rpmauto.com<br />
+              Email: info@rpmautosales.ca<br />
               Phone: (647) 550-9590
             </p>
             

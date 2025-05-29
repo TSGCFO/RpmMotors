@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         title="Privacy Policy | RPM Auto"
         description="RPM Auto's privacy policy explains how we collect, use, and protect your personal information when you visit our website or do business with us."
         keywords="privacy policy, data protection, personal information, RPM Auto privacy"
-        canonical="https://rpmauto.com/privacy-policy"
+        canonical="https://rpmautosales.ca/privacy-policy"
       />
       <CanonicalUrl path="/privacy-policy" />
       
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
               RPM Auto<br />
               By appointment only<br />
               Vaughan, ON L4H 0A1<br />
-              Email: info@rpmauto.com<br />
+              Email: info@rpmautosales.ca<br />
               Phone: (647) 550-9590
             </p>
             

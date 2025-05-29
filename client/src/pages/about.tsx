@@ -62,7 +62,7 @@ export default function About() {
   const businessData = {
     name: "RPM Auto",
     description: "A premier destination for luxury and exotic vehicles in the Greater Toronto Area, providing exceptional service and an unparalleled selection of premium automobiles.",
-    url: "https://rpmauto.com",
+    url: "https://rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
       streetAddress: "By appointment only",
@@ -79,7 +79,7 @@ export default function About() {
       "Mo-Fr 09:00-18:00",
       "Sa 10:00-16:00"
     ],
-    image: "https://rpmauto.com/RPM Auto.png",
+    image: "https://rpmautosales.ca/RPM Auto.png",
     priceRange: "$$$$"
   };
   
@@ -92,7 +92,7 @@ export default function About() {
         keywords="luxury car dealership, exotic cars, Toronto, Vaughan, premium vehicles, luxury automotive"
         ogType="website"
         ogImage="/RPM Auto.png"
-        canonical="https://rpmauto.com/about"
+        canonical="https://rpmautosales.ca/about"
       />
       <CanonicalUrl path="/about" />
       
@@ -105,8 +105,8 @@ export default function About() {
       {/* Breadcrumb structured data */}
       <JsonLdSchema
         schema={createBreadcrumbSchema([
-          { name: "Home", item: "https://rpmauto.com/" },
-          { name: "About Us", item: "https://rpmauto.com/about" }
+          { name: "Home", item: "https://rpmautosales.ca/" },
+          { name: "About Us", item: "https://rpmautosales.ca/about" }
         ])}
       />
       
@@ -116,7 +116,7 @@ export default function About() {
           "@type": "AboutPage",
           "name": "About RPM Auto",
           "description": pageDescription,
-          "url": "https://rpmauto.com/about",
+          "url": "https://rpmautosales.ca/about",
           "mainEntity": {
             "@type": "AutoDealer",
             "name": "RPM Auto",
