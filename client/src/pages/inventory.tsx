@@ -229,7 +229,7 @@ export default function Inventory() {
         keywords="luxury cars, exotic cars, premium vehicles, car inventory, Woodbridge, Toronto, Ontario"
         ogType="website"
         ogImage="/RPM Auto.png"
-        canonical={categoryName ? `https://rpmauto.com/inventory?category=${filters.category}` : "https://rpmauto.com/inventory"}
+        canonical={categoryName ? `https://rpmautosales.ca/inventory?category=${filters.category}` : "https://rpmautosales.ca/inventory"}
       />
       <CanonicalUrl path={categoryName ? `/inventory?category=${filters.category}` : "/inventory"} />
       
@@ -238,13 +238,13 @@ export default function Inventory() {
         schema={createBreadcrumbSchema(
           categoryName 
             ? [
-                { name: "Home", item: "https://rpmauto.com/" },
-                { name: "Inventory", item: "https://rpmauto.com/inventory" },
-                { name: categoryName, item: `https://rpmauto.com/inventory?category=${filters.category}` }
+                { name: "Home", item: "https://rpmautosales.ca/" },
+                { name: "Inventory", item: "https://rpmautosales.ca/inventory" },
+                { name: categoryName, item: `https://rpmautosales.ca/inventory?category=${filters.category}` }
               ]
             : [
-                { name: "Home", item: "https://rpmauto.com/" },
-                { name: "Inventory", item: "https://rpmauto.com/inventory" }
+                { name: "Home", item: "https://rpmautosales.ca/" },
+                { name: "Inventory", item: "https://rpmautosales.ca/inventory" }
               ]
         )}
       />
@@ -256,8 +256,8 @@ export default function Inventory() {
           "name": pageTitle,
           "description": pageDescription,
           "url": categoryName 
-            ? `https://rpmauto.com/inventory?category=${filters.category}` 
-            : "https://rpmauto.com/inventory",
+            ? `https://rpmautosales.ca/inventory?category=${filters.category}` 
+            : "https://rpmautosales.ca/inventory",
           "numberOfItems": filteredVehicles?.length || 0,
           "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => ({
             "@type": "ListItem",
@@ -265,7 +265,7 @@ export default function Inventory() {
             "item": {
               "@type": "Product",
               "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-              "url": `https://rpmauto.com/inventory/${vehicle.id}`,
+              "url": `https://rpmautosales.ca/inventory/${vehicle.id}`,
               "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
               "offers": {
                 "@type": "Offer",

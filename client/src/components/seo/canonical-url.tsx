@@ -18,7 +18,7 @@ interface CanonicalUrlProps {
  */
 export default function CanonicalUrl({ path }: CanonicalUrlProps) {
   const [location] = useLocation();
-  const baseDomain = 'https://rpmauto.com';
+  const baseDomain = 'https://rpmautosales.ca';
   
   // Use provided path or current location
   const canonicalPath = path || location;

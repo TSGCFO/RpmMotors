@@ -22,7 +22,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
       '@type': 'ListItem',
       'position': index + 1,
       'item': {
-        '@id': `https://rpmauto.com${item.href}`,
+        '@id': `https://rpmautosales.ca${item.href}`,
         'name': item.label,
       },
     })),

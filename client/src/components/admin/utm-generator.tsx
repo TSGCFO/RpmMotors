@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 
 export default function UTMGenerator() {
   const [utmParams, setUtmParams] = useState({
-    url: 'https://rpmauto.com',
+    url: 'https://rpmautosales.ca',
     source: '',
     medium: '',
     campaign: '',
@@ -91,7 +91,7 @@ export default function UTMGenerator() {
             value={utmParams.url}
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E31837]"
-            placeholder="e.g. https://rpmauto.com"
+            placeholder="e.g. https://rpmautosales.ca"
             required
           />
           <p className="text-sm text-gray-500 mt-1">The destination URL for your marketing campaign.</p>
