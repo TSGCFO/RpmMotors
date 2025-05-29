@@ -69,8 +69,8 @@ export default function Contact() {
       {/* Breadcrumb structured data */}
       <JsonLdSchema
         schema={createBreadcrumbSchema([
-          { name: "Home", item: "https://rpmautosales.ca/" },
-          { name: "Contact Us", item: "https://rpmautosales.ca/contact" }
+          { name: "Home", item: "https://www.rpmautosales.ca/" },
+          { name: "Contact Us", item: "https://www.rpmautosales.ca/contact" }
         ])}
       />
       
@@ -80,7 +80,7 @@ export default function Contact() {
           "@type": "ContactPage",
           "name": "Contact RPM Auto",
           "description": pageDescription,
-          "url": "https://rpmautosales.ca/contact",
+          "url": "https://www.rpmautosales.ca/contact",
           "mainEntity": {
             "@type": "AutoDealer",
             "name": "RPM Auto",
