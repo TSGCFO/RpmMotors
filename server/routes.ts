@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       featuredVehicles.forEach(vehicle => {
         sitemap += `
   <url>
-    <loc>https://rpmautosales.ca/vehicle/${vehicle.id}</loc>
+    <loc>https://www.rpmautosales.ca/vehicle/${vehicle.id}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -604,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!vehicle.isFeatured) {
           sitemap += `
   <url>
-    <loc>https://rpmautosales.ca/vehicle/${vehicle.id}</loc>
+    <loc>https://www.rpmautosales.ca/vehicle/${vehicle.id}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
