@@ -16,7 +16,7 @@ export default function Sitemap() {
         title="Sitemap | RPM Auto"
         description="Browse the complete sitemap of RPM Auto's website. Find all pages including inventory, services, gallery, financing, and contact information."
         keywords="sitemap, website map, RPM Auto pages, website navigation, luxury cars"
-        canonical="https://rpmautosales.ca/sitemap"
+        canonical="https://www.rpmautosales.ca/sitemap"
       />
       <CanonicalUrl path="/sitemap" />
       
