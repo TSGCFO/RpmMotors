@@ -13,6 +13,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import CTABanner from "@/components/ui/cta-banner";
 import PersonalizedRecommendations from "@/components/ui/personalized-recommendations";
 import PageMeta from "@/components/seo/page-meta";
+import { pageMetadata } from "@/utils/seo-metadata";
 import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createBusinessSchema, createFaqSchema } from "@/components/seo/json-ld-schema";

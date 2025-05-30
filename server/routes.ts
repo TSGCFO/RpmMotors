@@ -548,79 +548,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Dynamic sitemap that updates with current inventory
-  app.get("/sitemap.xml", async (_req: Request, res: Response) => {
+  // Dynamic sitemap generation
+  app.get("/sitemap.xml", async (req, res) => {
     try {
-      const vehicles = await storage.getVehicles();
-      const featuredVehicles = await storage.getFeaturedVehicles();
-      
-      const currentDate = new Date().toISOString().split('T')[0];
-      
-      let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.rpmautosales.ca/</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://www.rpmautosales.ca/about</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.rpmautosales.ca/inventory</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.rpmautosales.ca/services</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.rpmautosales.ca/contact</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
-
-      // Add featured vehicles with higher priority
-      featuredVehicles.forEach(vehicle => {
-        sitemap += `
-  <url>
-    <loc>https://www.rpmautosales.ca/vehicle/${vehicle.id}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-      });
-
-      // Add all other vehicles
-      vehicles.forEach(vehicle => {
-        if (!vehicle.isFeatured) {
-          sitemap += `
-  <url>
-    <loc>https://www.rpmautosales.ca/vehicle/${vehicle.id}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
-        }
-      });
-
-      sitemap += `
-</urlset>`;
-
-      res.set('Content-Type', 'application/xml');
+      const sitemap = await generateSitemap();
+      res.header("Content-Type", "application/xml");
+      res.header("Content-Encoding", "UTF-8");
       res.send(sitemap);
     } catch (error) {
-      console.error("Error generating sitemap:", error);
-      res.status(500).send("Error generating sitemap");
+      console.error('Sitemap generation error:', error);
+      res.status(500).send('Error generating sitemap');
     }
   });
 
