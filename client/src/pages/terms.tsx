@@ -15,7 +15,7 @@ export default function Terms() {
         title="Terms & Conditions | RPM Auto"
         description="The terms and conditions governing your use of RPM Auto's website and services. Learn about our policies regarding vehicle purchases, financing, and more."
         keywords="terms and conditions, legal terms, user agreement, RPM Auto terms"
-        canonical="https://rpmautosales.ca/terms"
+        canonical="https://www.rpmautosales.ca/terms"
       />
       <CanonicalUrl path="/terms" />
       

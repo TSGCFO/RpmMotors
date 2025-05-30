@@ -120,11 +120,11 @@ export default function Services() {
         services={services.map(service => ({
           name: service.title,
           description: service.description,
-          url: `https://rpmautosales.ca/services#${service.id}`,
-          image: `https://rpmautosales.ca/services/${service.id}.svg`,
+          url: `https://www.rpmautosales.ca/services#${service.id}`,
+          image: `https://www.rpmautosales.ca/services/${service.id}.svg`,
           provider: {
             name: "RPM Auto",
-            url: "https://rpmautosales.ca"
+            url: "https://www.rpmautosales.ca"
           },
           serviceType: "AutomotiveServices",
           areaServed: {
@@ -135,7 +135,7 @@ export default function Services() {
           },
           availableChannel: {
             name: "RPM Auto Service Center",
-            serviceUrl: "https://rpmautosales.ca/contact"
+            serviceUrl: "https://www.rpmautosales.ca/contact"
           }
         }))}
       />

@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         title="Privacy Policy | RPM Auto"
         description="RPM Auto's privacy policy explains how we collect, use, and protect your personal information when you visit our website or do business with us."
         keywords="privacy policy, data protection, personal information, RPM Auto privacy"
-        canonical="https://rpmautosales.ca/privacy-policy"
+        canonical="https://www.rpmautosales.ca/privacy-policy"
       />
       <CanonicalUrl path="/privacy-policy" />
       
