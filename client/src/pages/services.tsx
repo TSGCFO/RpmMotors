@@ -65,7 +65,7 @@ export default function Services() {
   const businessData = {
     name: "RPM Auto",
     description: "Premium automotive services for luxury and exotic vehicles in the Greater Toronto Area.",
-    url: "https://rpmautosales.ca",
+    url: "https://www.rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
       streetAddress: "By appointment only",
@@ -82,7 +82,7 @@ export default function Services() {
       "Mo-Fr 09:00-18:00",
       "Sa 10:00-16:00"
     ],
-    image: "https://rpmautosales.ca/RPM Auto.png",
+    image: "https://www.rpmautosales.ca/RPM Auto.png",
     priceRange: "$$$$"
   };
   
@@ -95,7 +95,7 @@ export default function Services() {
         keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Vaughan, Toronto"
         ogType="website"
         ogImage="/RPM Auto.png"
-        canonical="https://rpmautosales.ca/services"
+        canonical="https://www.rpmautosales.ca/services"
       />
       <CanonicalUrl path="/services" />
       
@@ -108,15 +108,15 @@ export default function Services() {
       {/* Breadcrumb structured data */}
       <JsonLdSchema
         schema={createBreadcrumbSchema([
-          { name: "Home", item: "https://rpmautosales.ca/" },
-          { name: "Services", item: "https://rpmautosales.ca/services" }
+          { name: "Home", item: "https://www.rpmautosales.ca/" },
+          { name: "Services", item: "https://www.rpmautosales.ca/services" }
         ])}
       />
       
       {/* Services specific schema */}
       <ServicesSchema
         businessName="RPM Auto"
-        businessUrl="https://rpmautosales.ca"
+        businessUrl="https://www.rpmautosales.ca"
         services={services.map(service => ({
           name: service.title,
           description: service.description,
