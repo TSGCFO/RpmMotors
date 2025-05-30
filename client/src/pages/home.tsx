@@ -190,11 +190,16 @@ export default function Home() {
       {/* Hero Slider */}
       <HeroSlider />
       
+      {/* Main H1 for SEO - Visually Hidden */}
+      <h1 className="sr-only">
+        RPM Auto - Luxury Car Dealership in Vaughan | Premium Vehicles, Exotic Cars & Expert Service
+      </h1>
+      
       {/* Featured Categories */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-['Poppins'] font-bold mb-4">Explore Our Collection</h1>
+            <h2 className="text-3xl font-['Poppins'] font-bold mb-4">Explore Our Collection</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Discover our handpicked selection of premium luxury vehicles</p>
           </div>
           
