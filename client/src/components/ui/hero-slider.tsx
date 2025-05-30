@@ -80,9 +80,9 @@ export function HeroSlider() {
             
             <div className="absolute inset-0 z-20 flex items-center justify-center">
               <div className="text-center px-6">
-                <h1 className="text-4xl md:text-6xl font-['Poppins'] font-bold text-white mb-6">
+                <h2 className="text-4xl md:text-6xl font-['Poppins'] font-bold text-white mb-6">
                   {slide.title}
-                </h1>
+                </h2>
                 <p className="text-xl text-white mb-8 max-w-3xl mx-auto">
                   {slide.subtitle}
                 </p>
