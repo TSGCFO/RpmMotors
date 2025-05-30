@@ -4,7 +4,7 @@ services:
     name: rpm-auto-dealership
     env: node
     plan: starter
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npm run db:push && npm run build
     startCommand: npm start
     # Standard health check path for Express.js application
     healthCheckPath: /api/health
