@@ -119,9 +119,9 @@ export default function Home() {
     <main>
       {/* SEO Components */}
       <PageMeta 
-        title="RPM Auto: New & Used Luxury Cars Dealer | Vaughan, Ontario"
-        description="RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles with expert service."
-        keywords="luxury cars, exotic cars, premium vehicles, car dealership, Vaughan, Toronto, Ontario, sports cars, SUVs, financing, auto service"
+        title={pageMetadata.home.title}
+        description={pageMetadata.home.description}
+        keywords={pageMetadata.home.keywords}
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/"
