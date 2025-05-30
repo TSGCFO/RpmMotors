@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertVehicleSchema, insertInquirySchema, insertTestimonialSchema, insertBlogPostSchema, blogPosts } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { generateSitemap } from './utils/sitemap-generator';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication endpoint
