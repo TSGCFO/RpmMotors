@@ -1,3 +1,5 @@
 # Redirect non-www to www
 https://rpmautosales.ca/* https://www.rpmautosales.ca/:splat 301!
 http://rpmautosales.ca/* https://www.rpmautosales.ca/:splat 301!
+# SPA fallback
+/*    /index.html   200
