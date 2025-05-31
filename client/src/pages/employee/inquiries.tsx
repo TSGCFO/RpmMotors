@@ -106,7 +106,7 @@ export default function EmployeeInquiries() {
       (inquiry.subject ? inquiry.subject.toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
       (inquiry.message ? inquiry.message.toLowerCase().includes(searchQuery.toLowerCase()) : false);
     
-    const matchesStatus = statusFilter === '' || inquiry.status === statusFilter;
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || inquiry.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   }) || [];
@@ -185,7 +185,7 @@ export default function EmployeeInquiries() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="new">New</SelectItem>
                   <SelectItem value="in-progress">In Progress</SelectItem>
                   <SelectItem value="responded">Responded</SelectItem>
@@ -366,7 +366,7 @@ export default function EmployeeInquiries() {
               <div className="flex justify-between items-center mt-4">
                 <div>
                   <Select 
-                    value={selectedInquiry.status} 
+                    value={selectedInquiry.status ?? 'new'} 
                     onValueChange={(status) => handleStatusChange(selectedInquiry.id, status)}
                   >
                     <SelectTrigger className="w-[180px]">
