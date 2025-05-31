@@ -61,6 +61,11 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+interface SortState {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
 export default function EmployeeInquiries() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -70,6 +75,7 @@ export default function EmployeeInquiries() {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
+  const [sort, setSort] = useState<SortState>({ field: 'createdAt', direction: 'desc' });
   
   // Fetch all inquiries
   const { data: inquiries, isLoading } = useQuery<Inquiry[]>({
@@ -110,6 +116,22 @@ export default function EmployeeInquiries() {
     
     return matchesSearch && matchesStatus;
   }) || [];
+
+  const sortedInquiries = [...filteredInquiries].sort((a, b) => {
+    if (sort.field === 'createdAt') {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return sort.direction === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+    if (sort.field === 'subject') {
+      const subjectA = a.subject || '';
+      const subjectB = b.subject || '';
+      return sort.direction === 'asc'
+        ? subjectA.localeCompare(subjectB)
+        : subjectB.localeCompare(subjectA);
+    }
+    return 0;
+  });
   
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
@@ -132,6 +154,14 @@ export default function EmployeeInquiries() {
   // Handle updating status
   const handleStatusChange = (id: number, status: string) => {
     updateStatusMutation.mutate({ id, status });
+  };
+
+  // Handle sort changes
+  const handleSortChange = (field: string) => {
+    setSort({
+      field,
+      direction: sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc'
+    });
   };
   
   // Handle sending a reply
@@ -216,16 +246,40 @@ export default function EmployeeInquiries() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>
-                        <div className="flex items-center gap-1 cursor-pointer">
+                        <div
+                          className="flex items-center gap-1 cursor-pointer"
+                          onClick={() => handleSortChange('createdAt')}
+                        >
                           Date
-                          <ArrowUpDown className="h-4 w-4 ml-1" />
+                          {sort.field === 'createdAt' && (
+                            sort.direction === 'asc' ? (
+                              <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" />
+                            ) : (
+                              <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )
+                          )}
+                          {sort.field !== 'createdAt' && (
+                            <ArrowUpDown className="h-4 w-4 ml-1" />
+                          )}
                         </div>
                       </TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>
-                        <div className="flex items-center gap-1 cursor-pointer">
+                        <div
+                          className="flex items-center gap-1 cursor-pointer"
+                          onClick={() => handleSortChange('subject')}
+                        >
                           Subject
-                          <ArrowUpDown className="h-4 w-4 ml-1" />
+                          {sort.field === 'subject' && (
+                            sort.direction === 'asc' ? (
+                              <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837]" />
+                            ) : (
+                              <ArrowUpDown className="h-4 w-4 ml-1 text-[#E31837] rotate-180" />
+                            )
+                          )}
+                          {sort.field !== 'subject' && (
+                            <ArrowUpDown className="h-4 w-4 ml-1" />
+                          )}
                         </div>
                       </TableHead>
                       <TableHead>Contact</TableHead>
@@ -234,7 +288,7 @@ export default function EmployeeInquiries() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredInquiries.map((inquiry) => (
+                    {sortedInquiries.map((inquiry) => (
                       <TableRow key={inquiry.id}>
                         <TableCell className="font-medium">
                           {inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString() : 'Unknown date'}
