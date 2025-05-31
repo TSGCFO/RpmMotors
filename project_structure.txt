@@ -1,0 +1,316 @@
+.
+├── about_blank.pdf
+├── add-all-inventory.sh
+├── add-bmw.sh
+├── add-mclaren.sh
+├── attached_assets
+│   ├── about-us.html
+│   ├── bmw_image1.jpg
+│   ├── bmw_image2.jpg
+│   ├── bmw_image3.jpg
+│   ├── bmw_image4.jpg
+│   ├── bmw_image5.jpg
+│   ├── content-1744495854444.md
+│   ├── content-1746501635780.md
+│   ├── content-1746666664461.md
+│   ├── custom.css
+│   ├── feed.html
+│   ├── gallery.html
+│   ├── image_1745542721567.png
+│   ├── image_1746501976654.png
+│   ├── image_1746501977001.png
+│   ├── image_1746502010756.png
+│   ├── image_1746507418626.png
+│   ├── image_1746507929688.png
+│   ├── image_1746751232556.png
+│   ├── image_1746751632680.png
+│   ├── image_1748372406627.png
+│   ├── index.html
+│   ├── logo.ai
+│   ├── logo copy.eps
+│   ├── logo copy.pdf
+│   ├── LOGO_SW copy.ai
+│   ├── LOGO_SW.pdf
+│   ├── Pasted-2025-05-07T22-37-50-108258012Z-Deploying-2025-05-07T22-38-20-464683184Z-Running-npm-run-1746657582128.txt
+│   ├── Pasted-The-above-error-occurred-in-the-SelectItem-component-at-https-d6efaa3b-4b52-473f-b218-d0-1745542672994.txt
+│   ├── Pasted-Warning-validateDOMNesting-s-cannot-appear-as-a-descendant-of-s-s-a-a-at-a--1745455977230.txt
+│   ├── screenshot-1745790042839.png
+│   ├── screenshot-1746501651294.png
+│   ├── screenshot-1746666665664.png
+│   └── style.css
+├── bucketUpload.sh
+├── client
+│   ├── index.html
+│   ├── public
+│   │   ├── logo
+│   │   │   ├── original
+│   │   │   │   ├── logo.png
+│   │   │   │   ├── LOGO_SW.pdf
+│   │   │   │   ├── rpm_logo_new.png
+│   │   │   │   ├── rpm_logo.pdf
+│   │   │   │   └── rpm_logo.png
+│   │   │   ├── original-logo.pdf
+│   │   │   └── rpm-auto-logo.svg
+│   │   ├── manifest.json
+│   │   ├── placeholders
+│   │   │   ├── placeholder-car.svg
+│   │   │   ├── placeholder-category.svg
+│   │   │   └── placeholder-product.svg
+│   │   ├── robots.txt
+│   │   ├── rpm-auto-logo.svg
+│   │   ├── services
+│   │   │   ├── consignment.jpg
+│   │   │   ├── consignment.svg
+│   │   │   ├── inspection.jpg
+│   │   │   ├── inspection.svg
+│   │   │   ├── trade-in.jpg
+│   │   │   ├── trade-in.svg
+│   │   │   ├── vehicle-sourcing.jpg
+│   │   │   ├── vehicle-sourcing.svg
+│   │   │   ├── warranty.jpg
+│   │   │   └── warranty.svg
+│   │   ├── sitemap.xml
+│   │   └── vehicles
+│   │       ├── bmw
+│   │       │   ├── bmw_image1.jpg
+│   │       │   ├── bmw_image2.jpg
+│   │       │   ├── bmw_image3.jpg
+│   │       │   ├── bmw_image4.jpg
+│   │       │   └── bmw_image5.jpg
+│   │       ├── maclaren
+│   │       │   ├── maclaren_image10.jpg
+│   │       │   ├── maclaren_image11.jpg
+│   │       │   ├── maclaren_image12.jpg
+│   │       │   ├── maclaren_image1.jpg
+│   │       │   ├── maclaren_image2.jpg
+│   │       │   ├── maclaren_image3.jpg
+│   │       │   ├── maclaren_image4.jpg
+│   │       │   ├── maclaren_image5.jpg
+│   │       │   ├── maclaren_image6.jpg
+│   │       │   ├── maclaren_image7.jpg
+│   │       │   ├── maclaren_image8.jpg
+│   │       │   └── maclaren_image9.jpg
+│   │       ├── porche
+│   │       │   ├── porche_image1.jpg
+│   │       │   ├── porche_image2.jpg
+│   │       │   ├── porche_image3.jpg
+│   │       │   ├── porche_image4.jpg
+│   │       │   ├── porche_image5.jpg
+│   │       │   └── porche_image6.jpg
+│   │       └── tesla
+│   │           ├── tesla_image1.jpg
+│   │           ├── tesla_image2.jpg
+│   │           ├── tesla_image3.jpg
+│   │           └── tesla_image4.jpg
+│   ├── RPM Auto.png
+│   └── src
+│       ├── App.tsx
+│       ├── assets
+│       │   └── rpm-auto-logo.png
+│       ├── components
+│       │   ├── admin
+│       │   │   ├── analytics-dashboard.tsx
+│       │   │   ├── dashboard-layout.tsx
+│       │   │   ├── FailedEmailList.tsx
+│       │   │   ├── image-upload-section.tsx
+│       │   │   └── utm-generator.tsx
+│       │   ├── employee
+│       │   │   └── employee-layout.tsx
+│       │   ├── icons
+│       │   │   └── rpm-logo.tsx
+│       │   ├── layout
+│       │   │   ├── footer.tsx
+│       │   │   └── header.tsx
+│       │   ├── seo
+│       │   │   ├── canonical-url.tsx
+│       │   │   ├── json-ld-schema.tsx
+│       │   │   ├── optimized-image.tsx
+│       │   │   ├── page-meta.tsx
+│       │   │   ├── services-schema.tsx
+│       │   │   └── structured-data.tsx
+│       │   └── ui
+│       │       ├── ab-test.tsx
+│       │       ├── accordion.tsx
+│       │       ├── alert-dialog.tsx
+│       │       ├── alert.tsx
+│       │       ├── aspect-ratio.tsx
+│       │       ├── avatar.tsx
+│       │       ├── back-to-top.tsx
+│       │       ├── badge.tsx
+│       │       ├── breadcrumb.tsx
+│       │       ├── button.tsx
+│       │       ├── calendar.tsx
+│       │       ├── car-card.tsx
+│       │       ├── card.tsx
+│       │       ├── carousel.tsx
+│       │       ├── category-card.tsx
+│       │       ├── chart.tsx
+│       │       ├── checkbox.tsx
+│       │       ├── collapsible.tsx
+│       │       ├── command.tsx
+│       │       ├── consent-preferences.tsx
+│       │       ├── contact-form.tsx
+│       │       ├── context-menu.tsx
+│       │       ├── cookie-consent.tsx
+│       │       ├── cta-banner.tsx
+│       │       ├── dialog.tsx
+│       │       ├── drawer.tsx
+│       │       ├── dropdown-menu.tsx
+│       │       ├── file-uploader.tsx
+│       │       ├── form.tsx
+│       │       ├── hero-slider.tsx
+│       │       ├── hover-card.tsx
+│       │       ├── input-otp.tsx
+│       │       ├── input.tsx
+│       │       ├── label.tsx
+│       │       ├── map-section.tsx
+│       │       ├── menubar.tsx
+│       │       ├── navigation-menu.tsx
+│       │       ├── optimized-image.tsx
+│       │       ├── pagination.tsx
+│       │       ├── personalized-recommendations.tsx
+│       │       ├── popover.tsx
+│       │       ├── progress.tsx
+│       │       ├── radio-group.tsx
+│       │       ├── recently-viewed-vehicles.tsx
+│       │       ├── resizable.tsx
+│       │       ├── scroll-area.tsx
+│       │       ├── search-bar.tsx
+│       │       ├── select.tsx
+│       │       ├── separator.tsx
+│       │       ├── service-card.tsx
+│       │       ├── sheet.tsx
+│       │       ├── sidebar.tsx
+│       │       ├── skeleton.tsx
+│       │       ├── slider.tsx
+│       │       ├── switch.tsx
+│       │       ├── table.tsx
+│       │       ├── tabs.tsx
+│       │       ├── testimonial-card.tsx
+│       │       ├── textarea.tsx
+│       │       ├── toaster.tsx
+│       │       ├── toast.tsx
+│       │       ├── toggle-group.tsx
+│       │       ├── toggle.tsx
+│       │       ├── tooltip.tsx
+│       │       └── vehicle-gallery.tsx
+│       ├── hooks
+│       │   ├── use-mobile.tsx
+│       │   └── use-toast.ts
+│       ├── index.css
+│       ├── lib
+│       │   ├── cookieUtils.ts
+│       │   ├── queryClient.ts
+│       │   └── utils.ts
+│       ├── main.tsx
+│       ├── pages
+│       │   ├── about.tsx
+│       │   ├── admin
+│       │   │   ├── analytics.tsx
+│       │   │   ├── index.tsx
+│       │   │   ├── inventory-manager.tsx
+│       │   │   ├── inventory.tsx
+│       │   │   └── marketing.tsx
+│       │   ├── contact.tsx
+│       │   ├── employee
+│       │   │   ├── index.tsx
+│       │   │   ├── inquiries.tsx
+│       │   │   ├── inventory.tsx
+│       │   │   └── inventory.tsx.bak
+│       │   ├── gallery.tsx
+│       │   ├── home.tsx
+│       │   ├── inventory.tsx
+│       │   ├── not-found.tsx
+│       │   ├── privacy-policy.tsx
+│       │   ├── services.tsx
+│       │   ├── sitemap.tsx
+│       │   ├── terms.tsx
+│       │   └── vehicle-details.tsx
+│       └── utils
+│           └── seo-metadata.ts
+├── comprehensive_search.txt
+├── detailed_search.txt
+├── docs
+│   ├── CODE_ARCHITECTURE.md
+│   ├── DATABASE_SCHEMA.md
+│   ├── DEBUGGING_GUIDE.md
+│   ├── DEVELOPER.md
+│   ├── EMAIL_SETUP_GUIDE.md
+│   ├── FIELD_MIGRATION_GUIDE.md
+│   ├── README.md
+│   ├── STYLE_GUIDE.md
+│   ├── TECHNICAL_WIKI.md
+│   └── TECH_STACK.md
+├── drizzle.config.ts
+├── full_dump.sql
+├── generated-icon.png
+├── IMAGE_STORAGE_GUIDE.md
+├── IMAGE_UPLOAD_INSTRUCTIONS.md
+├── logo.ai
+├── LOGO_SW.pdf
+├── migration.sql
+├── package-lock.json
+├── postcss.config.js
+├── project_structure.txt
+├── public
+│   ├── about
+│   ├── images
+│   │   ├── categories
+│   │   ├── hero
+│   │   └── team
+│   ├── placeholders
+│   │   ├── placeholder-car.svg
+│   │   └── placeholder-category.svg
+│   ├── _redirects
+│   └── uploads
+│       └── vehicles
+├── README.md
+├── RENDER_DEPLOYMENT.md
+├── render.yaml
+├── replit_agent
+│   ├── architecture.md
+│   └── user_preferences.md
+├── run-migration.js
+├── schema_dump.sql
+├── schema_with_data.sql
+├── scripts
+│   ├── add-all-inventory.js
+│   ├── add-bmw-inventory.js
+│   ├── add-bmw.js
+│   ├── add-mclaren-inventory.js
+│   ├── deploy.sh
+│   └── upload-to-bucket.ts
+├── search_results.txt
+├── SEO_improvements_instructions.md
+├── SEO_tasks
+│   ├── seo-critical-fixes.md
+│   ├── seo-high-priority.md
+│   ├── seo-long-term.md
+│   ├── seo-medium-priority.md
+│   └── seo-todo-master.md
+├── serach_commands.txt
+├── server
+│   ├── db.ts
+│   ├── email.ts
+│   ├── index.ts
+│   ├── routes.ts
+│   ├── storage-adapter.ts
+│   ├── storage.ts
+│   ├── upload.ts
+│   ├── utils
+│   │   └── sitemap-generator.ts
+│   └── vite.ts
+├── shared
+│   ├── schema_complete.ts
+│   ├── schema-core.ts
+│   └── schema.ts
+├── tailwind.config.ts
+├── theme.json
+├── tree.md
+├── tsconfig.json
+├── upload-to-bucket.sh
+├── verify_ca_domains_post_cleanup.txt
+├── verify_ca_domains.txt
+└── vite.config.ts
+
+44 directories, 270 files
