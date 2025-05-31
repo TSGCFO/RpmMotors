@@ -82,8 +82,8 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
       
       const data = await response.json();
       
-      if (response.ok && data.authenticated && data.role === 'admin') {
-        // Only allow admin users to access the employee portal
+      if (response.ok && data.authenticated && (data.role === 'admin' || data.role === 'employee')) {
+        // Allow both admin and employee users to access the employee portal
         sessionStorage.setItem('employee_authenticated', 'true');
         sessionStorage.setItem('employee_username', username);
         sessionStorage.setItem('employee_role', data.role);
@@ -93,8 +93,8 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
           title: "Login Successful",
           description: `Welcome back, ${username}!`,
         });
-      } else if (response.ok && data.authenticated && data.role !== 'admin') {
-        // User is authenticated but doesn't have admin role
+      } else if (response.ok && data.authenticated && data.role !== 'admin' && data.role !== 'employee') {
+        // User is authenticated but doesn't have the right role
         setError('Access denied. You do not have permission to access the employee portal.');
       } else {
         setError('Invalid username or password. Please try again.');
