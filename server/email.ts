@@ -124,6 +124,9 @@ interface InquiryEmailData {
   subject: string;
   message: string;
   vehicleId?: number | null; // Accept null values from the database
+  vehicleMake?: string | null;
+  vehicleModel?: string | null;
+  vehicleYear?: number | null;
   inquiryId?: number;
 }
 
@@ -133,6 +136,9 @@ interface InquiryEmailData {
 export const formatInquiryEmail = (data: InquiryEmailData): EmailOptions => {
   const inquiryReference = data.inquiryId ? `Inquiry Reference: #${data.inquiryId}` : '';
   const vehicleReference = data.vehicleId ? `Related Vehicle ID: ${data.vehicleId}` : '';
+  const vehicleInfo = data.vehicleMake
+    ? `${data.vehicleYear ?? ''} ${data.vehicleMake} ${data.vehicleModel ?? ''}`.trim()
+    : '';
   
   // Create a plain text formatted message
   const formattedMessage = `
@@ -142,6 +148,7 @@ Phone: ${data.phone || 'Not provided'}
 Subject: ${data.subject}
 ${inquiryReference ? `${inquiryReference}\n` : ''}
 ${vehicleReference ? `${vehicleReference}\n` : ''}
+${vehicleInfo ? `Vehicle: ${vehicleInfo}\n` : ''}
 
 Message:
 ${data.message}
@@ -207,6 +214,7 @@ This inquiry was sent from the RPM Auto website contact form.
     <div class="reference">
       ${inquiryReference ? `<div>${inquiryReference}</div>` : ''}
       ${vehicleReference ? `<div>${vehicleReference}</div>` : ''}
+      ${vehicleInfo ? `<div>Vehicle: ${vehicleInfo}</div>` : ''}
     </div>
   </div>
   <div class="footer">
