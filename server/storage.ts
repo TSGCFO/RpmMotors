@@ -65,6 +65,12 @@ export interface InventoryStats {
   mileageRange: { min: number; max: number; avg: number };
 }
 
+export interface InquiryWithVehicle extends Inquiry {
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleYear: number | null;
+}
+
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
@@ -86,7 +92,7 @@ export interface IStorage {
   getInventoryStats(): Promise<InventoryStats>;
   
   // Inquiry methods
-  getInquiries(): Promise<Inquiry[]>;
+  getInquiries(): Promise<InquiryWithVehicle[]>;
   getInquiryById(id: number): Promise<Inquiry | undefined>;
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   updateInquiryStatus(id: number, status: string): Promise<Inquiry | undefined>;
@@ -537,8 +543,18 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Inquiry methods
-  async getInquiries(): Promise<Inquiry[]> {
-    return await db.select().from(inquiries);
+  async getInquiries(): Promise<InquiryWithVehicle[]> {
+    const rows = await db
+      .select()
+      .from(inquiries)
+      .leftJoin(vehicles, eq(inquiries.vehicleId, vehicles.id));
+
+    return rows.map(row => ({
+      ...row.inquiries,
+      vehicleMake: row.vehicles?.make ?? null,
+      vehicleModel: row.vehicles?.model ?? null,
+      vehicleYear: row.vehicles?.year ?? null,
+    }));
   }
   
   async getInquiryById(id: number): Promise<Inquiry | undefined> {

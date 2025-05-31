@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Inquiry } from '@shared/schema';
+
+interface InquiryWithVehicle extends Inquiry {
+  vehicleMake?: string | null;
+  vehicleModel?: string | null;
+  vehicleYear?: number | null;
+}
 import EmployeeLayout from '@/components/employee/employee-layout';
 import { Car } from 'lucide-react';
 import { 
@@ -73,12 +79,12 @@ export default function EmployeeInquiries() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<InquiryWithVehicle | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [sort, setSort] = useState<SortState>({ field: 'createdAt', direction: 'desc' });
   
   // Fetch all inquiries
-  const { data: inquiries, isLoading } = useQuery<Inquiry[]>({
+  const { data: inquiries, isLoading } = useQuery<InquiryWithVehicle[]>({
     queryKey: ['/api/inquiries'],
   });
   
@@ -110,7 +116,9 @@ export default function EmployeeInquiries() {
       inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (inquiry.subject ? inquiry.subject.toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
-      (inquiry.message ? inquiry.message.toLowerCase().includes(searchQuery.toLowerCase()) : false);
+      (inquiry.message ? inquiry.message.toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
+      (inquiry.vehicleMake ? inquiry.vehicleMake.toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
+      (inquiry.vehicleModel ? inquiry.vehicleModel.toLowerCase().includes(searchQuery.toLowerCase()) : false);
     
     const matchesStatus = statusFilter === '' || statusFilter === 'all' || inquiry.status === statusFilter;
     
@@ -139,13 +147,13 @@ export default function EmployeeInquiries() {
   };
   
   // Handle viewing an inquiry
-  const handleViewInquiry = (inquiry: Inquiry) => {
+  const handleViewInquiry = (inquiry: InquiryWithVehicle) => {
     setSelectedInquiry(inquiry);
     setIsViewModalOpen(true);
   };
   
   // Handle replying to an inquiry
-  const handleReplyToInquiry = (inquiry: Inquiry) => {
+  const handleReplyToInquiry = (inquiry: InquiryWithVehicle) => {
     setSelectedInquiry(inquiry);
     setIsReplyModalOpen(true);
     setReplyMessage('');
@@ -282,6 +290,7 @@ export default function EmployeeInquiries() {
                           )}
                         </div>
                       </TableHead>
+                      <TableHead>Vehicle</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
@@ -295,6 +304,9 @@ export default function EmployeeInquiries() {
                         </TableCell>
                         <TableCell>{inquiry.name}</TableCell>
                         <TableCell>{inquiry.subject}</TableCell>
+                        <TableCell>
+                          {inquiry.vehicleMake ? `${inquiry.vehicleYear ?? ''} ${inquiry.vehicleMake} ${inquiry.vehicleModel ?? ''}` : '-'}
+                        </TableCell>
                         <TableCell>
                           <div className="text-sm">{inquiry.email}</div>
                           {inquiry.phone && <div className="text-sm text-gray-500">{inquiry.phone}</div>}
@@ -410,6 +422,11 @@ export default function EmployeeInquiries() {
                       <Car className="h-3 w-3 mr-1" />
                       Vehicle Inquiry
                     </Badge>
+                  )}
+                  {selectedInquiry.vehicleMake && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {selectedInquiry.vehicleYear ?? ''} {selectedInquiry.vehicleMake} {selectedInquiry.vehicleModel ?? ''}
+                    </p>
                   )}
                 </div>
                 <div className="border-t border-gray-200 pt-3 mt-3">
