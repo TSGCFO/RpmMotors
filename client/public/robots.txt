@@ -2,10 +2,10 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://rpmauto.com/sitemap.xml
+Sitemap: https://www.rpmautosales.ca/sitemap.xml
 
 # Crawl-delay for search engines
-Crawl-delay: 1
+Crawl-delay: 0
 
 # Disallow admin areas (if any are added later)
 Disallow: /admin/
@@ -17,3 +17,4 @@ Allow: /about
 Allow: /inventory
 Allow: /services
 Allow: /contact
+Allow: /gallery
