@@ -1,12 +1,13 @@
 import sgMail from '@sendgrid/mail';
 
-// Email configuration constants
-const RECIPIENT_EMAIL = 'fateh@rpmautosales.ca'; // Default recipient
+// Email configuration constants with environment variable support
+// These can be overridden in production via environment variables
+const RECIPIENT_EMAIL = process.env.ADMIN_EMAIL || 'fateh@rpmautosales.ca';
 
 // Use a verified sender from SendGrid
 // IMPORTANT: This must be a fully verified single sender in your SendGrid account
 // If using a free SendGrid account, you might need to use your personal email instead
-const FROM_EMAIL = 'fateh@rpmautosales.ca'; // Change this to your fully verified sender
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'tech.support@rpmautosales.ca';
 const FROM_NAME = 'RPM Auto Website';
 
 // Set up SendGrid mail service

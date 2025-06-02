@@ -28,6 +28,8 @@ The website uses SendGrid to deliver email notifications from customer inquiries
    - Complete the verification form using an existing email address (e.g., fateh@rpmautosales.ca)
    - Follow the verification instructions sent to the email
    - Make sure the sender email in the code matches the verified email
+   - The sending address is configured via the `SENDGRID_FROM_EMAIL` environment variable
+   - Inquiry notifications are sent to the address specified by `ADMIN_EMAIL`
 
 3. **Domain Authentication** (Optional but recommended):
    - In SendGrid, go to Settings → Sender Authentication
