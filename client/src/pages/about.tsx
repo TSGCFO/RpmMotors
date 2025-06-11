@@ -166,40 +166,14 @@ export default function About() {
         </div>
       </section>
 
-      {/* Our Story */}
+      {/* Our Story - Placeholder */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-['Poppins'] font-bold mb-6">Our Story</h2>
-              <p className="text-gray-700 mb-4">
-                RPM Auto was founded in 2013 with a simple mission: to provide discerning clients with access to the world's most exceptional automobiles, coupled with a purchasing experience that matches the caliber of these vehicles.
-              </p>
-              <p className="text-gray-700 mb-4">
-                What began as a boutique dealership has evolved into one of the premier destinations for luxury and exotic vehicles in the Greater Toronto Area, while maintaining our commitment to personalized service and automotive excellence.
-              </p>
-              <p className="text-gray-700 mb-4">
-                Our founder's passion for extraordinary automobiles and decades of experience in the luxury automotive sector laid the foundation for a business built on expertise, integrity, and an unwavering dedication to customer satisfaction.
-              </p>
-              <p className="text-gray-700">
-                Today, RPM Auto continues to set the standard in the luxury automotive market, offering a carefully curated inventory, comprehensive services, and a team of specialists who share our clients' enthusiasm for exceptional vehicles.
-              </p>
-            </div>
-            <div>
-              <div className="relative">
-                <OptimizedImage 
-                  src="https://images.unsplash.com/photo-1547038577-da80abbc4f19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1752&q=80" 
-                  alt="RPM Auto Dealership - Our luxury car showroom in Vaughan, Ontario" 
-                  className="w-full h-auto rounded-lg shadow-xl"
-                  width={1752}
-                  height={980}
-                  priority={true}
-                />
-                <div className="absolute -bottom-6 -left-6 bg-[#E31837] text-white p-6 rounded shadow-lg hidden md:block">
-                  <p className="text-3xl font-['Poppins'] font-bold">10+</p>
-                  <p className="text-sm uppercase tracking-wider">Years of Excellence</p>
-                </div>
-              </div>
+          <div className="text-center">
+            <h2 className="text-3xl font-['Poppins'] font-bold mb-6">Our Story</h2>
+            <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-12">
+              <p className="text-gray-500 text-lg">Content placeholder - Our Story section</p>
+              <p className="text-gray-400 text-sm mt-2">This section will be updated with your company story and history</p>
             </div>
           </div>
         </div>
