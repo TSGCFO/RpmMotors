@@ -9,6 +9,7 @@ import PageMeta from "@/components/seo/page-meta";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import StructuredData from "@/components/seo/structured-data";
+import { Search, Calendar, CreditCard, Key, ArrowRight, Clock } from "lucide-react";
 
 export default function About() {
   useEffect(() => {
@@ -258,34 +259,126 @@ export default function About() {
         </div>
       </section>
 
-      {/* Meet Our Team */}
-      <section className="py-16 bg-white">
+      {/* Customer Journey Steps */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-['Poppins'] font-bold mb-4">Meet Our Team</h2>
+            <h2 className="text-3xl font-['Poppins'] font-bold mb-4">Your Journey to the Perfect Car</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Our team of automotive experts is dedicated to providing you with an exceptional experience
+              Experience our streamlined process designed to make finding and purchasing your dream car effortless
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <OptimizedImage 
-                  src={member.image} 
-                  alt={`${member.name}, ${member.position} at RPM Auto`} 
-                  className="w-full h-64 object-cover"
-                  width={687}
-                  height={1030}
-                  priority={index < 2}
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-['Poppins'] font-bold mb-1">{member.name}</h3>
-                  <p className="text-[#E31837] font-semibold mb-4">{member.position}</p>
-                  <p className="text-gray-600 text-sm">{member.bio}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 1: Browse & Discover */}
+            <div className="group relative">
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-2 border-transparent hover:border-[#E31837]/20">
+                <div className="absolute -top-4 left-6">
+                  <div className="bg-[#E31837] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">
+                    1
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="w-12 h-12 bg-[#E31837]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#E31837]/20 transition-colors">
+                    <Search className="h-6 w-6 text-[#E31837]" />
+                  </div>
+                  <h3 className="text-lg font-['Poppins'] font-bold mb-2">Browse & Discover</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Explore our curated inventory of premium vehicles with advanced search filters
+                  </p>
+                  <div className="flex items-center text-[#E31837] text-sm font-semibold">
+                    <span>View Inventory</span>
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Step 2: Schedule & Test Drive */}
+            <div className="group relative">
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-2 border-transparent hover:border-[#E31837]/20">
+                <div className="absolute -top-4 left-6">
+                  <div className="bg-[#E31837] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">
+                    2
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="w-12 h-12 bg-[#E31837]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#E31837]/20 transition-colors">
+                    <Calendar className="h-6 w-6 text-[#E31837]" />
+                  </div>
+                  <h3 className="text-lg font-['Poppins'] font-bold mb-2">Schedule & Test Drive</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Book a convenient appointment and experience your chosen vehicle firsthand
+                  </p>
+                  <div className="flex items-center text-[#E31837] text-sm font-semibold">
+                    <span>Book Test Drive</span>
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Financing & Trade-in */}
+            <div className="group relative">
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-2 border-transparent hover:border-[#E31837]/20">
+                <div className="absolute -top-4 left-6">
+                  <div className="bg-[#E31837] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">
+                    3
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="w-12 h-12 bg-[#E31837]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#E31837]/20 transition-colors">
+                    <CreditCard className="h-6 w-6 text-[#E31837]" />
+                  </div>
+                  <h3 className="text-lg font-['Poppins'] font-bold mb-2">Financing & Trade-in</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Secure competitive financing and get top value for your current vehicle
+                  </p>
+                  <div className="flex items-center text-[#E31837] text-sm font-semibold">
+                    <span>Get Pre-Approved</span>
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: Finalize & Drive Home */}
+            <div className="group relative">
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-2 border-transparent hover:border-[#E31837]/20">
+                <div className="absolute -top-4 left-6">
+                  <div className="bg-[#E31837] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">
+                    4
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="w-12 h-12 bg-[#E31837]/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#E31837]/20 transition-colors">
+                    <Key className="h-6 w-6 text-[#E31837]" />
+                  </div>
+                  <h3 className="text-lg font-['Poppins'] font-bold mb-2">Finalize & Drive Home</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Complete the paperwork and drive away in your new vehicle the same day
+                  </p>
+                  <div className="flex items-center text-[#E31837] text-sm font-semibold">
+                    <span>Contact Us</span>
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Journey Timeline */}
+          <div className="mt-12 relative">
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#E31837]/20 via-[#E31837] to-[#E31837]/20 transform -translate-y-1/2"></div>
+            <div className="flex justify-center items-center space-x-8">
+              <div className="bg-white rounded-lg shadow-md p-6 max-w-md text-center">
+                <Clock className="h-8 w-8 text-[#E31837] mx-auto mb-3" />
+                <h4 className="font-['Poppins'] font-bold mb-2">Average Process Time</h4>
+                <p className="text-gray-600 text-sm">
+                  Most customers complete their entire journey in <span className="font-semibold text-[#E31837]">2-3 hours</span> or less
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
