@@ -9,7 +9,7 @@ import PageMeta from "@/components/seo/page-meta";
 import CanonicalUrl from "@/components/seo/canonical-url";
 import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
 import StructuredData from "@/components/seo/structured-data";
-import { Search, Calendar, CreditCard, Key, ArrowRight, Clock } from "lucide-react";
+import { Search, Calendar, CreditCard, Key, ArrowRight } from "lucide-react";
 
 export default function About() {
   useEffect(() => {
@@ -367,19 +367,7 @@ export default function About() {
             </div>
           </div>
 
-          {/* Journey Timeline */}
-          <div className="mt-12 relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#E31837]/20 via-[#E31837] to-[#E31837]/20 transform -translate-y-1/2"></div>
-            <div className="flex justify-center items-center space-x-8">
-              <div className="bg-white rounded-lg shadow-md p-6 max-w-md text-center">
-                <Clock className="h-8 w-8 text-[#E31837] mx-auto mb-3" />
-                <h4 className="font-['Poppins'] font-bold mb-2">Average Process Time</h4>
-                <p className="text-gray-600 text-sm">
-                  Most customers complete their entire journey in <span className="font-semibold text-[#E31837]">2-3 hours</span> or less
-                </p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </section>
 
