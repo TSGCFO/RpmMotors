@@ -84,6 +84,7 @@ The deployment includes:
 Changelog:
 - July 05, 2025. Initial setup
 - July 05, 2025. Updated "Our Story" section on About page with new founding date (April 2025) and refreshed company narrative
+- July 05, 2025. Revised "Our Story" section to remove specific founding date, keeping the focus on mission and values
 
 ## User Preferences
 

@@ -173,7 +173,7 @@ export default function About() {
             <div>
               <h2 className="text-3xl font-['Poppins'] font-bold mb-6">Our Story</h2>
               <p className="text-gray-700 mb-4">
-                At RPM Auto, we believe that buying a car should be as exhilarating as driving one. Founded in April 2025, RPM Auto was born from a passion for performance, precision, and premium service. Our mission is simple: to connect discerning clients with the world's most exceptional automobiles—while delivering a purchasing experience that's just as refined.
+                At RPM Auto, we believe that buying a car should be as exhilarating as driving one. Born from a passion for performance, precision, and premium service, our mission is simple: to connect discerning clients with the world's most exceptional automobiles—while delivering a purchasing experience that's just as refined.
               </p>
               <p className="text-gray-700 mb-4">
                 Whether you're looking for a luxury sedan, a high-performance sports car, or a rare collector's model, RPM Auto is your trusted partner. We're more than just a dealership—we're curators of automotive excellence. Every vehicle in our showroom is handpicked to meet the highest standards of quality, design, and engineering.
