@@ -15,16 +15,22 @@ import { format } from "date-fns";
 
 interface GarageRegister {
   id: number;
-  dateOfSale: string;
-  vehicleMake: string;
-  vehicleModel: string;
-  vehicleYear: number;
-  vehicleVin: string;
-  purposeOfSale: string;
-  buyerName: string;
-  buyerPhoneNumber: string;
-  licensePlate: string;
+  vehicleId: number;
+  make: string;
+  modelStyle: string;
+  colour: string;
+  dateIntoStock: string;
+  vinSerialNo: string;
+  purchasedFromName: string;
+  purchasedFromAddress: string;
+  purposeType: string;
+  dateOutOfStock: string;
+  soldToName: string;
+  soldToAddress: string;
+  plateNo: string;
   odometerReading: number;
+  createdAt: string;
+  createdBy: number | null;
 }
 
 export function SalesRecords() {
@@ -60,7 +66,7 @@ export function SalesRecords() {
                     <TableHead>VIN</TableHead>
                     <TableHead>Sale Purpose</TableHead>
                     <TableHead>Buyer Name</TableHead>
-                    <TableHead>Buyer Phone</TableHead>
+                    <TableHead>Buyer Address</TableHead>
                     <TableHead>License Plate</TableHead>
                     <TableHead>Odometer</TableHead>
                   </TableRow>
@@ -71,39 +77,39 @@ export function SalesRecords() {
                       <TableCell className="whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-muted-foreground" />
-                          {formatDate(register.dateOfSale)}
+                          {formatDate(register.dateOutOfStock)}
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-1">
                           <Car className="h-3 w-3 text-muted-foreground" />
-                          {register.vehicleMake} {register.vehicleModel} ({register.vehicleYear})
+                          {register.make} {register.modelStyle} ({register.colour})
                         </div>
                       </TableCell>
                       <TableCell>
                         <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                          {register.vehicleVin}
+                          {register.vinSerialNo}
                         </code>
                       </TableCell>
                       <TableCell>
                         <Badge variant={
-                          register.purposeOfSale === 'Resale' ? 'default' : 
-                          register.purposeOfSale === 'Wrecking' ? 'destructive' : 
+                          register.purposeType === 'Resale' ? 'default' : 
+                          register.purposeType === 'Wrecking' ? 'destructive' : 
                           'secondary'
                         }>
-                          {register.purposeOfSale}
+                          {register.purposeType}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3 text-muted-foreground" />
-                          {register.buyerName}
+                          {register.soldToName}
                         </div>
                       </TableCell>
-                      <TableCell>{register.buyerPhoneNumber}</TableCell>
+                      <TableCell className="text-sm">{register.soldToAddress}</TableCell>
                       <TableCell>
                         <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                          {register.licensePlate}
+                          {register.plateNo}
                         </code>
                       </TableCell>
                       <TableCell>{register.odometerReading.toLocaleString()} km</TableCell>
