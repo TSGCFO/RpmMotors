@@ -582,6 +582,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Garage register endpoints
+  app.get("/api/garage-registers", async (_req: Request, res: Response) => {
+    try {
+      const registers = await storage.getGarageRegisters();
+      res.json(registers);
+    } catch (error) {
+      console.error("Error fetching garage registers:", error);
+      res.status(500).json({ message: "Failed to fetch garage registers" });
+    }
+  });
+
   // Dynamic sitemap generation
   app.get("/sitemap.xml", async (req, res) => {
     try {

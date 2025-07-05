@@ -123,7 +123,7 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
     { path: '/employee/inquiries', label: 'Inquiries', icon: <MessageSquare className="h-5 w-5" />, description: 'Customer inquiries and messages' },
     { path: '/employee/testimonials', label: 'Testimonials', icon: <FileEdit className="h-5 w-5" />, description: 'Manage customer reviews' },
     { path: '/employee/media', label: 'Media Library', icon: <Image className="h-5 w-5" />, description: 'Manage images and media files' },
-    { path: '/employee/sales', label: 'Sales Records', icon: <Wallet className="h-5 w-5" />, description: 'View and manage sales records' },
+    { path: '/employee/sales-records', label: 'Sales Records', icon: <Wallet className="h-5 w-5" />, description: 'View and manage sales records' },
     { path: '/employee/reports', label: 'Reports', icon: <ClipboardList className="h-5 w-5" />, description: 'Sales and inventory reports' },
     { path: '/employee/analytics', label: 'Analytics', icon: <BarChart className="h-5 w-5" />, description: 'Traffic and user analytics' },
     { path: '/employee/settings', label: 'Settings', icon: <Settings className="h-5 w-5" />, description: 'System preferences and settings' },

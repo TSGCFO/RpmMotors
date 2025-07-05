@@ -22,6 +22,7 @@ import AdminInventory from "@/pages/admin/inventory";
 import EmployeeDashboard from "@/pages/employee";
 import EmployeeInventory from "@/pages/employee/inventory";
 import EmployeeInquiries from "@/pages/employee/inquiries";
+import { SalesRecords } from "@/pages/employee/sales-records";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -77,6 +78,7 @@ function Router() {
         <Route path="/employee" component={EmployeeDashboard} />
         <Route path="/employee/inventory" component={EmployeeInventory} />
         <Route path="/employee/inquiries" component={EmployeeInquiries} />
+        <Route path="/employee/sales-records" component={SalesRecords} />
         
         <Route component={NotFound} />
       </Switch>
