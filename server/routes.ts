@@ -321,9 +321,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid vehicle ID" });
       }
       
-      const { status } = req.body;
+      const { status, garageRegister: garageRegisterData } = req.body;
       if (!status || !['available', 'sold', 'reserved', 'pending'].includes(status)) {
         return res.status(400).json({ message: "Invalid status value. Must be one of: available, sold, reserved, pending" });
+      }
+      
+      // If status is changing to "sold", require garage register data
+      if (status === 'sold' && !garageRegisterData) {
+        return res.status(400).json({ 
+          message: "Garage register information is required when marking a vehicle as sold",
+          requiresGarageRegister: true 
+        });
+      }
+      
+      // If garage register data is provided, validate it
+      if (status === 'sold' && garageRegisterData) {
+        const { insertGarageRegisterSchema } = await import('@shared/schema');
+        const validationResult = insertGarageRegisterSchema.safeParse(garageRegisterData);
+        
+        if (!validationResult.success) {
+          const errorMessage = fromZodError(validationResult.error).message;
+          return res.status(400).json({ 
+            message: "Invalid garage register data",
+            errors: errorMessage,
+            requiresGarageRegister: true 
+          });
+        }
+        
+        // Check if garage register already exists for this vehicle
+        const existingRegister = await storage.getGarageRegisterByVehicleId(id);
+        if (existingRegister) {
+          return res.status(400).json({ 
+            message: "Garage register entry already exists for this vehicle" 
+          });
+        }
+        
+        // Create garage register entry
+        await storage.createGarageRegister(validationResult.data);
       }
       
       const updatedVehicle = await storage.updateVehicle(id, { status });

@@ -3,7 +3,8 @@ import {
   Vehicle, InsertVehicle, vehicles,
   Inquiry, InsertInquiry, inquiries,
   Testimonial, InsertTestimonial, testimonials,
-  BlogPost, InsertBlogPost, blogPosts
+  BlogPost, InsertBlogPost, blogPosts,
+  GarageRegister, InsertGarageRegister, garageRegister
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
@@ -108,6 +109,11 @@ export interface IStorage {
   getPublishedBlogPosts(): Promise<BlogPost[]>;
   getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
   createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost>;
+  
+  // Garage Register methods
+  createGarageRegister(register: InsertGarageRegister): Promise<GarageRegister>;
+  getGarageRegisterByVehicleId(vehicleId: number): Promise<GarageRegister | undefined>;
+  getGarageRegisters(): Promise<GarageRegister[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -765,6 +771,32 @@ export class DatabaseStorage implements IStorage {
       .values(insertBlogPost)
       .returning();
     return blogPost;
+  }
+  
+  // Garage Register methods
+  async createGarageRegister(register: InsertGarageRegister): Promise<GarageRegister> {
+    const [garageRegisterEntry] = await db
+      .insert(garageRegister)
+      .values(register)
+      .returning();
+    return garageRegisterEntry;
+  }
+
+  async getGarageRegisterByVehicleId(vehicleId: number): Promise<GarageRegister | undefined> {
+    const [register] = await db
+      .select()
+      .from(garageRegister)
+      .where(eq(garageRegister.vehicleId, vehicleId))
+      .limit(1);
+    return register || undefined;
+  }
+
+  async getGarageRegisters(): Promise<GarageRegister[]> {
+    const registers = await db
+      .select()
+      .from(garageRegister)
+      .orderBy(desc(garageRegister.createdAt));
+    return registers;
   }
 }
 

@@ -189,3 +189,52 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
 
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
+
+// Garage Register schema for tracking vehicle sales
+export const garageRegister = pgTable("garage_register", {
+  id: serial("id").primaryKey(),
+  vehicleId: integer("vehicle_id").notNull().references(() => vehicles.id, { onDelete: 'restrict' }),
+  make: text("make").notNull(),
+  modelStyle: text("model_style").notNull(),
+  colour: text("colour").notNull(),
+  dateIntoStock: text("date_into_stock").notNull(), // Format: yyyy/mm/dd
+  vinSerialNo: text("vin_serial_no").notNull(),
+  purchasedFromName: text("purchased_from_name").notNull(),
+  purchasedFromAddress: text("purchased_from_address").notNull(),
+  purposeType: text("purpose_type").notNull(), // Resale, Wrecking, or Consignment
+  dateOutOfStock: text("date_out_of_stock").notNull(), // Format: yyyy/mm/dd
+  soldToName: text("sold_to_name").notNull(),
+  soldToAddress: text("sold_to_address").notNull(),
+  plateNo: text("plate_no").notNull(),
+  odometerReading: integer("odometer_reading").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: integer("created_by").references(() => users.id),
+});
+
+export const insertGarageRegisterSchema = createInsertSchema(garageRegister).omit({
+  id: true,
+  createdAt: true
+}).extend({
+  purposeType: z.enum(["Resale", "Wrecking", "Consignment"], {
+    errorMap: () => ({ message: "Purpose type must be one of: Resale, Wrecking, or Consignment" })
+  }),
+  dateIntoStock: z.string().regex(/^\d{4}\/\d{2}\/\d{2}$/, "Date must be in format yyyy/mm/dd"),
+  dateOutOfStock: z.string().regex(/^\d{4}\/\d{2}\/\d{2}$/, "Date must be in format yyyy/mm/dd"),
+  plateNo: z.string().regex(/^[A-Z0-9]+$/, "Plate number must be alphanumeric"),
+  odometerReading: z.number().int().min(0, "Odometer reading must be positive"),
+});
+
+export type InsertGarageRegister = z.infer<typeof insertGarageRegisterSchema>;
+export type GarageRegister = typeof garageRegister.$inferSelect;
+
+// Relations for garage register
+export const garageRegisterRelations = relations(garageRegister, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [garageRegister.vehicleId],
+    references: [vehicles.id]
+  }),
+  createdByUser: one(users, {
+    fields: [garageRegister.createdBy],
+    references: [users.id]
+  })
+}));

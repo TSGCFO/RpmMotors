@@ -123,6 +123,12 @@ The application supports multiple deployment environments:
 ## Changelog
 
 - July 05, 2025. Initial setup
+- January 05, 2025. Implemented Garage Register feature
+  - Added garage_register table to track vehicle sales in compliance with dealership regulations
+  - Created auto-fill functionality that populates fields from vehicle data when marking as "Sold"
+  - Built validation for all required garage register fields including Ontario license plate format
+  - Integrated garage register dialog into employee portal's inventory management
+  - Modified vehicle status update flow to require garage register completion before marking vehicles as "Sold"
 
 ## User Preferences
 

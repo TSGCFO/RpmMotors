@@ -27,6 +27,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { GarageRegisterDialog } from '@/components/garage-register-dialog';
 import { Loader2, Pencil, Trash2, Car, Check, X, AlertTriangle } from 'lucide-react';
 import { Vehicle } from '@shared/schema';
 import { ImageUploadSection } from '@/components/admin/image-upload-section';
@@ -326,6 +327,8 @@ export default function EmployeeInventoryManager() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isGarageRegisterOpen, setIsGarageRegisterOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ vehicle: Vehicle | null, newStatus: string }>({ vehicle: null, newStatus: '' });
   // Use FormDataType for editing to ensure type compatibility
   const [editingVehicle, setEditingVehicle] = useState<FormDataType | null>(null);
   const [deletingVehicleId, setDeletingVehicleId] = useState<number | null>(null);
@@ -407,20 +410,26 @@ export default function EmployeeInventoryManager() {
   
   // Update vehicle status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: number, status: string }) => {
+    mutationFn: async ({ id, status, garageRegister }: { id: number, status: string, garageRegister?: any }) => {
       const response = await fetch(`/api/vehicles/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, garageRegister }),
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to update status');
+        // Check if the error is because garage register is required
+        if (data.requiresGarageRegister) {
+          throw { requiresGarageRegister: true, message: data.message };
+        }
+        throw new Error(data.message || 'Failed to update status');
       }
       
-      return response.json();
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
@@ -428,13 +437,17 @@ export default function EmployeeInventoryManager() {
         title: "Status Updated",
         description: "Vehicle status changed successfully!",
       });
+      setIsGarageRegisterOpen(false);
+      setPendingStatusChange({ vehicle: null, newStatus: '' });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update status. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      if (!error.requiresGarageRegister) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to update status. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
   
@@ -557,7 +570,28 @@ export default function EmployeeInventoryManager() {
   
   // Handle status change
   const handleStatusChange = (id: number, status: string) => {
-    updateStatusMutation.mutate({ id, status });
+    // Find the vehicle being updated
+    const vehicle = vehicles?.find(v => v.id === id);
+    
+    if (status === 'sold' && vehicle) {
+      // If changing to sold, show garage register dialog
+      setPendingStatusChange({ vehicle, newStatus: status });
+      setIsGarageRegisterOpen(true);
+    } else {
+      // For other status changes, proceed normally
+      updateStatusMutation.mutate({ id, status });
+    }
+  };
+  
+  // Handle garage register confirmation
+  const handleGarageRegisterConfirm = (garageRegisterData: any) => {
+    if (pendingStatusChange.vehicle) {
+      updateStatusMutation.mutate({
+        id: pendingStatusChange.vehicle.id,
+        status: pendingStatusChange.newStatus,
+        garageRegister: garageRegisterData
+      });
+    }
   };
   
   // Filter vehicles based on active tab
@@ -743,6 +777,19 @@ export default function EmployeeInventoryManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Garage Register Dialog */}
+      {pendingStatusChange.vehicle && (
+        <GarageRegisterDialog
+          isOpen={isGarageRegisterOpen}
+          onClose={() => {
+            setIsGarageRegisterOpen(false);
+            setPendingStatusChange({ vehicle: null, newStatus: '' });
+          }}
+          vehicle={pendingStatusChange.vehicle}
+          onConfirm={handleGarageRegisterConfirm}
+        />
+      )}
     </EmployeeLayout>
   );
 }
