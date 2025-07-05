@@ -173,16 +173,16 @@ export default function About() {
             <div>
               <h2 className="text-3xl font-['Poppins'] font-bold mb-6">Our Story</h2>
               <p className="text-gray-700 mb-4">
-                RPM Auto was founded in 2013 with a simple mission: to provide discerning clients with access to the world's most exceptional automobiles, coupled with a purchasing experience that matches the caliber of these vehicles.
+                At RPM Auto, we believe that buying a car should be as exhilarating as driving one. Founded in April 2025, RPM Auto was born from a passion for performance, precision, and premium service. Our mission is simple: to connect discerning clients with the world's most exceptional automobiles—while delivering a purchasing experience that's just as refined.
               </p>
               <p className="text-gray-700 mb-4">
-                What began as a boutique dealership has evolved into one of the premier destinations for luxury and exotic vehicles in the Greater Toronto Area, while maintaining our commitment to personalized service and automotive excellence.
+                Whether you're looking for a luxury sedan, a high-performance sports car, or a rare collector's model, RPM Auto is your trusted partner. We're more than just a dealership—we're curators of automotive excellence. Every vehicle in our showroom is handpicked to meet the highest standards of quality, design, and engineering.
               </p>
               <p className="text-gray-700 mb-4">
-                Our founder's passion for extraordinary automobiles and decades of experience in the luxury automotive sector laid the foundation for a business built on expertise, integrity, and an unwavering dedication to customer satisfaction.
+                But what truly sets us apart is our commitment to personalized service. From your first inquiry to the moment you drive off the lot—and beyond—we're here to make every step seamless, transparent, and tailored to you.
               </p>
               <p className="text-gray-700">
-                Today, RPM Auto continues to set the standard in the luxury automotive market, offering a carefully curated inventory, comprehensive services, and a team of specialists who share our clients' enthusiasm for exceptional vehicles.
+                Welcome to RPM Auto. Where passion meets performance.
               </p>
             </div>
             <div>
