@@ -1,5 +1,4 @@
 import PageMeta from "@/components/seo/page-meta";
-import CanonicalUrl from "@/components/seo/canonical-url";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function PrivacyPolicy() {
@@ -17,7 +16,6 @@ export default function PrivacyPolicy() {
         keywords="privacy policy, data protection, personal information, RPM Auto privacy"
         canonical="https://www.rpmautosales.ca/privacy-policy"
       />
-      <CanonicalUrl path="/privacy-policy" />
       
       <div className="container mx-auto px-6">
         {/* Breadcrumb */}

@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import PageMeta from "@/components/seo/page-meta";
-import CanonicalUrl from "@/components/seo/canonical-url";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function Sitemap() {
@@ -18,7 +17,6 @@ export default function Sitemap() {
         keywords="sitemap, website map, RPM Auto pages, website navigation, luxury cars"
         canonical="https://www.rpmautosales.ca/sitemap"
       />
-      <CanonicalUrl path="/sitemap" />
       
       <div className="container mx-auto px-6">
         {/* Breadcrumb */}

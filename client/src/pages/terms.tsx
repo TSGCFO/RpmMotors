@@ -1,5 +1,4 @@
 import PageMeta from "@/components/seo/page-meta";
-import CanonicalUrl from "@/components/seo/canonical-url";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function Terms() {
@@ -17,7 +16,6 @@ export default function Terms() {
         keywords="terms and conditions, legal terms, user agreement, RPM Auto terms"
         canonical="https://www.rpmautosales.ca/terms"
       />
-      <CanonicalUrl path="/terms" />
       
       <div className="container mx-auto px-6">
         {/* Breadcrumb */}
