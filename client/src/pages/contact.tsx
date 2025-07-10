@@ -58,6 +58,7 @@ export default function Contact() {
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/contact"
       />
+      <CanonicalUrl path="/contact" />
       
       {/* LocalBusiness structured data */}
       <StructuredData

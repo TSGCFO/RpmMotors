@@ -95,6 +95,7 @@ export default function About() {
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/about"
       />
+      <CanonicalUrl path="/about" />
       
       {/* LocalBusiness structured data */}
       <StructuredData
