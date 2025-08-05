@@ -260,8 +260,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const vehicle = await storage.createVehicle(validationResult.data);
       res.status(201).json(vehicle);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating vehicle:", error);
+      
+      // Check for duplicate VIN error
+      if (error.code === '23505' && error.constraint_name === 'vehicles_vin_unique') {
+        return res.status(409).json({ 
+          message: "A vehicle with this VIN already exists in the system. Please check the VIN and try again." 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to create vehicle" });
     }
   });

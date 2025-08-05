@@ -53,10 +53,11 @@ export default function AdminInventory() {
       setIsAddModalOpen(false);
       resetForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to add vehicle. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to add vehicle. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
