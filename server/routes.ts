@@ -115,6 +115,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paginated = req.query.paginated === 'true';
       const includeAll = req.query.includeAll === 'true';
       
+      // When includeAll is true, remove pagination to show all vehicles
+      if (includeAll && !req.query.limit && !req.query.page) {
+        delete options.pagination;
+      }
+      
       // Check if this is a request that should include sold vehicles
       if (!includeAll && !options.filters) {
         options.filters = { status: 'available' };
