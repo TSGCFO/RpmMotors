@@ -129,6 +129,11 @@ The application supports multiple deployment environments:
   - Built validation for all required garage register fields including Ontario license plate format
   - Integrated garage register dialog into employee portal's inventory management
   - Modified vehicle status update flow to require garage register completion before marking vehicles as "Sold"
+- January 06, 2025. Fixed pagination bug in vehicle inventory system
+  - Resolved issue where default pagination limit (10) was incorrectly applied when using includeAll=true
+  - Improved parseVehicleQueryOptions to only apply pagination when appropriate
+  - Ensured all vehicles display correctly in admin and employee inventory pages
+  - Vehicle with VIN KMHD84LF0JU551892 (ID 13) now properly appears in all inventory views
 
 ## User Preferences
 

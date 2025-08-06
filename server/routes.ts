@@ -64,10 +64,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const parseVehicleQueryOptions = (req: Request) => {
     const options: any = {};
     
-    // Parse pagination parameters
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    options.pagination = { page, limit };
+    // Parse pagination parameters - only add if explicitly requested or if not using includeAll
+    // This prevents default limits from interfering with showing all vehicles
+    const includeAll = req.query.includeAll === 'true';
+    
+    if (!includeAll) {
+      // Only apply pagination when not including all vehicles
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      options.pagination = { page, limit };
+    } else if (req.query.page || req.query.limit) {
+      // If includeAll is true but pagination params are explicitly provided, respect them
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      options.pagination = { page, limit };
+    }
+    // When includeAll=true with no explicit pagination, don't set any pagination
     
     // Parse sorting parameters
     if (req.query.sort) {
@@ -115,12 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paginated = req.query.paginated === 'true';
       const includeAll = req.query.includeAll === 'true';
       
-      // When includeAll is true, remove pagination to show all vehicles
-      if (includeAll && !req.query.limit && !req.query.page) {
-        delete options.pagination;
-      }
-      
-      // Check if this is a request that should include sold vehicles
+      // Apply status filter: only show available vehicles unless includeAll is true
       if (!includeAll && !options.filters) {
         options.filters = { status: 'available' };
       } else if (!includeAll && options.filters && !options.filters.status) {
