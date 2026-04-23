@@ -60,7 +60,7 @@ export default function Header() {
                     className="flex items-center hover:text-[#E31837] transition-colors text-sm"
                   >
                     <i className="icon-contact-icons-08 mr-2"></i>
-                    <span className="hidden md:inline">By appointment only<br />Vaughan, Ontario</span>
+                    <span className="hidden md:inline">11623 Yonge St., Unit 4<br />Richmond Hill, ON L4E 3N8</span>
                     <span className="md:hidden">Visit Us</span>
                   </a>
                 </li>

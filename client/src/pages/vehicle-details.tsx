@@ -125,7 +125,7 @@ export default function VehicleDetails() {
 
   // Prepare SEO data
   const pageTitle = `${vehicle.year} ${vehicle.make} ${vehicle.model} | RPM Auto`;
-  const pageDescription = `${vehicle.year} ${vehicle.make} ${vehicle.model} with ${formatNumber(vehicle.mileage)} km, ${vehicle.transmission}, ${vehicle.color}. Available at RPM Auto in Woodbridge.`;
+  const pageDescription = `${vehicle.year} ${vehicle.make} ${vehicle.model} with ${formatNumber(vehicle.mileage)} km, ${vehicle.transmission}, ${vehicle.color}. Available at RPM Auto in Richmond Hill.`;
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -173,7 +173,7 @@ export default function VehicleDetails() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords={`${vehicle.make}, ${vehicle.model}, used cars, luxury cars, ${vehicle.category}, Woodbridge, Toronto, Ontario`}
+        keywords={`${vehicle.make}, ${vehicle.model}, used cars, luxury cars, ${vehicle.category}, Richmond Hill, Toronto, Ontario`}
         ogType="product"
         ogImage={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ''}
         canonical={`https://www.rpmautosales.ca/inventory/${vehicle.id}`}
@@ -187,7 +187,7 @@ export default function VehicleDetails() {
       <JsonLdSchema
         schema={createVehicleSchema({
           name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-          description: vehicle.description || `${vehicle.year} ${vehicle.make} ${vehicle.model} available at RPM Auto in Woodbridge, Ontario. This ${vehicle.color} ${vehicle.category.toLowerCase()} features ${vehicle.transmission} transmission and ${formatNumber(vehicle.mileage)} kilometers.`,
+          description: vehicle.description || `${vehicle.year} ${vehicle.make} ${vehicle.model} available at RPM Auto in Richmond Hill, Ontario. This ${vehicle.color} ${vehicle.category.toLowerCase()} features ${vehicle.transmission} transmission and ${formatNumber(vehicle.mileage)} kilometers.`,
           brand: vehicle.make,
           model: vehicle.model,
           modelDate: vehicle.year.toString(),

@@ -66,15 +66,15 @@ export default function About() {
     url: "https://www.rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "By appointment only",
-      addressLocality: "Vaughan",
+      streetAddress: "11623 Yonge St., Unit 4",
+      addressLocality: "Richmond Hill",
       addressRegion: "ON",
-      postalCode: "L4H 0A1",
+      postalCode: "L4E 3N8",
       addressCountry: "CA"
     },
     geo: {
-      latitude: 43.7810,
-      longitude: -79.5988
+      latitude: 43.9534,
+      longitude: -79.4524
     },
     openingHours: [
       "Mo-Fr 09:00-18:00",
@@ -90,7 +90,7 @@ export default function About() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury car dealership, exotic cars, Toronto, Vaughan, premium vehicles, luxury automotive"
+        keywords="luxury car dealership, exotic cars, Toronto, Richmond Hill, premium vehicles, luxury automotive"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/about"
@@ -129,10 +129,10 @@ export default function About() {
             },
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "By appointment only",
-              "addressLocality": "Vaughan",
+              "streetAddress": "11623 Yonge St., Unit 4",
+              "addressLocality": "Richmond Hill",
               "addressRegion": "ON",
-              "postalCode": "L4H 0A1",
+              "postalCode": "L4E 3N8",
               "addressCountry": "CA"
             },
             "employee": teamMembers.map(member => ({
@@ -189,7 +189,7 @@ export default function About() {
               <div className="relative">
                 <OptimizedImage 
                   src="https://images.unsplash.com/photo-1547038577-da80abbc4f19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1752&q=80" 
-                  alt="RPM Auto Dealership - Our luxury car showroom in Vaughan, Ontario" 
+                  alt="RPM Auto Dealership - Our luxury car showroom in Richmond Hill, Ontario" 
                   className="w-full h-auto rounded-lg shadow-xl"
                   width={1752}
                   height={980}

@@ -13,8 +13,8 @@ export default function Contact() {
   }, []);
 
   // Prepare SEO metadata
-  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Vaughan";
-  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Vaughan, call us at (647) 550-9590, or send us a message online.";
+  const pageTitle = "Contact RPM Auto | Luxury Car Dealership in Richmond Hill";
+  const pageDescription = "Contact RPM Auto's sales or service departments. Visit our luxury car dealership in Richmond Hill, call us at (647) 550-9590, or send us a message online.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -29,15 +29,15 @@ export default function Contact() {
     url: "https://www.rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "By appointment only",
-      addressLocality: "Vaughan",
+      streetAddress: "11623 Yonge St., Unit 4",
+      addressLocality: "Richmond Hill",
       addressRegion: "Ontario",
-      postalCode: "L4H 0A1",
+      postalCode: "L4E 3N8",
       addressCountry: "CA"
     },
     geo: {
-      latitude: 43.7810,
-      longitude: -79.5988
+      latitude: 43.9534,
+      longitude: -79.4524
     },
     openingHours: [
       "Mo-Fr 09:00-19:00",
@@ -53,7 +53,7 @@ export default function Contact() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="contact RPM Auto, luxury car dealership, Vaughan dealership, car sales, vehicle service, Toronto luxury cars"
+        keywords="contact RPM Auto, luxury car dealership, Richmond Hill dealership, car sales, vehicle service, Toronto luxury cars"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/contact"
@@ -88,10 +88,10 @@ export default function Contact() {
             "email": "fateh@rpmautosales.ca",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "By appointment only",
-              "addressLocality": "Vaughan",
+              "streetAddress": "11623 Yonge St., Unit 4",
+              "addressLocality": "Richmond Hill",
               "addressRegion": "Ontario",
-              "postalCode": "L4H 0A1",
+              "postalCode": "L4E 3N8",
               "addressCountry": "CA"
             },
             "contactPoint": [
@@ -166,7 +166,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
+                    <p className="text-gray-600">11623 Yonge St., Unit 4, Richmond Hill, ON L4E 3N8</p>
                   </div>
                 </div>
                 

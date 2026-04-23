@@ -53,7 +53,7 @@ export default function Services() {
 
   // Prepare SEO metadata
   const pageTitle = "Luxury Car Services | RPM Auto";
-  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, inspections, warranties and consignment at RPM Auto in Vaughan, Ontario.";
+  const pageDescription = "Explore our premium automotive services including vehicle sourcing, trade-ins, inspections, warranties and consignment at RPM Auto in Richmond Hill, Ontario.";
   
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -68,15 +68,15 @@ export default function Services() {
     url: "https://www.rpmautosales.ca",
     telephone: "+1-647-550-9590",
     address: {
-      streetAddress: "By appointment only",
-      addressLocality: "Vaughan",
+      streetAddress: "11623 Yonge St., Unit 4",
+      addressLocality: "Richmond Hill",
       addressRegion: "ON",
-      postalCode: "L4H 0A1",
+      postalCode: "L4E 3N8",
       addressCountry: "CA"
     },
     geo: {
-      latitude: 43.7810,
-      longitude: -79.5988
+      latitude: 43.9534,
+      longitude: -79.4524
     },
     openingHours: [
       "Mo-Fr 09:00-18:00",
@@ -92,7 +92,7 @@ export default function Services() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Vaughan, Toronto"
+        keywords="luxury car services, vehicle sourcing, trade-in, vehicle inspection, extended warranty, consignment, luxury cars, Richmond Hill, Toronto"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical="https://www.rpmautosales.ca/services"
@@ -128,9 +128,9 @@ export default function Services() {
           },
           serviceType: "AutomotiveServices",
           areaServed: {
-            addressLocality: "Vaughan",
+            addressLocality: "Richmond Hill",
             addressRegion: "ON",
-            postalCode: "L4H 0A1",
+            postalCode: "L4E 3N8",
             addressCountry: "CA"
           },
           availableChannel: {
