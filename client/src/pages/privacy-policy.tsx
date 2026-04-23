@@ -100,8 +100,8 @@ export default function PrivacyPolicy() {
             </p>
             <p>
               RPM Auto<br />
-              By appointment only<br />
-              Vaughan, ON L4H 0A1<br />
+              11623 Yonge St., Unit 4<br />
+              Richmond Hill, ON L4E 3N8<br />
               Email: info@rpmautosales.ca<br />
               Phone: (647) 550-9590
             </p>

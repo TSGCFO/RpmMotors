@@ -32,19 +32,19 @@ export default function Home() {
   // Business data for structured data
   const businessData = {
     name: "RPM Auto",
-    description: "RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
+    description: "RPM Auto in Richmond Hill has New and Used Luxury Cars and SUVs for sale. Premium selection of luxury and exotic vehicles.",
     url: "https://www.rpmautosales.ca",
     telephone: "(647) 550-9590",
     address: {
-      streetAddress: "By appointment only",
-      addressLocality: "Vaughan",
+      streetAddress: "11623 Yonge St., Unit 4",
+      addressLocality: "Richmond Hill",
       addressRegion: "Ontario",
-      postalCode: "L4H 0A1",
+      postalCode: "L4E 3N8",
       addressCountry: "CA"
     },
     geo: {
-      latitude: 43.7856,
-      longitude: -79.5857
+      latitude: 43.9534,
+      longitude: -79.4524
     },
     openingHours: [
       "Monday 9:00-19:00",
@@ -135,19 +135,19 @@ export default function Home() {
       <JsonLdSchema
         schema={createBusinessSchema({
           name: "RPM Auto",
-          description: "Premium luxury and exotic car dealership in Vaughan, Ontario offering a curated selection of high-end vehicles.",
+          description: "Premium luxury and exotic car dealership in Richmond Hill, Ontario offering a curated selection of high-end vehicles.",
           url: "https://www.rpmautosales.ca",
           telephone: "(647) 550-9590",
           address: {
-            streetAddress: "By appointment only",
-            addressLocality: "Vaughan",
+            streetAddress: "11623 Yonge St., Unit 4",
+            addressLocality: "Richmond Hill",
             addressRegion: "Ontario",
-            postalCode: "L4H 0A1",
+            postalCode: "L4E 3N8",
             addressCountry: "CA"
           },
           geo: {
-            latitude: 43.7856,
-            longitude: -79.5857
+            latitude: 43.9534,
+            longitude: -79.4524
           },
           openingHours: [
             "Monday 9:00-19:00",
@@ -193,7 +193,7 @@ export default function Home() {
       
       {/* Main H1 for SEO - Visually Hidden */}
       <h1 className="sr-only">
-        RPM Auto - Luxury Car Dealership in Vaughan | Premium Vehicles, Exotic Cars & Expert Service
+        RPM Auto - Luxury Car Dealership in Richmond Hill | Premium Vehicles, Exotic Cars & Expert Service
       </h1>
       
       {/* Featured Categories */}
@@ -404,7 +404,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-['Poppins'] font-semibold mb-1">Visit Us</h3>
-                    <p className="text-gray-600">By appointment only, Vaughan, Ontario</p>
+                    <p className="text-gray-600">11623 Yonge St., Unit 4, Richmond Hill, ON L4E 3N8</p>
                   </div>
                 </div>
                 

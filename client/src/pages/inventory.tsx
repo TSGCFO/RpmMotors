@@ -203,8 +203,8 @@ export default function Inventory() {
     : "Our Inventory | RPM Auto";
     
   const pageDescription = categoryName
-    ? `Explore our collection of ${categoryName.toLowerCase()} at RPM Auto. Premium selection of luxury vehicles in Woodbridge, ON.`
-    : "Browse our inventory of premium luxury vehicles at RPM Auto in Woodbridge, ON. Find your dream car today.";
+    ? `Explore our collection of ${categoryName.toLowerCase()} at RPM Auto. Premium selection of luxury vehicles in Richmond Hill, ON.`
+    : "Browse our inventory of premium luxury vehicles at RPM Auto in Richmond Hill, ON. Find your dream car today.";
     
   // Prepare breadcrumb items
   const breadcrumbItems = [
@@ -226,7 +226,7 @@ export default function Inventory() {
       <PageMeta
         title={pageTitle}
         description={pageDescription}
-        keywords="luxury cars, exotic cars, premium vehicles, car inventory, Woodbridge, Toronto, Ontario"
+        keywords="luxury cars, exotic cars, premium vehicles, car inventory, Richmond Hill, Toronto, Ontario"
         ogType="website"
         ogImage="/RPM Auto.png"
         canonical={categoryName ? `https://www.rpmautosales.ca/inventory?category=${filters.category}` : "https://www.rpmautosales.ca/inventory"}
