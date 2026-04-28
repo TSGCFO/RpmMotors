@@ -119,7 +119,7 @@ app.get("/sitemap.xml", (req, res) => {
 ```jsx
 {/* Main H1 for SEO - Visually Hidden */}
 <h1 className="sr-only">
-  RPM Auto - Luxury Car Dealership in Vaughan | Premium Vehicles, Exotic Cars & Expert Service
+  RPM Auto - Luxury Car Dealership in Richmond Hill | Premium Vehicles, Exotic Cars & Expert Service
 </h1>
 ```
 

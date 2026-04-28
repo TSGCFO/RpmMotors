@@ -151,7 +151,7 @@
 
 #### Task E1: Identify Top 3 Competitors
 1. Search main keywords:
-   - "luxury cars Vaughan"
+   - "luxury cars Richmond Hill"
    - "exotic cars Toronto"
    - "premium auto dealer GTA"
 2. Note top 3 competing dealerships
@@ -204,7 +204,7 @@
 #### Task F3: Local Content Creation
 1. Create location-specific page:
    - "[Service] in [Neighborhood]"
-   - Example: "Luxury Car Service in Woodbridge"
+   - Example: "Luxury Car Service in Richmond Hill"
 2. Include:
    - Local landmarks
    - Driving directions

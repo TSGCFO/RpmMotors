@@ -197,7 +197,7 @@ For each page, ensure:
 3. Open file: `client/index.html`
 4. Add the meta tag after line 10 (after the description meta tag):
    ```html
-   <meta name="description" content="RPM Auto in Vaughan has New and Used Luxury Cars and SUVs for sale. Call (647) 550-9590 for RPM Auto Specials and Promotions.">
+   <meta name="description" content="RPM Auto in Richmond Hill has New and Used Luxury Cars and SUVs for sale. Call (647) 550-9590 for RPM Auto Specials and Promotions.">
    <meta name="google-site-verification" content="XXXXXXXXXXXXX" />
    ```
 5. Save the file
@@ -248,7 +248,7 @@ To:
 ```jsx
 <img 
   src="/images/rpm-auto-showroom-interior-01.jpg" 
-  alt="RPM Auto luxury car dealership showroom interior in Vaughan Ontario" 
+  alt="RPM Auto luxury car dealership showroom interior in Richmond Hill Ontario" 
   title="RPM Auto Showroom - Premium Luxury Vehicles"
   className="w-full h-[400px] object-cover rounded-lg shadow-xl"
   width="800"
@@ -503,7 +503,7 @@ For EACH page, ensure meta description includes primary keyword within first 160
 
 Example for homepage:
 ```jsx
-description="RPM Auto in Vaughan offers luxury cars and exotic vehicles for sale. Premium selection of high-end automobiles with expert service."
+description="RPM Auto in Richmond Hill offers luxury cars and exotic vehicles for sale. Premium selection of high-end automobiles with expert service."
 ```
 
 ### Task 6.3: Update Page Content
