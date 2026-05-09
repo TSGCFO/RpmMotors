@@ -219,6 +219,7 @@ function VehicleForm({ initialData, onSubmit, onCancel, isEdit = false, isPendin
               <SelectItem value="Exotics">Exotics</SelectItem>
               <SelectItem value="Hatchbacks">Hatchbacks</SelectItem>
               <SelectItem value="Wagons">Wagons</SelectItem>
+              <SelectItem value="Trucks">Trucks</SelectItem>
             </SelectContent>
           </Select>
         </div>

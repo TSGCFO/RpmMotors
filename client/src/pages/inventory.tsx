@@ -444,6 +444,7 @@ export default function Inventory() {
                       <SelectItem value="suvs-crossovers">SUVs & Crossovers</SelectItem>
                       <SelectItem value="exotic-collection">Exotic Collection</SelectItem>
                       <SelectItem value="convertibles">Convertibles</SelectItem>
+                      <SelectItem value="trucks">Trucks</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -560,6 +561,7 @@ export default function Inventory() {
                           <SelectItem value="suvs-crossovers">SUVs & Crossovers</SelectItem>
                           <SelectItem value="exotic-collection">Exotic Collection</SelectItem>
                           <SelectItem value="convertibles">Convertibles</SelectItem>
+                          <SelectItem value="trucks">Trucks</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
