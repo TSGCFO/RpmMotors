@@ -289,6 +289,7 @@ export default function InventoryManager() {
                         <SelectItem value="Sedans">Sedans</SelectItem>
                         <SelectItem value="Convertibles">Convertibles</SelectItem>
                         <SelectItem value="Exotics">Exotics</SelectItem>
+                        <SelectItem value="Trucks">Trucks</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -464,6 +465,7 @@ export default function InventoryManager() {
                                 <SelectItem value="Sedans">Sedans</SelectItem>
                                 <SelectItem value="Convertibles">Convertibles</SelectItem>
                                 <SelectItem value="Exotics">Exotics</SelectItem>
+                                <SelectItem value="Trucks">Trucks</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
