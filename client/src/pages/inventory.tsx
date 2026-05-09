@@ -159,12 +159,7 @@ export default function Inventory() {
 
   // Determine if any filter is active. When none are, the inventory page renders
   // a deterministic default order (pinned VINs first, then status groups).
-  const hasActiveFilter = Object.entries(filters).some(([key, value]) => {
-    if (!value) return false;
-    // The status select uses 'all' as a sentinel for "no filter".
-    if (key === 'status' && value === 'all') return false;
-    return true;
-  });
+  const hasActiveFilter = Object.values(filters).some(value => Boolean(value));
 
   // VINs of the three cars to pin to the top of the default inventory view, in order.
   const PINNED_VINS = [
