@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "PYJnTkosd4IogTSXLcEsH"
+uri = "file://attached_assets/stock_images/trucks_category_card.jpg"
+type = "image"
+title = "modern pickup truck on the road, professional automotive photography, premium quality"
