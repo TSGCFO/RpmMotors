@@ -48,14 +48,32 @@ export default function Inventory() {
   // Parse query parameters and load saved preferences
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1]);
-    
-    const category = params.get("category");
-    const search = params.get("search");
-    
+
+    const FILTER_KEYS = [
+      "make",
+      "model",
+      "year",
+      "priceMin",
+      "priceMax",
+      "category",
+      "status",
+      "search",
+    ] as const;
+
+    const urlFilters: Partial<Record<(typeof FILTER_KEYS)[number], string>> = {};
+    for (const key of FILTER_KEYS) {
+      const v = params.get(key);
+      if (v) urlFilters[key] = v;
+    }
+
+    const category = urlFilters.category;
+
     // First check if we have URL parameters (these take priority)
+    if (Object.keys(urlFilters).length > 0) {
+      setFilters(prev => ({ ...prev, ...urlFilters }));
+    }
+
     if (category) {
-      setFilters(prev => ({ ...prev, category }));
-      
       // Set readable category name for breadcrumb
       const formattedCategory = category.replace(/-/g, " ")
         .split(" ")
@@ -65,13 +83,9 @@ export default function Inventory() {
     } else {
       setCategoryName("");
     }
-    
-    if (search) {
-      setFilters(prev => ({ ...prev, search }));
-    }
-    
+
     // If no URL parameters and user has consented to cookies, load saved preferences
-    if (!category && !search && hasConsentedToCookies()) {
+    if (Object.keys(urlFilters).length === 0 && hasConsentedToCookies()) {
       const savedFilters = getFilterPreferences();
       if (savedFilters) {
         // Only update if we have saved filters
