@@ -79,6 +79,11 @@ export default function Home() {
       title: "Exotic Collection",
       image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80",
       link: "/inventory?category=exotic-collection"
+    },
+    {
+      title: "Trucks",
+      image: "https://images.unsplash.com/photo-1595758228888-a3ee8442ec7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+      link: "/inventory?category=trucks"
     }
   ];
   

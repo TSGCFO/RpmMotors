@@ -92,6 +92,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/inventory?category=trucks" className="text-gray-400 hover:text-[#E31837] transition-colors">
+                  Trucks
+                </Link>
+              </li>
+              <li>
                 <Link href="/inventory?filter=new-arrivals" className="text-gray-400 hover:text-[#E31837] transition-colors">
                   New Arrivals
                 </Link>
