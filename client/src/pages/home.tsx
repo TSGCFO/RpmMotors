@@ -13,7 +13,6 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import CTABanner from "@/components/ui/cta-banner";
 import PersonalizedRecommendations from "@/components/ui/personalized-recommendations";
 import PageMeta from "@/components/seo/page-meta";
-import trucksCategoryImage from "@assets/stock_images/trucks_category_card.jpg";
 import { pageMetadata } from "@/utils/seo-metadata";
 import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
@@ -83,7 +82,7 @@ export default function Home() {
     },
     {
       title: "Trucks",
-      image: trucksCategoryImage,
+      image: "https://images.unsplash.com/photo-1605893477799-b99e3b8b93fe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
       link: "/inventory?category=trucks"
     }
   ];
