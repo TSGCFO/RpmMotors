@@ -163,7 +163,7 @@ export function getRecentlyViewedVehicles(): number[] {
 // Save user's filter preferences
 export function saveFilterPreferences(filters: Record<string, string>): void {
   if (!hasConsentedToCookies()) return;
-  setCookie('filter_preferences', JSON.stringify(filters), { days: 30 });
+  setCookie('filter_preferences', JSON.stringify(filters), { days: 1 });
   
   // Track this for user preference analytics
   trackUserPreferences('filters', filters);

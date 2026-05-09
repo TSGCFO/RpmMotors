@@ -157,6 +157,61 @@ export default function Inventory() {
     ? [...new Set(allVehicles.map(v => v.make))].sort() 
     : [];
 
+  // Determine if any filter is active. When none are, the inventory page renders
+  // a deterministic default order (pinned VINs first, then status groups).
+  const hasActiveFilter = Object.entries(filters).some(([key, value]) => {
+    if (!value) return false;
+    // The status select uses 'all' as a sentinel for "no filter".
+    if (key === 'status' && value === 'all') return false;
+    return true;
+  });
+
+  // VINs of the three cars to pin to the top of the default inventory view, in order.
+  const PINNED_VINS = [
+    'SBM13RAA1KW008137', // 2019 McLaren 600LT Coupe
+    '7SAXCDE56PF375875', // 2023 Tesla Model X Long Range
+    'WBS4Z9C50JEA24138', // 2018 BMW M4 Cabriolet
+  ];
+  const STATUS_ORDER: Record<string, number> = {
+    available: 0,
+    reserved: 1,
+    pending: 2,
+    sold: 3,
+  };
+
+  const orderedVehicles = (() => {
+    if (hasActiveFilter || !filteredVehicles) return filteredVehicles;
+
+    const byVin = new Map<string, Vehicle>();
+    for (const v of filteredVehicles) {
+      if (v.vin) byVin.set(v.vin, v);
+    }
+
+    const pinned: Vehicle[] = [];
+    const pinnedIds = new Set<number>();
+    for (const vin of PINNED_VINS) {
+      const v = byVin.get(vin);
+      if (v) {
+        pinned.push(v);
+        pinnedIds.add(v.id);
+      }
+    }
+
+    const rest = filteredVehicles
+      .filter(v => !pinnedIds.has(v.id))
+      .slice()
+      .sort((a, b) => {
+        const sa = STATUS_ORDER[a.status] ?? 99;
+        const sb = STATUS_ORDER[b.status] ?? 99;
+        if (sa !== sb) return sa - sb;
+        const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return ta - tb;
+      });
+
+    return [...pinned, ...rest];
+  })();
+
   // Handle filter changes
   const handleFilterChange = (name: string, value: string) => {
     const updatedFilters = { ...filters, [name]: value };
@@ -550,9 +605,9 @@ export default function Inventory() {
                   </div>
                 ))}
               </div>
-            ) : filteredVehicles && filteredVehicles.length > 0 ? (
+            ) : orderedVehicles && orderedVehicles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredVehicles.map((vehicle) => (
+                {orderedVehicles.map((vehicle) => (
                   <CarCard key={vehicle.id} vehicle={vehicle} />
                 ))}
               </div>
