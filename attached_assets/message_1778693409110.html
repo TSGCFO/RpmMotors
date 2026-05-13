@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vehicle Appraisal Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b0c10;
+      --surface:   #13141a;
+      --surface2:  #1c1e27;
+      --border:    #2a2d3a;
+      --accent:    #c9a84c;
+      --accent2:   #e8c96b;
+      --text:      #e8eaf0;
+      --muted:     #7a7f96;
+      --danger:    #e05c5c;
+      --success:   #4caf7c;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Widget shell ── */
+    .widget {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(201,168,76,.08);
+    }
+
+    /* Gold top bar */
+    .widget::before {
+      content: '';
+      display: block;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+    }
+
+    /* Header */
+    .widget-header {
+      padding: 2rem 2.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+    }
+    .header-icon {
+      flex-shrink: 0;
+      width: 46px;
+      height: 46px;
+      background: rgba(201,168,76,.12);
+      border: 1px solid rgba(201,168,76,.3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-icon svg { width: 24px; height: 24px; }
+    .widget-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .widget-subtitle {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .3rem;
+      font-weight: 300;
+    }
+
+    /* Steps indicator */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex: 1;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color .3s;
+    }
+    .step.active { color: var(--accent); }
+    .step.done   { color: var(--success); }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      flex-shrink: 0;
+      transition: background .3s, border-color .3s;
+    }
+    .step.active .step-num { background: var(--accent); border-color: var(--accent); color: #000; }
+    .step.done   .step-num { background: var(--success); border-color: var(--success); color: #fff; }
+    .step-connector {
+      height: 1px;
+      width: 24px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Form body */
+    .widget-body { padding: 2rem 2.5rem; }
+
+    .panel { display: none; animation: fadeUp .4s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Field groups */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .field-row.single { grid-template-columns: 1fr; }
+    .field-row.trio   { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field label {
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input,
+    .field select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      padding: .65rem .9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: var(--muted); opacity: .6; }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+    }
+    .field select option { background: var(--surface2); }
+
+    /* Select arrow */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: .9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--muted);
+      pointer-events: none;
+    }
+    .select-wrap select { padding-right: 2.2rem; width: 100%; }
+
+    /* Condition badges */
+    .condition-group { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .cond-btn {
+      flex: 1;
+      min-width: 80px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: .55rem .5rem;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+    }
+    .cond-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cond-btn.selected {
+      background: rgba(201,168,76,.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Checkboxes */
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: .55rem .8rem;
+      cursor: pointer;
+      font-size: .88rem;
+      color: var(--muted);
+      transition: all .2s;
+      user-select: none;
+    }
+    .check-item:hover { border-color: var(--accent); color: var(--text); }
+    .check-item input[type=checkbox] { display: none; }
+    .check-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 2px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+    }
+    .check-item.checked .check-box {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .check-item.checked .check-box::after {
+      content: '';
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #000;
+      border-bottom: 2px solid #000;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+    .check-item.checked { color: var(--text); border-color: rgba(201,168,76,.3); }
+
+    /* Section label */
+    .section-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1.2rem 0 .6rem;
+    }
+
+    /* Email panel */
+    .email-intro {
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      line-height: 1.6;
+    }
+    .email-intro span { color: var(--accent); font-weight: 500; }
+
+    /* CTA button */
+    .btn {
+      width: 100%;
+      padding: .85rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 1.5rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(201,168,76,.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      margin-top: .6rem;
+    }
+    .btn-outline:hover { border-color: var(--muted); color: var(--text); }
+
+    /* Loading spinner */
+    .loading-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 3rem 0;
+      text-align: center;
+    }
+    .loading-wrap.active { display: flex; }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .loading-sub { font-size: .8rem; color: var(--muted); opacity: .6; }
+
+    /* Result panel */
+    .result-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+    }
+    .result-card-header {
+      background: rgba(201,168,76,.08);
+      border-bottom: 1px solid var(--border);
+      padding: .8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .result-card-header svg { width: 16px; height: 16px; color: var(--accent); }
+    .result-card-header span {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .result-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: .6rem;
+      padding: 1.2rem 1.2rem .4rem;
+    }
+    .result-value {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--accent2);
+      line-height: 1;
+    }
+    .result-range {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .result-body { padding: .6rem 1.2rem 1.2rem; }
+    .result-body p {
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .result-factors {
+      margin-top: .8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+    .factor-tag {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: .25rem .6rem;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .email-sent-badge {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: rgba(76,175,124,.08);
+      border: 1px solid rgba(76,175,124,.25);
+      border-radius: 3px;
+      padding: .75rem 1rem;
+      margin-top: 1rem;
+      font-size: .85rem;
+      color: var(--success);
+    }
+    .email-sent-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      background: rgba(224,92,92,.08);
+      border: 1px solid rgba(224,92,92,.3);
+      border-radius: 3px;
+      padding: .65rem .9rem;
+      color: var(--danger);
+      font-size: .85rem;
+      margin-top: .8rem;
+    }
+    .error-msg.show { display: block; }
+
+    /* Disclaimer */
+    .disclaimer {
+      padding: 1rem 2.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+      font-size: .73rem;
+      color: var(--muted);
+      opacity: .7;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 480px) {
+      .widget-body { padding: 1.5rem; }
+      .widget-header { padding: 1.5rem; }
+      .steps { padding: 1rem 1.5rem; }
+      .field-row { grid-template-columns: 1fr; }
+      .field-row.trio { grid-template-columns: 1fr 1fr; }
+      .disclaimer { padding: 1rem 1.5rem; }
+      .step span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="widget" id="appraisalWidget">
+  <div class="widget-header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6">
+        <path d="M3 17l2-7h14l2 7M5 17h14M9 17v2m6-2v2M1 10h22"/>
+        <circle cx="7" cy="17" r="1.5"/>
+        <circle cx="17" cy="17" r="1.5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="widget-title">Vehicle Appraisal</div>
+      <div class="widget-subtitle">Get an AI-powered estimate for your vehicle — free & instant</div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step1" >
+      <div class="step-num">1</div>
+      <span>Vehicle</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <span>Condition</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" id="step3">
+      <div class="step-num">3</div>
+      <span>Contact</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" id="step4">
+      <div class="step-num">4</div>
+      <span>Estimate</span>
+    </div>
+  </div>
+
+  <div class="widget-body">
+
+    <!-- PANEL 1: Vehicle Details -->
+    <div class="panel active" id="panel1">
+      <div class="field-row trio">
+        <div class="field">
+          <label>Year</label>
+          <input type="number" id="year" placeholder="2019" min="1980" max="2026" />
+        </div>
+        <div class="field" style="grid-column: span 2">
+          <label>Make</label>
+          <div class="select-wrap">
+            <select id="make">
+              <option value="">Select make…</option>
+              <option>Acura</option><option>Alfa Romeo</option><option>Aston Martin</option>
+              <option>Audi</option><option>Bentley</option><option>BMW</option>
+              <option>Buick</option><option>Cadillac</option><option>Chevrolet</option>
+              <option>Chrysler</option><option>Dodge</option><option>Ferrari</option>
+              <option>Fiat</option><option>Ford</option><option>Genesis</option>
+              <option>GMC</option><option>Honda</option><option>Hyundai</option>
+              <option>Infiniti</option><option>Jaguar</option><option>Jeep</option>
+              <option>Kia</option><option>Lamborghini</option><option>Land Rover</option>
+              <option>Lexus</option><option>Lincoln</option><option>Lotus</option>
+              <option>Maserati</option><option>Mazda</option><option>McLaren</option>
+              <option>Mercedes-Benz</option><option>Mini</option><option>Mitsubishi</option>
+              <option>Nissan</option><option>Porsche</option><option>Ram</option>
+              <option>Rolls-Royce</option><option>Subaru</option><option>Tesla</option>
+              <option>Toyota</option><option>Volkswagen</option><option>Volvo</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Model</label>
+          <input type="text" id="model" placeholder="e.g. Camry, F-150…" />
+        </div>
+        <div class="field">
+          <label>Trim / Package</label>
+          <input type="text" id="trim" placeholder="e.g. LE, Sport, XLT…" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Mileage (km)</label>
+          <input type="number" id="mileage" placeholder="e.g. 85000" min="0" />
+        </div>
+        <div class="field">
+          <label>Body Type</label>
+          <div class="select-wrap">
+            <select id="bodyType">
+              <option value="">Select…</option>
+              <option>Sedan</option><option>SUV / Crossover</option>
+              <option>Pickup Truck</option><option>Coupe</option>
+              <option>Hatchback</option><option>Convertible</option>
+              <option>Minivan</option><option>Wagon</option>
+              <option>Van</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="error-msg" id="err1">Please fill in all required fields (year, make, model, mileage).</div>
+      <button class="btn btn-primary" onclick="goStep(2)">Continue — Condition &amp; Features</button>
+    </div>
+
+    <!-- PANEL 2: Condition -->
+    <div class="panel" id="panel2">
+      <div class="section-label">Overall Condition</div>
+      <div class="condition-group" id="conditionGroup">
+        <button class="cond-btn" data-val="Excellent" onclick="selectCond(this)">Excellent</button>
+        <button class="cond-btn" data-val="Good" onclick="selectCond(this)">Good</button>
+        <button class="cond-btn" data-val="Fair" onclick="selectCond(this)">Fair</button>
+        <button class="cond-btn" data-val="Poor" onclick="selectCond(this)">Poor</button>
+      </div>
+
+      <div class="section-label" style="margin-top:1.4rem">Notable Features &amp; Options</div>
+      <div class="check-grid" id="featureGrid">
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Leather seats" /><div class="check-box"></div>Leather Seats
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Sunroof/Moonroof" /><div class="check-box"></div>Sunroof / Moonroof
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Navigation system" /><div class="check-box"></div>Navigation System
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="4WD/AWD" /><div class="check-box"></div>4WD / AWD
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Backup camera" /><div class="check-box"></div>Backup Camera
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Heated seats" /><div class="check-box"></div>Heated Seats
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Remote start" /><div class="check-box"></div>Remote Start
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Premium sound system" /><div class="check-box"></div>Premium Audio
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Apple CarPlay/Android Auto" /><div class="check-box"></div>CarPlay / Android Auto
+        </label>
+        <label class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="Third-row seating" /><div class="check-box"></div>3rd Row Seating
+        </label>
+      </div>
+
+      <div class="section-label" style="margin-top:1.4rem">Any Issues?</div>
+      <div class="field field-row single">
+        <input type="text" id="issues" placeholder="e.g. minor scratches, needs brakes… (or leave blank)" />
+      </div>
+
+      <div class="error-msg" id="err2">Please select a condition rating.</div>
+      <button class="btn btn-primary" onclick="goStep(3)">Continue — Contact Info</button>
+      <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
+    </div>
+
+    <!-- PANEL 3: Email -->
+    <div class="panel" id="panel3">
+      <p class="email-intro">
+        We'll send your <span>AI-generated appraisal</span> straight to your inbox — no obligation, no spam. Just your vehicle's estimated value.
+      </p>
+      <div class="field-row">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Smith" />
+        </div>
+      </div>
+      <div class="field-row single">
+        <div class="field">
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="jane@example.com" />
+        </div>
+      </div>
+      <div class="field-row single">
+        <div class="field">
+          <label>Phone (optional)</label>
+          <input type="tel" id="phone" placeholder="+1 (416) 555-0100" />
+        </div>
+      </div>
+      <div class="error-msg" id="err3">Please enter a valid email address.</div>
+      <button class="btn btn-primary" onclick="submitAppraisal()">Get My Free Estimate →</button>
+      <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
+    </div>
+
+    <!-- PANEL 4: Loading + Result -->
+    <div class="panel" id="panel4">
+      <div class="loading-wrap active" id="loadingWrap">
+        <div class="spinner"></div>
+        <div class="loading-text">Analysing your vehicle</div>
+        <div class="loading-sub">Cross-referencing market data…</div>
+      </div>
+
+      <div id="resultWrap" style="display:none">
+        <div class="result-card">
+          <div class="result-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span>AI Market Estimate</span>
+          </div>
+          <div class="result-value-row">
+            <div class="result-value" id="resultValue">—</div>
+            <div class="result-range" id="resultRange"></div>
+          </div>
+          <div class="result-body">
+            <p id="resultSummary"></p>
+            <div class="result-factors" id="resultFactors"></div>
+          </div>
+        </div>
+        <div class="email-sent-badge" id="emailBadge" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.62-.62a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120 14.9z"/>
+          </svg>
+          A full report has been sent to <strong id="emailSentTo" style="margin-left:.25rem"></strong>
+        </div>
+        <div class="error-msg show" id="emailFailNote" style="display:none!important">
+          ⚠ Email delivery requires your backend integration. The estimate above is ready to display.
+        </div>
+        <button class="btn btn-outline" style="margin-top:1rem" onclick="resetWidget()">Start a New Appraisal</button>
+      </div>
+    </div>
+
+  </div><!-- /widget-body -->
+
+  <div class="disclaimer">
+    * This tool provides an estimated market value range based on publicly available market data and AI analysis. It is not a guaranteed offer to purchase. Final valuations are subject to in-person inspection. Prices in CAD.
+  </div>
+</div>
+
+<script>
+  /* ──────────────────────────────────────────
+     STATE
+  ────────────────────────────────────────── */
+  let selectedCondition = '';
+  const selectedFeatures = new Set();
+
+  /* ──────────────────────────────────────────
+     STEP NAVIGATION
+  ────────────────────────────────────────── */
+  function goStep(n) {
+    if (n === 2 && !validateStep1()) return;
+    if (n === 3 && !validateStep2()) return;
+
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel' + n).classList.add('active');
+
+    document.querySelectorAll('.step').forEach((s, i) => {
+      s.classList.remove('active', 'done');
+      if (i + 1 < n)  s.classList.add('done');
+      if (i + 1 === n) s.classList.add('active');
+    });
+  }
+
+  /* ──────────────────────────────────────────
+     VALIDATION
+  ────────────────────────────────────────── */
+  function validateStep1() {
+    const year    = document.getElementById('year').value.trim();
+    const make    = document.getElementById('make').value;
+    const model   = document.getElementById('model').value.trim();
+    const mileage = document.getElementById('mileage').value.trim();
+    const err     = document.getElementById('err1');
+    if (!year || !make || !model || !mileage) {
+      err.classList.add('show'); return false;
+    }
+    err.classList.remove('show'); return true;
+  }
+
+  function validateStep2() {
+    const err = document.getElementById('err2');
+    if (!selectedCondition) { err.classList.add('show'); return false; }
+    err.classList.remove('show'); return true;
+  }
+
+  function validateStep3() {
+    const email = document.getElementById('email').value.trim();
+    const err   = document.getElementById('err3');
+    const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!re.test(email)) { err.classList.add('show'); return false; }
+    err.classList.remove('show'); return true;
+  }
+
+  /* ──────────────────────────────────────────
+     CONDITION TOGGLE
+  ────────────────────────────────────────── */
+  function selectCond(btn) {
+    document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedCondition = btn.dataset.val;
+  }
+
+  /* ──────────────────────────────────────────
+     FEATURE CHECKBOXES
+  ────────────────────────────────────────── */
+  function toggleCheck(label) {
+    const cb  = label.querySelector('input[type=checkbox]');
+    const box = label.querySelector('.check-box');
+    cb.checked = !cb.checked;
+    label.classList.toggle('checked', cb.checked);
+    if (cb.checked) selectedFeatures.add(cb.value);
+    else            selectedFeatures.delete(cb.value);
+  }
+
+  /* ──────────────────────────────────────────
+     SUBMIT
+  ────────────────────────────────────────── */
+  async function submitAppraisal() {
+    if (!validateStep3()) return;
+
+    goStep(4);
+
+    const vehicleData = {
+      year:       document.getElementById('year').value,
+      make:       document.getElementById('make').value,
+      model:      document.getElementById('model').value,
+      trim:       document.getElementById('trim').value,
+      bodyType:   document.getElementById('bodyType').value,
+      mileage:    document.getElementById('mileage').value,
+      condition:  selectedCondition,
+      features:   [...selectedFeatures],
+      issues:     document.getElementById('issues').value,
+      firstName:  document.getElementById('firstName').value,
+      lastName:   document.getElementById('lastName').value,
+      email:      document.getElementById('email').value,
+    };
+
+    try {
+      const estimate = await getAIEstimate(vehicleData);
+      showResult(estimate, vehicleData);
+      await sendEmail(vehicleData, estimate);
+    } catch (e) {
+      console.error(e);
+      showResult({ value: 'N/A', range: '', summary: 'We were unable to generate an estimate at this time. Please try again.', factors: [] }, vehicleData);
+    }
+  }
+
+  /* ──────────────────────────────────────────
+     AI ESTIMATE  (Claude API)
+  ────────────────────────────────────────── */
+  async function getAIEstimate(d) {
+    const prompt = `You are an expert Canadian automotive appraiser. Provide a realistic market value estimate for this vehicle.
+
+Vehicle: ${d.year} ${d.make} ${d.model} ${d.trim || ''}
+Body Type: ${d.bodyType || 'Not specified'}
+Mileage: ${d.mileage} km
+Condition: ${d.condition}
+Features: ${d.features.length ? d.features.join(', ') : 'None specified'}
+Known Issues: ${d.issues || 'None'}
+
+Respond ONLY with a JSON object (no markdown, no extra text):
+{
+  "estimatedValue": "<midpoint value e.g. $24,500>",
+  "rangeLow": "<low end e.g. $22,000>",
+  "rangeHigh": "<high end e.g. $27,000>",
+  "summary": "<2–3 sentence explanation of the estimate, mentioning key factors>",
+  "factors": ["<factor 1>", "<factor 2>", "<factor 3>"]
+}
+
+Use Canadian dollars. Be realistic and specific. The value range should reflect actual current Canadian used-car market conditions.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error: ' + response.status);
+    const data = await response.json();
+    const text = data.content.map(b => b.text || '').join('').trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  }
+
+  /* ──────────────────────────────────────────
+     SHOW RESULT
+  ────────────────────────────────────────── */
+  function showResult(est, vehicleData) {
+    document.getElementById('loadingWrap').classList.remove('active');
+    document.getElementById('resultWrap').style.display = 'block';
+
+    document.getElementById('resultValue').textContent = est.estimatedValue || 'N/A';
+
+    if (est.rangeLow && est.rangeHigh) {
+      document.getElementById('resultRange').textContent = `Range: ${est.rangeLow} – ${est.rangeHigh}`;
+    }
+
+    document.getElementById('resultSummary').textContent = est.summary || '';
+
+    const factorsEl = document.getElementById('resultFactors');
+    factorsEl.innerHTML = '';
+    (est.factors || []).forEach(f => {
+      const tag = document.createElement('span');
+      tag.className = 'factor-tag';
+      tag.textContent = f;
+      factorsEl.appendChild(tag);
+    });
+
+    // Mark step 4 done
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step4').classList.add('active');
+  }
+
+  /* ──────────────────────────────────────────
+     EMAIL SEND  — Replace with your backend!
+     This demo calls a placeholder endpoint.
+     Integrate with SendGrid, Nodemailer, etc.
+  ────────────────────────────────────────── */
+  async function sendEmail(vehicleData, estimate) {
+    /*
+      TO INTEGRATE EMAIL:
+      Replace this function body with a POST to your backend endpoint:
+
+      await fetch('/api/send-appraisal-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicleData, estimate })
+      });
+
+      Your backend should use SendGrid / Nodemailer / AWS SES to
+      compose and deliver the formatted appraisal report.
+    */
+
+    // DEMO: simulate a small delay then show "sent" badge
+    await new Promise(r => setTimeout(r, 800));
+
+    const badge = document.getElementById('emailBadge');
+    document.getElementById('emailSentTo').textContent = vehicleData.email;
+    badge.style.display = 'flex';
+  }
+
+  /* ──────────────────────────────────────────
+     RESET
+  ────────────────────────────────────────── */
+  function resetWidget() {
+    // Clear inputs
+    ['year','make','model','trim','mileage','bodyType','issues','firstName','lastName','email','phone']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+    selectedCondition = '';
+    selectedFeatures.clear();
+
+    document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.check-item').forEach(item => {
+      item.classList.remove('checked');
+      const cb = item.querySelector('input'); if (cb) cb.checked = false;
+    });
+
+    document.getElementById('loadingWrap').classList.add('active');
+    document.getElementById('resultWrap').style.display = 'none';
+
+    goStep(1);
+  }
+</script>
+</body>
+</html>
