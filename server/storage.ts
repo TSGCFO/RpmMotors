@@ -4,10 +4,45 @@ import {
   Inquiry, InsertInquiry, inquiries,
   Testimonial, InsertTestimonial, testimonials,
   BlogPost, InsertBlogPost, blogPosts,
-  GarageRegister, InsertGarageRegister, garageRegister
+  GarageRegister, InsertGarageRegister, garageRegister,
+  Appraisal, InsertAppraisal, appraisals,
+  AppraisalAuditLog, InsertAppraisalAuditLog, appraisalAuditLog,
+  appraisalRateLimits
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
+import { eq, like, or, and, asc, desc, sql, gte } from "drizzle-orm";
+
+export type AppraisalStatus =
+  | "pending"
+  | "stage1_running"
+  | "stage1_complete"
+  | "stage2_running"
+  | "completed"
+  | "failed";
+
+export interface AppraisalListOptions {
+  status?: AppraisalStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AppraisalResultUpdate {
+  status: AppraisalStatus;
+  result?: Record<string, unknown> | null;
+  estimatedLow?: number | null;
+  estimatedHigh?: number | null;
+  estimatedMid?: number | null;
+  errorMessage?: string | null;
+  inquiryId?: number | null;
+  staffNotified?: boolean;
+}
+
+export interface AppraisalRateLimitQuery {
+  ipHash?: string | null;
+  email?: string | null;
+  windowMs: number;
+  now?: Date; // clock fake hook
+}
 
 // Define interfaces for filtering, pagination, and sorting
 export interface VehicleFilters {
@@ -114,6 +149,19 @@ export interface IStorage {
   createGarageRegister(register: InsertGarageRegister): Promise<GarageRegister>;
   getGarageRegisterByVehicleId(vehicleId: number): Promise<GarageRegister | undefined>;
   getGarageRegisters(): Promise<GarageRegister[]>;
+
+  // Appraisal methods
+  createAppraisal(input: InsertAppraisal & {
+    ipHash?: string | null;
+    userAgent?: string | null;
+    turnstileVerified?: boolean;
+  }): Promise<Appraisal>;
+  updateAppraisalWithResult(id: number, update: AppraisalResultUpdate): Promise<Appraisal | undefined>;
+  setAppraisalStatus(id: number, status: AppraisalStatus, errorMessage?: string | null): Promise<Appraisal | undefined>;
+  getAppraisal(id: number): Promise<Appraisal | undefined>;
+  listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]>;
+  countRecentAppraisalsByIpOrEmail(query: AppraisalRateLimitQuery): Promise<{ ipCount: number; emailCount: number }>;
+  logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -797,6 +845,126 @@ export class DatabaseStorage implements IStorage {
       .from(garageRegister)
       .orderBy(desc(garageRegister.createdAt));
     return registers;
+  }
+
+  // ----- Appraisal methods -----
+  async createAppraisal(input: InsertAppraisal & {
+    ipHash?: string | null;
+    userAgent?: string | null;
+    turnstileVerified?: boolean;
+  }): Promise<Appraisal> {
+    const { ipHash, userAgent, turnstileVerified, ...rest } = input;
+    const normalizedEmail = rest.email.trim().toLowerCase();
+
+    const insertValue: typeof appraisals.$inferInsert = {
+      ...rest,
+      email: normalizedEmail,
+      ipHash: ipHash ?? null,
+      userAgent: userAgent ?? null,
+      turnstileVerified: !!turnstileVerified,
+      status: "pending",
+    };
+
+    const rateLimitRow: typeof appraisalRateLimits.$inferInsert = {
+      ipHash: ipHash ?? null,
+      email: normalizedEmail,
+    };
+
+    // Atomic: appraisal + rate-limit ledger entry must succeed or fail together.
+    return await db.transaction(async (tx) => {
+      const [row] = await tx.insert(appraisals).values(insertValue).returning();
+      await tx.insert(appraisalRateLimits).values(rateLimitRow);
+      return row;
+    });
+  }
+
+  async updateAppraisalWithResult(id: number, update: AppraisalResultUpdate): Promise<Appraisal | undefined> {
+    const patch: Partial<typeof appraisals.$inferInsert> = {
+      status: update.status,
+      updatedAt: new Date(),
+    };
+    if (update.result !== undefined) patch.result = update.result;
+    if (update.estimatedLow !== undefined) patch.estimatedLow = update.estimatedLow;
+    if (update.estimatedHigh !== undefined) patch.estimatedHigh = update.estimatedHigh;
+    if (update.estimatedMid !== undefined) patch.estimatedMid = update.estimatedMid;
+    if (update.errorMessage !== undefined) patch.errorMessage = update.errorMessage;
+    if (update.inquiryId !== undefined) patch.inquiryId = update.inquiryId;
+    if (update.staffNotified !== undefined) patch.staffNotified = update.staffNotified;
+
+    const [row] = await db
+      .update(appraisals)
+      .set(patch)
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async setAppraisalStatus(id: number, status: AppraisalStatus, errorMessage?: string | null): Promise<Appraisal | undefined> {
+    const patch: Partial<typeof appraisals.$inferInsert> = {
+      status,
+      errorMessage: errorMessage ?? null,
+      updatedAt: new Date(),
+    };
+    const [row] = await db
+      .update(appraisals)
+      .set(patch)
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async getAppraisal(id: number): Promise<Appraisal | undefined> {
+    const [row] = await db.select().from(appraisals).where(eq(appraisals.id, id));
+    return row || undefined;
+  }
+
+  async listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]> {
+    let q = db.select().from(appraisals).$dynamic();
+    if (options?.status) {
+      q = q.where(eq(appraisals.status, options.status));
+    }
+    q = q.orderBy(desc(appraisals.createdAt));
+    if (options?.limit !== undefined) q = q.limit(options.limit);
+    if (options?.offset !== undefined) q = q.offset(options.offset);
+    return await q;
+  }
+
+  async countRecentAppraisalsByIpOrEmail(query: AppraisalRateLimitQuery): Promise<{ ipCount: number; emailCount: number }> {
+    const now = query.now ?? new Date();
+    const cutoff = new Date(now.getTime() - query.windowMs);
+
+    let ipCount = 0;
+    let emailCount = 0;
+
+    if (query.ipHash) {
+      const [r] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(appraisalRateLimits)
+        .where(and(eq(appraisalRateLimits.ipHash, query.ipHash), gte(appraisalRateLimits.createdAt, cutoff)));
+      ipCount = Number(r?.count ?? 0);
+    }
+
+    if (query.email) {
+      const normalizedEmail = query.email.trim().toLowerCase();
+      const [r] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(appraisalRateLimits)
+        .where(and(eq(appraisalRateLimits.email, normalizedEmail), gte(appraisalRateLimits.createdAt, cutoff)));
+      emailCount = Number(r?.count ?? 0);
+    }
+
+    return { ipCount, emailCount };
+  }
+
+  async logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog> {
+    const insertValue: typeof appraisalAuditLog.$inferInsert = {
+      appraisalId: entry.appraisalId,
+      event: entry.event,
+      actor: entry.actor ?? null,
+      details: (entry.details ?? null) as Record<string, unknown> | null,
+    };
+    const [row] = await db.insert(appraisalAuditLog).values(insertValue).returning();
+    return row;
   }
 }
 
