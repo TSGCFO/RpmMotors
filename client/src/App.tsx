@@ -19,11 +19,15 @@ import AdminDashboard from "@/pages/admin";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminMarketing from "@/pages/admin/marketing";
 import AdminInventory from "@/pages/admin/inventory";
+import AdminAppraisalsPage from "@/pages/admin/appraisals";
+import AdminAppraisalDetailPage from "@/pages/admin/appraisal-detail";
 // Employee portal pages
 import EmployeeDashboard from "@/pages/employee";
 import EmployeeInventory from "@/pages/employee/inventory";
 import EmployeeInquiries from "@/pages/employee/inquiries";
 import { SalesRecords } from "@/pages/employee/sales-records";
+import EmployeeAppraisalsPage from "@/pages/employee/appraisals";
+import EmployeeAppraisalDetailPage from "@/pages/employee/appraisal-detail";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -75,12 +79,16 @@ function Router() {
         <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
         <Route path="/admin/marketing" component={AdminMarketing} />
+        <Route path="/admin/appraisals" component={AdminAppraisalsPage} />
+        <Route path="/admin/appraisals/:id" component={AdminAppraisalDetailPage} />
         
         {/* Employee portal routes */}
         <Route path="/employee" component={EmployeeDashboard} />
         <Route path="/employee/inventory" component={EmployeeInventory} />
         <Route path="/employee/inquiries" component={EmployeeInquiries} />
         <Route path="/employee/sales-records" component={SalesRecords} />
+        <Route path="/employee/appraisals" component={EmployeeAppraisalsPage} />
+        <Route path="/employee/appraisals/:id" component={EmployeeAppraisalDetailPage} />
         
         <Route component={NotFound} />
       </Switch>

@@ -10,7 +10,7 @@ import {
   appraisalRateLimits
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, or, and, asc, desc, sql, gte } from "drizzle-orm";
+import { eq, like, or, and, asc, desc, sql, gte, type SQL } from "drizzle-orm";
 
 export type AppraisalStatus =
   | "pending"
@@ -24,6 +24,28 @@ export interface AppraisalListOptions {
   status?: AppraisalStatus;
   limit?: number;
   offset?: number;
+}
+
+export interface StaffAppraisalListOptions {
+  offerRequestsOnly?: boolean;
+  search?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  page?: number;
+  limit?: number;
+}
+
+export interface StaffAppraisalListResult {
+  data: Appraisal[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface StaffAppraisalUpdate {
+  staffNotes?: string | null;
+  quotedPriceCad?: number | null;
 }
 
 export interface AppraisalResultUpdate {
@@ -162,6 +184,11 @@ export interface IStorage {
   listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]>;
   countRecentAppraisalsByIpOrEmail(query: AppraisalRateLimitQuery): Promise<{ ipCount: number; emailCount: number }>;
   logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog>;
+  // Staff admin appraisal methods
+  listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult>;
+  countOfferRequestsSince(since: Date): Promise<number>;
+  getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]>;
+  updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -954,6 +981,101 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { ipCount, emailCount };
+  }
+
+  async listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult> {
+    const page = Math.max(1, options.page ?? 1);
+    const limit = Math.min(200, Math.max(1, options.limit ?? 25));
+    const offset = (page - 1) * limit;
+
+    const conditions: SQL[] = [];
+    if (options.offerRequestsOnly) {
+      // wantsOffer is true OR an inquiry was auto-created
+      conditions.push(
+        sql`((${appraisals.result}->>'wantsOffer')::boolean IS TRUE OR ${appraisals.inquiryId} IS NOT NULL)`,
+      );
+    }
+    if (options.dateFrom) {
+      conditions.push(sql`${appraisals.createdAt} >= ${options.dateFrom}`);
+    }
+    if (options.dateTo) {
+      conditions.push(sql`${appraisals.createdAt} <= ${options.dateTo}`);
+    }
+    if (options.search && options.search.trim()) {
+      const pat = `%${options.search.trim().toLowerCase()}%`;
+      conditions.push(
+        sql`(LOWER(${appraisals.name}) LIKE ${pat}
+          OR LOWER(${appraisals.email}) LIKE ${pat}
+          OR LOWER(${appraisals.make}) LIKE ${pat}
+          OR LOWER(${appraisals.model}) LIKE ${pat})`,
+      );
+    }
+
+    const whereClause: SQL | undefined = conditions.length ? and(...conditions) : undefined;
+
+    const countQuery = db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(appraisals)
+      .$dynamic();
+    const [countRow] = await (whereClause ? countQuery.where(whereClause) : countQuery);
+    const total = Number(countRow?.count ?? 0);
+
+    let q = db.select().from(appraisals).$dynamic();
+    if (whereClause) q = q.where(whereClause);
+    q = q.orderBy(desc(appraisals.createdAt)).limit(limit).offset(offset);
+    const data = await q;
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
+  }
+
+  async countOfferRequestsSince(since: Date): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(appraisals)
+      .where(
+        and(
+          gte(appraisals.createdAt, since),
+          sql`((${appraisals.result}->>'wantsOffer')::boolean IS TRUE OR ${appraisals.inquiryId} IS NOT NULL)`,
+        ),
+      );
+    return Number(row?.count ?? 0);
+  }
+
+  async getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]> {
+    return await db
+      .select()
+      .from(appraisalAuditLog)
+      .where(eq(appraisalAuditLog.appraisalId, appraisalId))
+      .orderBy(desc(appraisalAuditLog.createdAt));
+  }
+
+  async updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined> {
+    // Persist staff-editable fields inside the existing result jsonb under
+    // result.staff. This keeps the schema unchanged (Task A scope) while
+    // letting the detail view reliably surface staffNotes / quotedPriceCad.
+    const current = await this.getAppraisal(id);
+    if (!current) return undefined;
+
+    const existingResult = (current.result ?? {}) as Record<string, unknown>;
+    const existingStaff = ((existingResult.staff as Record<string, unknown>) ?? {});
+    const nextStaff: Record<string, unknown> = { ...existingStaff };
+    if (update.staffNotes !== undefined) nextStaff.staffNotes = update.staffNotes;
+    if (update.quotedPriceCad !== undefined) nextStaff.quotedPriceCad = update.quotedPriceCad;
+
+    const nextResult = { ...existingResult, staff: nextStaff };
+
+    const [row] = await db
+      .update(appraisals)
+      .set({ result: nextResult, updatedAt: new Date() })
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
   }
 
   async logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog> {

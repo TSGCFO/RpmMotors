@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -6,8 +7,42 @@ import { getUploadDir } from "./storage-adapter";
 import uploadRouter from "./upload";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const isProd = process.env.NODE_ENV === "production";
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  if (isProd) {
+    throw new Error(
+      "SESSION_SECRET environment variable is required in production. " +
+        "Set a strong, random secret before starting the server.",
+    );
+  }
+  console.warn(
+    "[security] SESSION_SECRET is not set. Using an ephemeral dev-only secret. " +
+      "This MUST NOT be used in production.",
+  );
+}
+app.use(
+  session({
+    name: "rpm.sid",
+    secret:
+      sessionSecret ||
+      // Dev-only ephemeral secret regenerated on every process start so any
+      // signed cookies from a previous run are invalidated automatically.
+      require("crypto").randomBytes(32).toString("hex"),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isProd,
+      maxAge: 1000 * 60 * 60 * 8,
+    },
+  }),
+);
 
 // Serve uploaded files from the uploads directory
 // Works on both Replit and Render environments
