@@ -686,7 +686,10 @@ function ResultPanel({
       >
         {formatCad(estimate)}
       </div>
-      <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-200 text-green-700 text-sm">
+      <div
+        className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-200 text-green-700 text-sm"
+        data-testid="text-email-confirmation"
+      >
         <Check className="h-4 w-4" />
         <span>We've also emailed this estimate to you.</span>
       </div>
@@ -749,11 +752,13 @@ export default function ValueMyCar() {
 
   async function handleFinalSubmit(values: ContactStepValues) {
     setContact(values);
+    const composedName = `${values.firstName ?? ""} ${values.lastName ?? ""}`.trim();
     const full = {
       ...(vehicle as VehicleStepValues),
       ...(condition as ConditionStepValues),
       ...values,
-    } as AppraisalFormValues;
+      name: composedName,
+    } as AppraisalFormValues & { name: string };
 
     setSubmitting(true);
     setPhase("loading");

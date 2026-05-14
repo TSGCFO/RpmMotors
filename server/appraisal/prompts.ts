@@ -18,8 +18,12 @@ export const Stage1CompSchema = z.object({
   make: z.string(),
   model: z.string(),
   trim: z.string().nullable(),
-  mileageKm: z.number().int().nonnegative(),
-  askingPriceCad: z.number().nonnegative(),
+  // Real-world AutoTrader/Kijiji listings sometimes omit mileage or asking
+  // price (e.g. "Call for price", auction-listed, dealer-private). Accept
+  // null here so a single missing field doesn't cause the entire Stage 1
+  // payload to be rejected; `medianAnchor` filters these out before pricing.
+  mileageKm: z.number().int().nonnegative().nullable(),
+  askingPriceCad: z.number().nonnegative().nullable(),
   location: z.string().nullable(),
   // Required free-text scrape of the listing description.
   descriptionExcerpt: z.string(),

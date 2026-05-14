@@ -131,8 +131,13 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
   const r = readResult(a.result);
   const wantsOffer = r.wantsOffer === true || a.inquiryId != null;
   const reasoning: string = r.reasoning ?? r.stage2?.reasoning ?? "";
-  const factorTags: string[] = r.factorTags ?? r.stage2?.factorTags ?? [];
-  const breakdown = r.breakdown ?? r.stage2?.breakdown ?? null;
+  const factorTagsRaw: Array<string | { label?: string }> =
+    r.factorTags ?? r.stage2?.factorTags ?? r.stage2?.priceFactors ?? [];
+  const factorTags: string[] = factorTagsRaw.map((t) =>
+    typeof t === "string" ? t : t?.label ?? JSON.stringify(t),
+  );
+  const breakdown =
+    r.breakdown ?? r.stage2?.breakdown ?? r.stage2?.internalBreakdown ?? null;
   const comps: Comp[] = (r.comps ?? r.stage1?.comps ?? []) as Comp[];
   const modelUsed = r.modelUsed ?? r.meta?.modelUsed;
   const stage1Ms = r.stage1DurationMs ?? r.meta?.stage1DurationMs;
@@ -266,12 +271,22 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
             <div className="text-sm text-gray-600 mt-1">Range: {estimateRange}</div>
           )}
           {reasoning && (
-            <p className="mt-4 text-sm text-gray-700 whitespace-pre-wrap">{reasoning}</p>
+            <p
+              className="mt-4 text-sm text-gray-700 whitespace-pre-wrap"
+              data-testid="text-reasoning"
+            >
+              {reasoning}
+            </p>
           )}
           {factorTags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div
+              className="mt-4 flex flex-wrap gap-2"
+              data-testid="factor-tags"
+            >
               {factorTags.map((t, i) => (
-                <Badge key={i} variant="secondary">{t}</Badge>
+                <Badge key={i} variant="secondary" data-testid={`factor-tag-${i}`}>
+                  {t}
+                </Badge>
               ))}
             </div>
           )}
@@ -279,7 +294,7 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
       </Card>
 
       {breakdown && (
-        <Card>
+        <Card data-testid="card-breakdown">
           <CardHeader>
             <CardTitle className="text-lg">Internal Breakdown</CardTitle>
           </CardHeader>
@@ -294,16 +309,20 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
               <TableBody>
                 {(
                   [
-                    ["Anchor", breakdown.anchor],
-                    ["Mileage adjustment", breakdown.mileageAdj],
-                    ["Condition %", breakdown.conditionPct],
-                    ["Accident %", breakdown.accidentPct],
-                    ["Owners %", breakdown.ownersPct],
-                    ["Service records %", breakdown.serviceRecordsPct],
-                    ["Seasonal %", breakdown.seasonalPct],
-                    ["Features $", breakdown.featuresDollars ?? breakdown.featuresCad],
-                    ["CPI %", breakdown.cpiPct],
-                    ["Final", breakdown.final],
+                    // Read the current Stage 2 `internalBreakdown` keys first,
+                    // then fall back to the older field names so historical
+                    // appraisal rows still render.
+                    ["Anchor (CAD)", breakdown.anchorCad ?? breakdown.anchor],
+                    ["Mileage adjustment", breakdown.mileageAdjustPct ?? breakdown.mileageAdj],
+                    ["Condition multiplier", breakdown.conditionMult ?? breakdown.conditionPct],
+                    ["Accident multiplier", breakdown.accidentMult ?? breakdown.accidentPct],
+                    ["Owners multiplier", breakdown.ownersMult ?? breakdown.ownersPct],
+                    ["Service records multiplier", breakdown.serviceRecordsMult ?? breakdown.serviceRecordsPct],
+                    ["Seasonal multiplier", breakdown.seasonalMult ?? breakdown.seasonalPct],
+                    ["Features bump (CAD)", breakdown.featureBumpCad ?? breakdown.featuresDollars ?? breakdown.featuresCad],
+                    ["CPI nudge %", breakdown.cpiNudgePct ?? breakdown.cpiPct],
+                    ["Pre-round (CAD)", breakdown.preRoundCad ?? breakdown.final],
+                    ["Comps used", breakdown.compsUsedCount],
                   ] as Array<[string, unknown]>
                 ).map(([label, value]) => (
                   <TableRow key={label}>
@@ -319,7 +338,7 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
         </Card>
       )}
 
-      <Card>
+      <Card data-testid="card-comps">
         <CardHeader>
           <CardTitle className="text-lg">Comps</CardTitle>
         </CardHeader>
@@ -327,7 +346,7 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
           {comps.length === 0 ? (
             <p className="text-sm text-gray-500">No comps captured.</p>
           ) : (
-            <Table>
+            <Table data-testid="table-comps">
               <TableHeader>
                 <TableRow>
                   <TableHead>Source</TableHead>
@@ -342,7 +361,7 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
                 {comps.map((c, i) => {
                   const excluded = c.excludedFromAnchor || c.majorAccident;
                   return (
-                    <TableRow key={i} className={excluded ? "bg-red-50" : ""}>
+                    <TableRow key={i} className={excluded ? "bg-red-50" : ""} data-testid={`row-comp-${i}`}>
                       <TableCell>
                         <Badge variant="outline">{c.source ?? "—"}</Badge>
                         {excluded && (

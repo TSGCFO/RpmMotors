@@ -42,7 +42,36 @@ export async function runAppraisalOrchestration(
   let estimatedPriceCad: number | null = appraisal.estimatedMid ?? null;
   let pipelineSucceeded = appraisal.status === "completed";
 
-  if (appraisal.status !== "completed") {
+  // E2E fast path: when E2E_FAST_PIPELINE=1 and not in production, return a
+  // deterministic canned result without calling Claude. Used by Playwright
+  // scenarios 1 and 2 so the UI round-trip completes inside the test budget.
+  // NEVER honored in production.
+  const e2eFast =
+    process.env.NODE_ENV !== "production" &&
+    process.env.E2E_FAST_PIPELINE === "1";
+
+  if (appraisal.status !== "completed" && e2eFast) {
+    await storage.setAppraisalStatus(appraisalId, "stage1_running" as AppraisalStatus);
+    estimatedPriceCad = 18500;
+    await storage.updateAppraisalWithResult(appraisalId, {
+      status: "completed",
+      result: {
+        stage2: { estimatedPriceCad, confidence: "medium" },
+        meta: { modelUsed: "e2e-fast-stub", stage1DurationMs: 1, stage2DurationMs: 1, cacheHit: false },
+      } as unknown as Record<string, unknown>,
+      estimatedMid: estimatedPriceCad,
+      estimatedLow: null,
+      estimatedHigh: null,
+      errorMessage: null,
+    });
+    await storage.logAppraisalAudit({
+      appraisalId,
+      event: "completed",
+      actor: "system",
+      details: { estimatedPriceCad, modelUsed: "e2e-fast-stub", stage1DurationMs: 1, stage2DurationMs: 1, cacheHit: false },
+    });
+    pipelineSucceeded = true;
+  } else if (appraisal.status !== "completed") {
     await storage.setAppraisalStatus(appraisalId, "stage1_running" as AppraisalStatus);
     try {
       const result = await runAppraisalPipeline(

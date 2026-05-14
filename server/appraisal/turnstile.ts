@@ -5,6 +5,20 @@ export interface TurnstileVerifyResult {
   errorCodes?: string[];
 }
 
+/**
+ * Magic bypass token honored only when (a) NODE_ENV is not "production" and
+ * (b) E2E_TEST_BYPASS is explicitly set to "1". The bypass is OFF by default
+ * — operators on shared staging must explicitly opt in. Lets Playwright drive
+ * the full pipeline through the UI without hitting Cloudflare. NEVER honored
+ * in prod.
+ */
+export const E2E_BYPASS_TOKEN = "__PLAYWRIGHT_E2E_BYPASS__";
+
+function isE2EBypassAllowed(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  return process.env.E2E_TEST_BYPASS === "1";
+}
+
 export async function verifyTurnstileToken(
   token: string | null | undefined,
   remoteIp?: string | null,
@@ -16,6 +30,9 @@ export async function verifyTurnstileToken(
       console.warn("[appraisal] TURNSTILE_SECRET_KEY not set — skipping Turnstile verification");
       (globalThis as any).__turnstile_warned__ = true;
     }
+    return { success: true };
+  }
+  if (token === E2E_BYPASS_TOKEN && isE2EBypassAllowed()) {
     return { success: true };
   }
   if (!token || typeof token !== "string") {

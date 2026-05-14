@@ -240,12 +240,12 @@ export function cpiNudgePct(
  * down-weights minor-accident comps per `ADJUSTMENTS.minorAccidentCompWeight`.
  */
 export function medianAnchor(
-  comps: readonly { askingPriceCad: number; accidentSignalFromDescription?: string | null }[],
+  comps: readonly { askingPriceCad: number | null; accidentSignalFromDescription?: string | null }[],
   cfg: AdjustmentsConfig = ADJUSTMENTS,
 ): number {
   const weighted: { value: number; weight: number }[] = [];
   for (const c of comps) {
-    if (!(c.askingPriceCad > 0)) continue;
+    if (c.askingPriceCad == null || !(c.askingPriceCad > 0)) continue;
     const sig = (c.accidentSignalFromDescription || "unknown").toLowerCase();
     if (sig === "major" || sig === "rebuilt" || sig === "branded") continue;
     const weight = sig === "minor" ? cfg.minorAccidentCompWeight : 1;

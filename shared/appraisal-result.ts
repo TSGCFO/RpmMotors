@@ -26,8 +26,7 @@ export interface AppraisalBreakdown {
   finalHigh?: number;
   finalMid?: number;
 
-  // Pipeline-specific fields written by the current AI scorer. Optional so the
-  // staff UI can render rows generically without enabling them all at once.
+  // Legacy field names (kept so older appraisal rows still render).
   anchor?: number;
   mileageAdj?: number;
   conditionPct?: number;
@@ -39,6 +38,26 @@ export interface AppraisalBreakdown {
   featuresCad?: number;
   cpiPct?: number;
   final?: number;
+
+  // Current Stage 2 `internalBreakdown` shape (Stage2OutputSchema in
+  // server/appraisal/prompts.ts). These are what the live pipeline writes.
+  anchorCad?: number;
+  mileageAdjustPct?: number;
+  conditionMult?: number;
+  accidentMult?: number;
+  ownersMult?: number;
+  serviceRecordsMult?: number;
+  seasonalMult?: number;
+  featureBumpCad?: number;
+  cpiNudgePct?: number;
+  preRoundCad?: number;
+  compsUsedCount?: number;
+}
+
+export interface AppraisalPriceFactor {
+  label: string;
+  impact?: "positive" | "negative" | "neutral";
+  detail?: string;
 }
 
 export interface AppraisalStaffFields {
@@ -62,7 +81,16 @@ export interface AppraisalResultData {
 
   // Legacy / nested fallback shapes
   stage1?: { comps?: AppraisalComp[] };
-  stage2?: { reasoning?: string; factorTags?: string[]; breakdown?: AppraisalBreakdown | null };
+  stage2?: {
+    reasoning?: string;
+    factorTags?: string[];
+    breakdown?: AppraisalBreakdown | null;
+    // Alternate field names written by the current AI pipeline.
+    // Current Stage 2 writes structured factors `{label, impact, detail}`;
+    // older or staff-edited rows may carry plain strings. Accept either.
+    priceFactors?: Array<string | AppraisalPriceFactor>;
+    internalBreakdown?: AppraisalBreakdown | null;
+  };
   meta?: {
     modelUsed?: string;
     stage1DurationMs?: number;

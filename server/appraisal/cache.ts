@@ -89,7 +89,7 @@ export async function getStage1Cache(
   const rows = await db.execute<CacheRow>(sql`
     SELECT "payload", "model_used", "created_at", "expires_at"
     FROM "appraisal_stage1_cache"
-    WHERE "cache_key" = ${key} AND "expires_at" > ${now}
+    WHERE "cache_key" = ${key} AND "expires_at" > ${now.toISOString()}::timestamp
     LIMIT 1
   `);
   const row = rows[0];
@@ -121,9 +121,14 @@ export async function setStage1Cache(
   const key = buildCacheKey(input);
   const expiresAt = new Date(now.getTime() + ttlMs);
   const payload = JSON.stringify(output);
+  // postgres-js binds Date params via util.inspect, which rejects them with
+  // ERR_INVALID_ARG_TYPE on certain driver versions. Pass ISO strings + an
+  // explicit cast to keep this independent of driver-internal behavior.
+  const nowIso = now.toISOString();
+  const expiresIso = expiresAt.toISOString();
   await db.execute(sql`
     INSERT INTO "appraisal_stage1_cache" ("cache_key", "payload", "model_used", "created_at", "expires_at")
-    VALUES (${key}, ${payload}::jsonb, ${modelUsed}, ${now}, ${expiresAt})
+    VALUES (${key}, ${payload}::jsonb, ${modelUsed}, ${nowIso}::timestamp, ${expiresIso}::timestamp)
     ON CONFLICT ("cache_key") DO UPDATE SET
       "payload" = EXCLUDED."payload",
       "model_used" = EXCLUDED."model_used",
@@ -134,5 +139,5 @@ export async function setStage1Cache(
 
 export async function purgeExpiredStage1Cache(now: Date = new Date()): Promise<void> {
   await ensureTable();
-  await db.execute(sql`DELETE FROM "appraisal_stage1_cache" WHERE "expires_at" <= ${now}`);
+  await db.execute(sql`DELETE FROM "appraisal_stage1_cache" WHERE "expires_at" <= ${now.toISOString()}::timestamp`);
 }
