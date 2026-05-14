@@ -764,20 +764,20 @@ export default function ValueMyCar() {
       pollRef.current = window.setInterval(async () => {
         try {
           const s = await getAppraisalStatus(appraisalId, statusToken);
-          if (s.status === "completed" && typeof s.estimatedValueCad === "number") {
+          if (s.status === "complete" && typeof s.estimatedPriceCad === "number") {
             if (pollRef.current) window.clearInterval(pollRef.current);
             pollRef.current = null;
-            setEstimate(s.estimatedValueCad);
+            setEstimate(s.estimatedPriceCad);
             setPhase("result");
             setSubmitting(false);
-          } else if (s.status === "failed") {
+          } else if (s.status === "error") {
             if (pollRef.current) window.clearInterval(pollRef.current);
             pollRef.current = null;
             setPhase("error");
             setSubmitting(false);
             toast({
               title: "We couldn't generate an estimate",
-              description: s.error ?? "Please try again in a moment.",
+              description: "Please try again in a moment.",
               variant: "destructive",
             });
           }

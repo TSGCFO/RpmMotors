@@ -284,6 +284,10 @@ export const appraisals = pgTable("appraisals", {
   // Lead routing
   inquiryId: integer("inquiry_id").references(() => inquiries.id, { onDelete: 'set null' }),
   staffNotified: boolean("staff_notified").default(false),
+  leadInquiryError: text("lead_inquiry_error"),
+  // Customer email observability + idempotency
+  emailSentAt: timestamp("email_sent_at"),
+  emailError: text("email_error"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({

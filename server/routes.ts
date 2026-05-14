@@ -6,8 +6,11 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { generateSitemap } from './utils/sitemap-generator';
 import { registerAdminAppraisalRoutes } from './routes/admin-appraisals';
+import { registerAppraisalRoutes } from './routes/appraisals';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerAppraisalRoutes(app);
+
   // Authentication endpoint
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {

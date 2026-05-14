@@ -57,6 +57,9 @@ export interface AppraisalResultUpdate {
   errorMessage?: string | null;
   inquiryId?: number | null;
   staffNotified?: boolean;
+  emailSentAt?: Date | null;
+  emailError?: string | null;
+  leadInquiryError?: string | null;
 }
 
 export interface AppraisalRateLimitQuery {
@@ -917,6 +920,9 @@ export class DatabaseStorage implements IStorage {
     if (update.errorMessage !== undefined) patch.errorMessage = update.errorMessage;
     if (update.inquiryId !== undefined) patch.inquiryId = update.inquiryId;
     if (update.staffNotified !== undefined) patch.staffNotified = update.staffNotified;
+    if (update.emailSentAt !== undefined) patch.emailSentAt = update.emailSentAt;
+    if (update.emailError !== undefined) patch.emailError = update.emailError;
+    if (update.leadInquiryError !== undefined) patch.leadInquiryError = update.leadInquiryError;
 
     const [row] = await db
       .update(appraisals)
