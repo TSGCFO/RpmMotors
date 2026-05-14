@@ -66,6 +66,11 @@ export default function Sitemap() {
                     Contact Us
                   </Link>
                 </li>
+                <li>
+                  <Link href="/value-my-car" className="text-gray-700 hover:text-[#E31837] transition-colors">
+                    Value My Car
+                  </Link>
+                </li>
               </ul>
             </div>
             

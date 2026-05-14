@@ -281,6 +281,48 @@ export default function Home() {
         </div>
       </section>
       
+      {/* Value My Car Teaser */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="bg-gradient-to-r from-black to-gray-900 rounded-lg overflow-hidden shadow-xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 items-center">
+              <div className="md:col-span-2 p-8 md:p-10 text-white">
+                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-[#E31837]/20 border border-[#E31837]/40">
+                  <i className="fas fa-bolt text-[#E31837] text-xs"></i>
+                  <span className="text-xs uppercase tracking-widest text-[#E31837] font-semibold">
+                    Free AI Appraisal
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-['Poppins'] font-bold mb-3">
+                  Curious what your car is worth?
+                </h2>
+                <p className="text-gray-300 mb-6 max-w-xl">
+                  Get an instant, AI-powered estimate based on real Canadian market data. Takes
+                  about a minute — no obligation, and optionally request a buyout offer from RPM Auto.
+                </p>
+                <Link
+                  href="/value-my-car"
+                  className="inline-block px-6 py-3 bg-[#E31837] text-white font-['Poppins'] font-semibold rounded hover:bg-[#c01530] transition"
+                  data-testid="link-value-my-car-home"
+                >
+                  Value My Car
+                </Link>
+              </div>
+              <div className="hidden md:flex items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#E31837]/15 border border-[#E31837]/30 mb-3">
+                    <i className="fas fa-car-side text-[#E31837] text-4xl"></i>
+                  </div>
+                  <div className="text-xs uppercase tracking-widest text-gray-400">
+                    Instant Estimate
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">

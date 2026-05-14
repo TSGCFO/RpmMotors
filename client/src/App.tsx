@@ -11,6 +11,7 @@ import Services from "@/pages/services";
 import Gallery from "@/pages/gallery";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
+import ValueMyCar from "@/pages/value-my-car";
 import Sitemap from "@/pages/sitemap";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Terms from "@/pages/terms";
@@ -64,6 +65,7 @@ function Router() {
         <Route path="/gallery" component={Gallery} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
+        <Route path="/value-my-car" component={ValueMyCar} />
         <Route path="/sitemap" component={Sitemap} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms" component={Terms} />

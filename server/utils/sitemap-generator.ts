@@ -19,6 +19,7 @@ export async function generateSitemap(): Promise<string> {
     { url: '/services', changefreq: 'monthly', priority: 0.7 },
     { url: '/gallery', changefreq: 'weekly', priority: 0.6 },
     { url: '/contact', changefreq: 'monthly', priority: 0.6 },
+    { url: '/value-my-car', changefreq: 'monthly', priority: 0.8 },
     { url: '/privacy-policy', changefreq: 'yearly', priority: 0.3 },
     { url: '/terms', changefreq: 'yearly', priority: 0.3 },
     { url: '/sitemap', changefreq: 'monthly', priority: 0.4 }

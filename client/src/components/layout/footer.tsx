@@ -59,6 +59,15 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/value-my-car"
+                  className="text-[#E31837] font-semibold hover:text-white transition-colors"
+                  data-testid="link-value-my-car-footer"
+                >
+                  Value My Car
+                </Link>
+              </li>
             </ul>
           </div>
           
