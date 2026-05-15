@@ -60,6 +60,30 @@ export interface AppraisalResultUpdate {
   emailSentAt?: Date | null;
   emailError?: string | null;
   leadInquiryError?: string | null;
+  // ---- Cost tracking (Task #22) ----
+  stage1Model?: string | null;
+  stage1InputTokens?: number | null;
+  stage1OutputTokens?: number | null;
+  stage1CacheCreationTokens?: number | null;
+  stage1CacheReadTokens?: number | null;
+  stage2Model?: string | null;
+  stage2InputTokens?: number | null;
+  stage2OutputTokens?: number | null;
+  stage2CacheCreationTokens?: number | null;
+  stage2CacheReadTokens?: number | null;
+  totalCostMills?: number | null;
+}
+
+export interface AppraisalCostSummary {
+  windowDays: number;
+  totalAppraisals: number;
+  completedAppraisals: number;
+  totalCostMills: number;
+  avgCostMills: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalCacheCreationTokens: number;
 }
 
 export interface AppraisalRateLimitQuery {
@@ -190,6 +214,7 @@ export interface IStorage {
   // Staff admin appraisal methods
   listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult>;
   countOfferRequestsSince(since: Date): Promise<number>;
+  getAppraisalCostSummary(windowDays: number): Promise<AppraisalCostSummary>;
   getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]>;
   updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined>;
 }
@@ -923,6 +948,17 @@ export class DatabaseStorage implements IStorage {
     if (update.emailSentAt !== undefined) patch.emailSentAt = update.emailSentAt;
     if (update.emailError !== undefined) patch.emailError = update.emailError;
     if (update.leadInquiryError !== undefined) patch.leadInquiryError = update.leadInquiryError;
+    if (update.stage1Model !== undefined) patch.stage1Model = update.stage1Model;
+    if (update.stage1InputTokens !== undefined) patch.stage1InputTokens = update.stage1InputTokens;
+    if (update.stage1OutputTokens !== undefined) patch.stage1OutputTokens = update.stage1OutputTokens;
+    if (update.stage1CacheCreationTokens !== undefined) patch.stage1CacheCreationTokens = update.stage1CacheCreationTokens;
+    if (update.stage1CacheReadTokens !== undefined) patch.stage1CacheReadTokens = update.stage1CacheReadTokens;
+    if (update.stage2Model !== undefined) patch.stage2Model = update.stage2Model;
+    if (update.stage2InputTokens !== undefined) patch.stage2InputTokens = update.stage2InputTokens;
+    if (update.stage2OutputTokens !== undefined) patch.stage2OutputTokens = update.stage2OutputTokens;
+    if (update.stage2CacheCreationTokens !== undefined) patch.stage2CacheCreationTokens = update.stage2CacheCreationTokens;
+    if (update.stage2CacheReadTokens !== undefined) patch.stage2CacheReadTokens = update.stage2CacheReadTokens;
+    if (update.totalCostMills !== undefined) patch.totalCostMills = update.totalCostMills;
 
     const [row] = await db
       .update(appraisals)
@@ -1051,6 +1087,37 @@ export class DatabaseStorage implements IStorage {
         ),
       );
     return Number(row?.count ?? 0);
+  }
+
+  async getAppraisalCostSummary(windowDays: number): Promise<AppraisalCostSummary> {
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
+    const [row] = await db
+      .select({
+        total: sql<number>`count(*)::int`,
+        completed: sql<number>`count(*) filter (where ${appraisals.status} = 'completed')::int`,
+        totalCost: sql<number>`coalesce(sum(${appraisals.totalCostMills}), 0)::int`,
+        avgCost: sql<number>`coalesce(round(avg(${appraisals.totalCostMills})), 0)::int`,
+        // NOTE: coalesce EACH sum individually before adding — otherwise a NULL
+        // stage1 sum (common when Stage 1 was a cache hit) poisons the whole
+        // expression to NULL and the outer coalesce silently returns 0.
+        inputTok: sql<number>`(coalesce(sum(${appraisals.stage1InputTokens}), 0) + coalesce(sum(${appraisals.stage2InputTokens}), 0))::int`,
+        outputTok: sql<number>`(coalesce(sum(${appraisals.stage1OutputTokens}), 0) + coalesce(sum(${appraisals.stage2OutputTokens}), 0))::int`,
+        cacheReadTok: sql<number>`(coalesce(sum(${appraisals.stage1CacheReadTokens}), 0) + coalesce(sum(${appraisals.stage2CacheReadTokens}), 0))::int`,
+        cacheCreateTok: sql<number>`(coalesce(sum(${appraisals.stage1CacheCreationTokens}), 0) + coalesce(sum(${appraisals.stage2CacheCreationTokens}), 0))::int`,
+      })
+      .from(appraisals)
+      .where(gte(appraisals.createdAt, since));
+    return {
+      windowDays,
+      totalAppraisals: Number(row?.total ?? 0),
+      completedAppraisals: Number(row?.completed ?? 0),
+      totalCostMills: Number(row?.totalCost ?? 0),
+      avgCostMills: Number(row?.avgCost ?? 0),
+      totalInputTokens: Number(row?.inputTok ?? 0),
+      totalOutputTokens: Number(row?.outputTok ?? 0),
+      totalCacheReadTokens: Number(row?.cacheReadTok ?? 0),
+      totalCacheCreationTokens: Number(row?.cacheCreateTok ?? 0),
+    };
   }
 
   async getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]> {

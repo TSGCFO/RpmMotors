@@ -237,7 +237,13 @@ await test("GET /api/appraisals/:id/status: pending → complete → response sh
   assert.equal(r.body.status, "complete");
   assert.equal(r.body.estimatedPriceCad, 21500);
   // Public DTO leakage guard — should not include any internal fields.
-  for (const leak of ["reasoning", "priceFactors", "internalBreakdown", "result", "stage1", "stage2", "comps", "estimatedLow", "estimatedHigh", "email", "ipHash", "userAgent"]) {
+  for (const leak of [
+    "reasoning", "priceFactors", "internalBreakdown", "result", "stage1", "stage2", "comps",
+    "estimatedLow", "estimatedHigh", "email", "ipHash", "userAgent",
+    // Cost-tracking fields (Task #22) — must never leak to public status.
+    "totalCostMills", "stage1InputTokens", "stage1OutputTokens", "stage2InputTokens",
+    "stage2OutputTokens", "stage1Model", "stage2Model",
+  ]) {
     assert.equal(r.body[leak], undefined, `public response leaked field: ${leak}`);
   }
 });

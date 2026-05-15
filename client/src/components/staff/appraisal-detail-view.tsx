@@ -409,6 +409,30 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
             <div><dt className="text-gray-500">Model used</dt><dd className="font-medium">{modelUsed ?? "—"}</dd></div>
             <div><dt className="text-gray-500">Stage 1 duration</dt><dd className="font-medium">{stage1Ms != null ? `${stage1Ms} ms` : "—"}</dd></div>
             <div><dt className="text-gray-500">Stage 2 duration</dt><dd className="font-medium">{stage2Ms != null ? `${stage2Ms} ms` : "—"}</dd></div>
+            <div>
+              <dt className="text-gray-500">AI cost</dt>
+              <dd className="font-medium" data-testid="text-detail-cost">
+                {a.totalCostMills != null
+                  ? `$${(a.totalCostMills / 1000).toFixed(a.totalCostMills >= 1000 ? 2 : 3)}`
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 1 tokens (in / out)</dt>
+              <dd className="font-medium">
+                {a.stage1InputTokens != null || a.stage1OutputTokens != null
+                  ? `${(a.stage1InputTokens ?? 0).toLocaleString()} / ${(a.stage1OutputTokens ?? 0).toLocaleString()}`
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 2 tokens (in / out)</dt>
+              <dd className="font-medium">
+                {a.stage2InputTokens != null || a.stage2OutputTokens != null
+                  ? `${(a.stage2InputTokens ?? 0).toLocaleString()} / ${(a.stage2OutputTokens ?? 0).toLocaleString()}`
+                  : "—"}
+              </dd>
+            </div>
             <div><dt className="text-gray-500">Email sent</dt><dd className="font-medium">{emailSentAt ?? "—"}</dd></div>
             <div><dt className="text-gray-500">Email error</dt><dd className="font-medium text-red-700">{emailError ?? "—"}</dd></div>
             <div>

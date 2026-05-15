@@ -124,7 +124,17 @@ export interface ClaudeCallResult {
   text: string;
   model: string;
   stopReason: string | null;
-  usage: { inputTokens?: number; outputTokens?: number };
+  /**
+   * Token counts from the Anthropic Messages API `usage` field. The cache
+   * fields are populated only when prompt caching is enabled (currently
+   * scaffolded but disabled by default — see server/appraisal/cost.ts).
+   */
+  usage: {
+    inputTokens?: number;
+    outputTokens?: number;
+    cacheCreationInputTokens?: number;
+    cacheReadInputTokens?: number;
+  };
   raw: Message;
 }
 
@@ -209,13 +219,23 @@ export async function callClaude(
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await client.messages.create(request);
+      const u = response.usage as
+        | {
+            input_tokens?: number;
+            output_tokens?: number;
+            cache_creation_input_tokens?: number | null;
+            cache_read_input_tokens?: number | null;
+          }
+        | undefined;
       return {
         text: extractText(response),
         model: cfg.model,
         stopReason: response.stop_reason ?? null,
         usage: {
-          inputTokens: response.usage?.input_tokens,
-          outputTokens: response.usage?.output_tokens,
+          inputTokens: u?.input_tokens,
+          outputTokens: u?.output_tokens,
+          cacheCreationInputTokens: u?.cache_creation_input_tokens ?? undefined,
+          cacheReadInputTokens: u?.cache_read_input_tokens ?? undefined,
         },
         raw: response,
       };

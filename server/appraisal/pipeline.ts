@@ -40,6 +40,14 @@ export interface AppraisalPipelineOptions {
   logger?: { info: (msg: string, meta?: unknown) => void };
 }
 
+export interface StageUsageMeta {
+  model: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  cacheCreationTokens: number | null;
+  cacheReadTokens: number | null;
+}
+
 export interface AppraisalPipelineResult {
   stage1: Stage1Output;
   stage2: Stage2Output;
@@ -50,6 +58,27 @@ export interface AppraisalPipelineResult {
     stage2DurationMs: number;
     modelUsed: string;
     stage1ModelUsed: string | null;
+    /** Per-stage token usage; null fields when the stage didn't run (cache hit). */
+    stage1Usage: StageUsageMeta | null;
+    stage2Usage: StageUsageMeta;
+  };
+}
+
+function toStageUsageMeta(
+  model: string,
+  usage: {
+    inputTokens?: number;
+    outputTokens?: number;
+    cacheCreationInputTokens?: number;
+    cacheReadInputTokens?: number;
+  },
+): StageUsageMeta {
+  return {
+    model,
+    inputTokens: usage.inputTokens ?? null,
+    outputTokens: usage.outputTokens ?? null,
+    cacheCreationTokens: usage.cacheCreationInputTokens ?? null,
+    cacheReadTokens: usage.cacheReadInputTokens ?? null,
   };
 }
 
@@ -79,6 +108,7 @@ export async function runAppraisalPipeline(
   let stage1Output: Stage1Output;
   let stage1DurationMs = 0;
   let stage1ModelUsed: string | null = null;
+  let stage1Usage: StageUsageMeta | null = null;
   let cacheHit = false;
 
   if (options.prebuiltStage1) {
@@ -97,6 +127,7 @@ export async function runAppraisalPipeline(
       stage1DurationMs = Date.now() - t0;
       stage1Output = result.output;
       stage1ModelUsed = result.modelUsed;
+      stage1Usage = toStageUsageMeta(result.modelUsed, result.raw.usage);
       logger.info("stage1 complete", {
         cacheKey,
         durationMs: stage1DurationMs,
@@ -128,6 +159,7 @@ export async function runAppraisalPipeline(
   const t1 = Date.now();
   const stage2 = await runStage2(stage2Subject, stage1Output, options.stage2 ?? {});
   const stage2DurationMs = Date.now() - t1;
+  const stage2Usage = toStageUsageMeta(stage2.modelUsed, stage2.raw.usage);
   logger.info("stage2 complete", {
     durationMs: stage2DurationMs,
     modelUsed: stage2.modelUsed,
@@ -145,6 +177,8 @@ export async function runAppraisalPipeline(
       stage2DurationMs,
       modelUsed: stage2.modelUsed,
       stage1ModelUsed,
+      stage1Usage,
+      stage2Usage,
     },
   };
 }

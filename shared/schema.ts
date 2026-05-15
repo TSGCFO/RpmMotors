@@ -288,6 +288,23 @@ export const appraisals = pgTable("appraisals", {
   // Customer email observability + idempotency
   emailSentAt: timestamp("email_sent_at"),
   emailError: text("email_error"),
+  // ---- Per-appraisal Anthropic cost tracking (Task #22) ----
+  // Token counts captured from the Anthropic Messages API `usage` field for
+  // each stage. Cache columns are populated only when prompt-caching is
+  // enabled (currently scaffolded but DISABLED by default).
+  stage1Model: text("stage1_model"),
+  stage1InputTokens: integer("stage1_input_tokens"),
+  stage1OutputTokens: integer("stage1_output_tokens"),
+  stage1CacheCreationTokens: integer("stage1_cache_creation_tokens"),
+  stage1CacheReadTokens: integer("stage1_cache_read_tokens"),
+  stage2Model: text("stage2_model"),
+  stage2InputTokens: integer("stage2_input_tokens"),
+  stage2OutputTokens: integer("stage2_output_tokens"),
+  stage2CacheCreationTokens: integer("stage2_cache_creation_tokens"),
+  stage2CacheReadTokens: integer("stage2_cache_read_tokens"),
+  // Total cost in mills (1/1000 USD). $2.30 → 2300. Null when not computed
+  // (Stage 1 cache hit doesn't pay for Stage 1 tokens; we still record 0).
+  totalCostMills: integer("total_cost_mills"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -324,6 +341,20 @@ export const insertAppraisalSchema = createInsertSchema(appraisals)
     turnstileVerified: true,
     inquiryId: true,
     staffNotified: true,
+    leadInquiryError: true,
+    emailSentAt: true,
+    emailError: true,
+    stage1Model: true,
+    stage1InputTokens: true,
+    stage1OutputTokens: true,
+    stage1CacheCreationTokens: true,
+    stage1CacheReadTokens: true,
+    stage2Model: true,
+    stage2InputTokens: true,
+    stage2OutputTokens: true,
+    stage2CacheCreationTokens: true,
+    stage2CacheReadTokens: true,
+    totalCostMills: true,
     createdAt: true,
     updatedAt: true,
   })

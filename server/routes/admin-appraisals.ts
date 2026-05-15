@@ -35,6 +35,21 @@ function parseDate(value?: string): Date | undefined {
 }
 
 export function registerAdminAppraisalRoutes(app: Express) {
+  // GET /api/admin/appraisals/cost-summary — aggregate Anthropic cost (Task #22)
+  // NOTE: Registered before the `/:id` route so "cost-summary" isn't parsed as
+  // a numeric id.
+  app.get("/api/admin/appraisals/cost-summary", requireStaff, async (req: StaffAuthRequest, res: Response) => {
+    try {
+      const daysRaw = Number(req.query.days);
+      const windowDays = Number.isFinite(daysRaw) && daysRaw > 0 && daysRaw <= 365 ? Math.floor(daysRaw) : 30;
+      const summary = await storage.getAppraisalCostSummary(windowDays);
+      res.json(summary);
+    } catch (err) {
+      console.error("Error fetching appraisal cost summary:", err);
+      res.status(500).json({ message: "Failed to fetch cost summary" });
+    }
+  });
+
   // GET /api/admin/appraisals — paginated list + filters
   app.get("/api/admin/appraisals", requireStaff, async (req: StaffAuthRequest, res: Response) => {
     try {

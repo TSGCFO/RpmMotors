@@ -23,6 +23,25 @@ interface ListResponse {
   offerRequestCount7d: number;
 }
 
+interface CostSummary {
+  windowDays: number;
+  totalAppraisals: number;
+  completedAppraisals: number;
+  totalCostMills: number;
+  avgCostMills: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalCacheCreationTokens: number;
+}
+
+// 1 mill = 1/1000 USD. Render as e.g. "$0.142" or "$1.42".
+function formatMillsAsUsd(mills: number | null | undefined): string {
+  if (mills == null) return "—";
+  const dollars = mills / 1000;
+  return `$${dollars.toFixed(dollars >= 1 ? 2 : 3)}`;
+}
+
 function getWantsOffer(a: Appraisal): boolean {
   return readResult(a.result).wantsOffer === true || a.inquiryId != null;
 }
@@ -70,6 +89,14 @@ export default function AppraisalListView({ basePath }: Props) {
   if (dateTo) queryString.set("dateTo", dateTo);
 
   const url = `/api/admin/appraisals?${queryString.toString()}`;
+  const { data: costSummary } = useQuery<CostSummary>({
+    queryKey: ["/api/admin/appraisals/cost-summary", 30],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/appraisals/cost-summary?days=30", { credentials: "include" });
+      if (!res.ok) throw new Error(`Failed (${res.status})`);
+      return res.json();
+    },
+  });
   const { data, isLoading, isError, error } = useQuery<ListResponse>({
     queryKey: ["/api/admin/appraisals", page, search, offerOnly, dateFrom, dateTo],
     queryFn: async () => {
@@ -103,6 +130,44 @@ export default function AppraisalListView({ basePath }: Props) {
           </Badge>
         )}
       </div>
+
+      {costSummary && (
+        <Card data-testid="card-cost-summary">
+          <CardHeader>
+            <CardTitle className="text-base">
+              AI cost — last {costSummary.windowDays} days
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <div className="text-gray-500">Total spend</div>
+                <div className="text-lg font-semibold text-gray-900" data-testid="text-total-cost">
+                  {formatMillsAsUsd(costSummary.totalCostMills)}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-500">Avg per appraisal</div>
+                <div className="text-lg font-semibold text-gray-900" data-testid="text-avg-cost">
+                  {formatMillsAsUsd(costSummary.avgCostMills)}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-500">Appraisals</div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {costSummary.completedAppraisals} / {costSummary.totalAppraisals}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-500">Tokens (in / out)</div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {costSummary.totalInputTokens.toLocaleString()} / {costSummary.totalOutputTokens.toLocaleString()}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -195,6 +260,7 @@ export default function AppraisalListView({ basePath }: Props) {
                     <TableHead>Mileage</TableHead>
                     <TableHead>Condition</TableHead>
                     <TableHead>AI Estimate</TableHead>
+                    <TableHead>Cost</TableHead>
                     <TableHead>Offer</TableHead>
                     <TableHead>Confidence</TableHead>
                     <TableHead>Staff Notes</TableHead>
@@ -221,6 +287,9 @@ export default function AppraisalListView({ basePath }: Props) {
                         </TableCell>
                         <TableCell className="text-sm">{a.conditionRating ?? "—"}</TableCell>
                         <TableCell className="text-sm font-medium">{getEstimateLabel(a)}</TableCell>
+                        <TableCell className="text-sm text-gray-600" data-testid={`cell-cost-${a.id}`}>
+                          {formatMillsAsUsd(a.totalCostMills)}
+                        </TableCell>
                         <TableCell>
                           {wantsOffer ? (
                             <Badge className="bg-[#E31837] hover:bg-[#C31530]" data-testid={`badge-offer-${a.id}`}>
