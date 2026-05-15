@@ -32,6 +32,7 @@ import type {
   WebFetchTool20250910,
   WebSearchTool20250305,
 } from "@anthropic-ai/sdk/resources/messages";
+import { loadCostLeverFlags } from "./cost-levers.config";
 
 export interface AppraisalClaudeConfig {
   model: string;
@@ -91,12 +92,17 @@ const STAGE1_WEB_SEARCH_TOOL: WebSearchTool20250305 = {
   name: "web_search",
   max_uses: 25,
 };
-const STAGE1_WEB_FETCH_TOOL: WebFetchTool20250910 = {
-  type: "web_fetch_20250910",
-  name: "web_fetch",
-  max_uses: 25,
-};
-const STAGE1_TOOLS: ToolUnion[] = [STAGE1_WEB_SEARCH_TOOL, STAGE1_WEB_FETCH_TOOL];
+const STAGE1_WEB_FETCH_TOOL_DEFAULT_MAX_USES = 25;
+function buildStage1WebFetchTool(maxUses: number): WebFetchTool20250910 {
+  return {
+    type: "web_fetch_20250910",
+    name: "web_fetch",
+    max_uses: maxUses,
+  };
+}
+function buildStage1Tools(webFetchMaxUses: number): ToolUnion[] {
+  return [STAGE1_WEB_SEARCH_TOOL, buildStage1WebFetchTool(webFetchMaxUses)];
+}
 
 /** Minimal interface for tests to substitute the Anthropic SDK. */
 export interface AnthropicMessagesClient {
@@ -196,14 +202,39 @@ export async function callClaude(
   const cfg: AppraisalClaudeConfig = { ...baseCfg, ...opts.config };
   const client = opts.client ?? buildClient();
 
+  // ---- Cost-reduction levers (Task #22, OFF by default) ----------------
+  // Read once per call; flags default to off when env is unset.
+  const leverFlags = loadCostLeverFlags();
+
+  // Lever: fetch-cap. When the operator sets APPRAISAL_LEVER_MAX_FETCHES=N,
+  // we lower web_fetch.max_uses to min(N, default). When unset → default.
+  const webFetchMaxUses =
+    leverFlags.fetchCap !== undefined
+      ? Math.min(leverFlags.fetchCap, STAGE1_WEB_FETCH_TOOL_DEFAULT_MAX_USES)
+      : STAGE1_WEB_FETCH_TOOL_DEFAULT_MAX_USES;
+
   // Native server tools (Anthropic-hosted) only for Stage 1 research.
   const tools: ToolUnion[] | undefined =
-    opts.stage === "stage1" ? STAGE1_TOOLS : undefined;
+    opts.stage === "stage1" ? buildStage1Tools(webFetchMaxUses) : undefined;
+
+  // Lever: prompt-cache. When APPRAISAL_LEVER_PROMPT_CACHE=1, mark the
+  // system prompt with an Anthropic ephemeral cache control block so repeat
+  // appraisals pay the cache-read rate ($1.50/Mtok) instead of full input
+  // rate ($15/Mtok). When off, system is sent as a plain string.
+  const systemParam: MessageCreateParamsNonStreaming["system"] = leverFlags.promptCacheEnabled
+    ? [
+        {
+          type: "text",
+          text: opts.system,
+          cache_control: { type: "ephemeral" },
+        },
+      ]
+    : opts.system;
 
   const request: MessageCreateParamsNonStreaming = {
     model: cfg.model,
     max_tokens: cfg.maxTokens,
-    system: opts.system,
+    system: systemParam,
     messages: [{ role: "user", content: opts.user }],
     // Extended thinking ≈ "high reasoning effort".
     thinking: {

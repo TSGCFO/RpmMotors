@@ -5,6 +5,55 @@ import { maybeApplyPromptCache, type SystemBlock } from "../levers/prompt-cache"
 import { shouldAllowFetch, remainingFetchBudget } from "../levers/fetch-cap";
 import { stripListingHtml } from "../levers/strip-html";
 import { loadCostLeverFlags } from "../cost-levers.config";
+import { callClaude } from "../claude";
+import { runStage1 } from "../stage1-research";
+
+// Ensure the module loads with a key for env-driven config; we never call
+// the real API in these tests.
+process.env.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "test-key";
+
+/** Build a mock Anthropic messages client that records the request and
+ * returns a canned response. */
+function makeMockClient(responseText: string, usage: Record<string, number> = {}) {
+  const calls: any[] = [];
+  return {
+    calls,
+    client: {
+      messages: {
+        async create(req: any) {
+          calls.push(req);
+          return {
+            content: [{ type: "text", text: responseText }],
+            stop_reason: "end_turn",
+            usage: {
+              input_tokens: usage.input_tokens ?? 1000,
+              output_tokens: usage.output_tokens ?? 200,
+              cache_creation_input_tokens: usage.cache_creation_input_tokens ?? null,
+              cache_read_input_tokens: usage.cache_read_input_tokens ?? null,
+            },
+          };
+        },
+      },
+    },
+  };
+}
+
+/** Restore the cost-lever env vars after each runtime-wiring test. */
+function withLeverEnv(overrides: Record<string, string | undefined>, fn: () => Promise<void>) {
+  const keys = ["APPRAISAL_LEVER_PROMPT_CACHE", "APPRAISAL_LEVER_MAX_FETCHES", "APPRAISAL_LEVER_STRIP_LISTING_HTML"];
+  const saved: Record<string, string | undefined> = {};
+  for (const k of keys) saved[k] = process.env[k];
+  for (const k of keys) {
+    if (overrides[k] === undefined) delete process.env[k];
+    else process.env[k] = overrides[k];
+  }
+  return fn().finally(() => {
+    for (const k of keys) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+}
 
 // --- cost helpers -----------------------------------------------------------
 
@@ -156,4 +205,177 @@ test("loadCostLeverFlags reads env flags when explicitly set", () => {
   assert.equal(flags.promptCacheEnabled, true);
   assert.equal(flags.fetchCap, 6);
   assert.equal(flags.stripListingHtmlEnabled, true);
+});
+
+// --- runtime wiring: callClaude honors lever env vars ---------------------
+
+test("callClaude sends system as a plain string when prompt-cache lever is OFF", async () => {
+  await withLeverEnv({}, async () => {
+    const m = makeMockClient(JSON.stringify({ ok: true }));
+    await callClaude({
+      system: "SYS",
+      user: "USR",
+      stage: "stage2",
+      client: m.client,
+    });
+    assert.equal(typeof m.calls[0].system, "string");
+    assert.equal(m.calls[0].system, "SYS");
+  });
+});
+
+test("callClaude marks system with ephemeral cache_control when prompt-cache lever is ON", async () => {
+  await withLeverEnv({ APPRAISAL_LEVER_PROMPT_CACHE: "1" }, async () => {
+    const m = makeMockClient(JSON.stringify({ ok: true }));
+    await callClaude({
+      system: "SYS",
+      user: "USR",
+      stage: "stage2",
+      client: m.client,
+    });
+    assert.equal(Array.isArray(m.calls[0].system), true);
+    assert.deepEqual(m.calls[0].system[0].cache_control, { type: "ephemeral" });
+    assert.equal(m.calls[0].system[0].text, "SYS");
+  });
+});
+
+test("callClaude uses default web_fetch max_uses when fetch-cap lever is unset", async () => {
+  await withLeverEnv({}, async () => {
+    const m = makeMockClient(JSON.stringify({ ok: true }));
+    await callClaude({
+      system: "SYS",
+      user: "USR",
+      stage: "stage1",
+      client: m.client,
+    });
+    const tools = m.calls[0].tools;
+    const webFetch = tools.find((t: any) => t.name === "web_fetch");
+    assert.equal(webFetch.max_uses, 25);
+  });
+});
+
+test("callClaude lowers web_fetch max_uses when fetch-cap lever is set", async () => {
+  await withLeverEnv({ APPRAISAL_LEVER_MAX_FETCHES: "5" }, async () => {
+    const m = makeMockClient(JSON.stringify({ ok: true }));
+    await callClaude({
+      system: "SYS",
+      user: "USR",
+      stage: "stage1",
+      client: m.client,
+    });
+    const tools = m.calls[0].tools;
+    const webFetch = tools.find((t: any) => t.name === "web_fetch");
+    assert.equal(webFetch.max_uses, 5);
+  });
+});
+
+// --- runtime wiring: Stage 1 multi-call usage aggregation -----------------
+
+const STAGE1_VALID_JSON = JSON.stringify({
+  comps: Array.from({ length: 6 }, (_, i) => ({
+    source: "autotrader.ca",
+    url: `https://example.com/l${i}`,
+    title: `2020 Honda Civic EX #${i}`,
+    year: 2020,
+    make: "Honda",
+    model: "Civic",
+    trim: "EX",
+    mileageKm: 60000 + i * 1000,
+    askingPriceCad: 19000 + i * 100,
+    location: "Toronto, ON",
+    descriptionExcerpt: "Clean.",
+    accidentSignalFromDescription: "clean",
+    daysOnMarket: 10,
+    sellerType: "dealer",
+  })),
+  compsBandUsed: "strict",
+  compsCount: 6,
+  statCanCpiLatest: 158,
+  statCanCpi3MonthDirection: "up",
+  researchNotes: "ok",
+});
+
+test("runStage1 aggregates usage across initial + Firecrawl-fallback Claude calls (Task #22)", async () => {
+  await withLeverEnv({}, async () => {
+    let callIdx = 0;
+    const mockClient = {
+      messages: {
+        async create(_req: any) {
+          callIdx += 1;
+          if (callIdx === 1) {
+            // First call: simulate a blocked web_fetch in the response so
+            // runStage1 will invoke the Firecrawl fallback and re-ask.
+            return {
+              content: [
+                {
+                  type: "web_fetch_tool_result",
+                  tool_name: "web_fetch",
+                  is_error: true,
+                  input: { url: "https://example.com/blocked" },
+                },
+                { type: "text", text: STAGE1_VALID_JSON },
+              ],
+              stop_reason: "end_turn",
+              usage: {
+                input_tokens: 8000,
+                output_tokens: 400,
+                cache_creation_input_tokens: null,
+                cache_read_input_tokens: null,
+              },
+            };
+          }
+          // Second call: clean response, valid JSON.
+          return {
+            content: [{ type: "text", text: STAGE1_VALID_JSON }],
+            stop_reason: "end_turn",
+            usage: {
+              input_tokens: 3000,
+              output_tokens: 150,
+              cache_creation_input_tokens: null,
+              cache_read_input_tokens: null,
+            },
+          };
+        },
+      },
+    };
+    const result = await runStage1(
+      { year: 2020, make: "Honda", model: "Civic", trim: "EX", mileageKm: 60000 },
+      {
+        firecrawlFetch: async () => "<html><body><p>fallback</p></body></html>",
+        client: mockClient as any,
+      },
+    );
+    assert.equal(callIdx, 2, "expected two Claude calls (initial + fallback re-ask)");
+    // Aggregated usage MUST sum both calls — not just the last one.
+    assert.equal(result.aggregatedUsage.inputTokens, 11000);
+    assert.equal(result.aggregatedUsage.outputTokens, 550);
+    // And aggregated must NOT equal just the final call's usage.
+    assert.notEqual(result.aggregatedUsage.inputTokens, result.raw.usage.inputTokens);
+  });
+});
+
+test("runStage1 records single-call usage when no fallback is triggered", async () => {
+  await withLeverEnv({}, async () => {
+    const mockClient = {
+      messages: {
+        async create() {
+          return {
+            content: [{ type: "text", text: STAGE1_VALID_JSON }],
+            stop_reason: "end_turn",
+            usage: {
+              input_tokens: 5000,
+              output_tokens: 300,
+              cache_creation_input_tokens: null,
+              cache_read_input_tokens: null,
+            },
+          };
+        },
+      },
+    };
+    const result = await runStage1(
+      { year: 2020, make: "Honda", model: "Civic", trim: "EX", mileageKm: 60000 },
+      { client: mockClient as any },
+    );
+    assert.equal(result.aggregatedUsage.inputTokens, 5000);
+    assert.equal(result.aggregatedUsage.outputTokens, 300);
+  });
 });

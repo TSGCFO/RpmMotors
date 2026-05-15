@@ -127,7 +127,9 @@ export async function runAppraisalPipeline(
       stage1DurationMs = Date.now() - t0;
       stage1Output = result.output;
       stage1ModelUsed = result.modelUsed;
-      stage1Usage = toStageUsageMeta(result.modelUsed, result.raw.usage);
+      // Use aggregated usage so multi-call Stage 1 paths (e.g. Firecrawl
+      // fallback re-ask) are fully counted in cost accounting (Task #22).
+      stage1Usage = toStageUsageMeta(result.modelUsed, result.aggregatedUsage);
       logger.info("stage1 complete", {
         cacheKey,
         durationMs: stage1DurationMs,

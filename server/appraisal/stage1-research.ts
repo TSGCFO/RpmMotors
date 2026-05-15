@@ -17,6 +17,8 @@ import {
   Stage1OutputSchema,
   type Stage1Output,
 } from "./prompts";
+import { loadCostLeverFlags } from "./cost-levers.config";
+import { stripListingHtml } from "./levers/strip-html";
 
 export interface Stage1Input {
   year: number;
@@ -43,7 +45,37 @@ export interface Stage1Result {
   output: Stage1Output;
   modelUsed: string;
   durationMs: number;
+  /**
+   * The final Claude call's raw response (used for blocked-URL detection
+   * and as the source of `text` for JSON parsing).
+   */
   raw: ClaudeCallResult;
+  /**
+   * Aggregated token usage across ALL Claude calls made in Stage 1 — both
+   * the initial call and any follow-up call after Firecrawl fallback.
+   * Persisted by the orchestrator as the Stage 1 usage so cost accounting
+   * is exact for multi-call paths (Task #22).
+   */
+  aggregatedUsage: ClaudeCallResult["usage"];
+}
+
+/** Sum two usage objects field by field, treating missing fields as 0. */
+function addUsage(
+  a: ClaudeCallResult["usage"],
+  b: ClaudeCallResult["usage"],
+): ClaudeCallResult["usage"] {
+  const sum = (x?: number, y?: number) => {
+    const xv = typeof x === "number" ? x : 0;
+    const yv = typeof y === "number" ? y : 0;
+    if (xv === 0 && yv === 0) return undefined;
+    return xv + yv;
+  };
+  return {
+    inputTokens: sum(a.inputTokens, b.inputTokens),
+    outputTokens: sum(a.outputTokens, b.outputTokens),
+    cacheCreationInputTokens: sum(a.cacheCreationInputTokens, b.cacheCreationInputTokens),
+    cacheReadInputTokens: sum(a.cacheReadInputTokens, b.cacheReadInputTokens),
+  };
 }
 
 function buildStage1UserPrompt(input: Stage1Input): string {
@@ -166,14 +198,21 @@ export async function runStage1(
   // incorporated.
   const blockedUrls = options.firecrawlFetch ? findBlockedFetchUrls(first) : [];
   let finalResult: ClaudeCallResult = first;
+  // Aggregate token usage across all Claude calls (Task #22 — exact
+  // accounting requirement).
+  let aggregatedUsage: ClaudeCallResult["usage"] = first.usage;
+  // Lever: strip-html. When APPRAISAL_LEVER_STRIP_LISTING_HTML=1, pre-strip
+  // nav/footer/script/style noise before sending fetched HTML back to Claude.
+  const leverFlags = loadCostLeverFlags();
   if (blockedUrls.length && options.firecrawlFetch) {
     const fetched: { url: string; text: string }[] = [];
     for (const url of blockedUrls) {
       try {
         const text = await options.firecrawlFetch(url);
         if (text && text.trim()) {
-          // Keep payload bounded.
-          fetched.push({ url, text: text.slice(0, 12000) });
+          // Strip lever (no-op when flag off), then bound the payload.
+          const cleaned = stripListingHtml(text, leverFlags.stripListingHtmlEnabled);
+          fetched.push({ url, text: cleaned.slice(0, 12000) });
         }
       } catch {
         // Silent — best-effort fallback.
@@ -193,6 +232,7 @@ export async function runStage1(
         config: options.config,
         client: options.client,
       });
+      aggregatedUsage = addUsage(aggregatedUsage, finalResult.usage);
     }
   }
 
@@ -204,5 +244,6 @@ export async function runStage1(
     modelUsed: finalResult.model,
     durationMs: Date.now() - started,
     raw: finalResult,
+    aggregatedUsage,
   };
 }

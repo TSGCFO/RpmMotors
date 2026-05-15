@@ -93,7 +93,36 @@ top.
 
 Each lever exports a pure helper (`maybeApplyPromptCache`,
 `shouldAllowFetch` / `remainingFetchBudget`, `stripListingHtml`) that is a
-no-op when its flag is off, so the levers can be wired into the pipeline
-without changing default behavior. Unit tests in
-`__tests__/cost.test.ts` cover both the off (no-op) and on (transform)
-cases for each lever.
+no-op when its flag is off.
+
+### Runtime wiring
+
+The flags are read by `loadCostLeverFlags()` at the call sites that
+actually shape Anthropic billing:
+
+- **`callClaude()` in `server/appraisal/claude.ts`** reads the flags on
+  every call.
+  - `APPRAISAL_LEVER_PROMPT_CACHE=1` → the `system` parameter is sent as
+    a `[{ type: "text", text, cache_control: { type: "ephemeral" } }]`
+    array instead of a plain string.
+  - `APPRAISAL_LEVER_MAX_FETCHES=<n>` → Stage 1's `web_fetch` tool is
+    built with `max_uses = min(n, 25)`; unset keeps the default of 25.
+- **`runStage1()` in `server/appraisal/stage1-research.ts`** applies
+  `APPRAISAL_LEVER_STRIP_LISTING_HTML=1` to Firecrawl fallback payloads
+  before they are re-injected into Claude's context.
+
+When every flag is unset, the request shape is byte-for-byte identical to
+the pre-Task-#22 behavior. Unit tests in `__tests__/cost.test.ts` exercise
+both off (no-op) and on (transform) cases via a mock Anthropic client that
+records the outgoing request.
+
+### Multi-call Stage 1 usage aggregation
+
+`runStage1()` may issue **two** Claude calls when the Firecrawl fallback
+fires (a blocked `web_fetch` triggers a re-ask with the fetched HTML).
+Both calls' `usage` objects are summed into `Stage1Result.aggregatedUsage`
+and persisted by the orchestrator as `stage1_input_tokens` /
+`stage1_output_tokens`. Cost accounting is therefore exact even on the
+fallback path — the first call's tokens are never dropped. Coverage lives
+in `__tests__/cost.test.ts` ("runStage1 aggregates usage across initial +
+Firecrawl-fallback Claude calls").
