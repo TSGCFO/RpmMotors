@@ -2,7 +2,7 @@ import { storage, type AppraisalStatus } from "../storage";
 import { runAppraisalPipeline, type AppraisalPipelineOptions } from "./pipeline";
 import { sendCustomerAppraisalEmail } from "./customer-email";
 import { routeAppraisalLead } from "./lead-routing";
-import { stageCostMills } from "./cost";
+import { computeAnthropicCostCents } from "./cost";
 import type { Appraisal } from "@shared/schema";
 
 export interface OrchestratorOptions {
@@ -90,25 +90,38 @@ export async function runAppraisalOrchestration(
       );
       estimatedPriceCad = result.stage2.estimatedPriceCad;
       // ---- Cost tracking (Task #22) ----
+      // Computed best-effort: if any field is missing/throws we persist null
+      // costs but still mark the appraisal completed. The appraisal MUST
+      // never fail because of a billing-side issue.
       const s1u = result.meta.stage1Usage;
       const s2u = result.meta.stage2Usage;
-      const s1Cost = s1u
-        ? stageCostMills({
-            model: s1u.model,
-            inputTokens: s1u.inputTokens,
-            outputTokens: s1u.outputTokens,
-            cacheCreationTokens: s1u.cacheCreationTokens,
-            cacheReadTokens: s1u.cacheReadTokens,
-          })
-        : 0;
-      const s2Cost = stageCostMills({
-        model: s2u.model,
-        inputTokens: s2u.inputTokens,
-        outputTokens: s2u.outputTokens,
-        cacheCreationTokens: s2u.cacheCreationTokens,
-        cacheReadTokens: s2u.cacheReadTokens,
-      });
-      const totalCostMills = s1Cost + s2Cost;
+      let s1CostCents: number | null = null;
+      let s2CostCents: number | null = null;
+      let totalCostCents: number | null = null;
+      try {
+        s1CostCents = s1u
+          ? computeAnthropicCostCents({
+              model: s1u.model,
+              inputTokens: s1u.inputTokens,
+              outputTokens: s1u.outputTokens,
+              cacheCreationTokens: s1u.cacheCreationTokens,
+              cacheReadTokens: s1u.cacheReadTokens,
+            })
+          : 0;
+        s2CostCents = computeAnthropicCostCents({
+          model: s2u.model,
+          inputTokens: s2u.inputTokens,
+          outputTokens: s2u.outputTokens,
+          cacheCreationTokens: s2u.cacheCreationTokens,
+          cacheReadTokens: s2u.cacheReadTokens,
+        });
+        totalCostCents = s1CostCents + s2CostCents;
+      } catch (costErr) {
+        console.error(`[appraisal #${appraisalId}] cost computation failed:`, costErr);
+        s1CostCents = null;
+        s2CostCents = null;
+        totalCostCents = null;
+      }
       await storage.updateAppraisalWithResult(appraisalId, {
         status: "completed",
         result: {
@@ -130,7 +143,9 @@ export async function runAppraisalOrchestration(
         stage2OutputTokens: s2u.outputTokens ?? null,
         stage2CacheCreationTokens: s2u.cacheCreationTokens ?? null,
         stage2CacheReadTokens: s2u.cacheReadTokens ?? null,
-        totalCostMills,
+        stage1CostCents: s1CostCents,
+        stage2CostCents: s2CostCents,
+        totalCostCents,
       });
       await storage.logAppraisalAudit({
         appraisalId,
@@ -142,9 +157,9 @@ export async function runAppraisalOrchestration(
           stage1DurationMs: result.meta.stage1DurationMs,
           stage2DurationMs: result.meta.stage2DurationMs,
           cacheHit: result.meta.cacheHit,
-          totalCostMills,
-          stage1CostMills: s1Cost,
-          stage2CostMills: s2Cost,
+          stage1CostCents: s1CostCents,
+          stage2CostCents: s2CostCents,
+          totalCostCents,
         },
       });
       pipelineSucceeded = true;

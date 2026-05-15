@@ -410,11 +410,19 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
             <div><dt className="text-gray-500">Stage 1 duration</dt><dd className="font-medium">{stage1Ms != null ? `${stage1Ms} ms` : "—"}</dd></div>
             <div><dt className="text-gray-500">Stage 2 duration</dt><dd className="font-medium">{stage2Ms != null ? `${stage2Ms} ms` : "—"}</dd></div>
             <div>
-              <dt className="text-gray-500">AI cost</dt>
+              <dt className="text-gray-500">AI cost (total)</dt>
               <dd className="font-medium" data-testid="text-detail-cost">
-                {a.totalCostMills != null
-                  ? `$${(a.totalCostMills / 1000).toFixed(a.totalCostMills >= 1000 ? 2 : 3)}`
-                  : "—"}
+                {a.totalCostCents != null ? `$${(a.totalCostCents / 100).toFixed(2)}` : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 1 model</dt>
+              <dd className="font-medium" data-testid="text-detail-stage1-model">{a.stage1Model ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 1 cost</dt>
+              <dd className="font-medium" data-testid="text-detail-stage1-cost">
+                {a.stage1CostCents != null ? `$${(a.stage1CostCents / 100).toFixed(2)}` : "—"}
               </dd>
             </div>
             <div>
@@ -423,6 +431,16 @@ export default function AppraisalDetailView({ id, basePath }: Props) {
                 {a.stage1InputTokens != null || a.stage1OutputTokens != null
                   ? `${(a.stage1InputTokens ?? 0).toLocaleString()} / ${(a.stage1OutputTokens ?? 0).toLocaleString()}`
                   : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 2 model</dt>
+              <dd className="font-medium" data-testid="text-detail-stage2-model">{a.stage2Model ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Stage 2 cost</dt>
+              <dd className="font-medium" data-testid="text-detail-stage2-cost">
+                {a.stage2CostCents != null ? `$${(a.stage2CostCents / 100).toFixed(2)}` : "—"}
               </dd>
             </div>
             <div>

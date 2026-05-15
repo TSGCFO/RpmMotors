@@ -1,164 +1,99 @@
-# Appraisal Feature — Data Layer
+# Appraisal pipeline — cost tracking & cost-reduction levers
 
-This directory will house the server-side code for the AI-powered Ontario car
-price calculator (public `/value-my-car` page). This task (#11) only adds the
-**data model, storage interface, and secrets** that everything else depends on.
+This directory contains the AI car-appraisal pipeline. Task #22 added
+per-appraisal Anthropic cost tracking, aggregate cost reporting, and three
+**disabled-by-default** cost-reduction levers.
 
-## New Database Tables
+## Per-appraisal cost columns
 
-All tables live in `shared/schema.ts`. Migration is performed via
-`scripts/migrate-appraisal.ts` (idempotent raw-SQL `CREATE TABLE IF NOT EXISTS`)
-because the managed Render Postgres rejects `drizzle-kit push`'s attempts to
-modify system views.
+Every appraisal row in PostgreSQL carries usage and cost metadata for both
+Claude stages of the pipeline. All money values are stored as **integer
+cents (USD)** — never floats, never dollars-as-strings.
 
-### `appraisals`
+| Column | Type | Description |
+| --- | --- | --- |
+| `stage1_model` / `stage2_model` | text | Claude model id used for each stage (e.g. `claude-opus-4-5`). |
+| `stage1_input_tokens` / `stage2_input_tokens` | int | Prompt input tokens billed at the full input rate. |
+| `stage1_output_tokens` / `stage2_output_tokens` | int | Completion tokens billed at the output rate. |
+| `stage1_cache_creation_tokens` / `stage2_cache_creation_tokens` | int | Tokens written into the Anthropic prompt cache. |
+| `stage1_cache_read_tokens` / `stage2_cache_read_tokens` | int | Tokens read from the prompt cache (cheap). |
+| `stage1_cost_cents` / `stage2_cost_cents` | int | Cents spent on each stage. |
+| `total_cost_cents` | int | `stage1 + stage2` cents — the value shown in staff UI. |
 
-One row per user-submitted appraisal request. Stores both the input snapshot
-and the AI pipeline result.
+`null` in any of these columns means "we don't have a number for this run"
+(usually a Stage 1 cache hit or a pre-Task-#22 row). Storage and UI both
+treat `null` as "—".
 
-| Column                | Type             | Notes                                                                              |
-| --------------------- | ---------------- | ---------------------------------------------------------------------------------- |
-| `id`                  | `serial` (PK)    |                                                                                    |
-| `name`                | `text NOT NULL`  | Contact name                                                                       |
-| `email`               | `text NOT NULL`  | Contact email                                                                      |
-| `phone`               | `text`           | Optional                                                                           |
-| `postal_code`         | `text`           | Optional Canadian postal code (validated FSA/LDU on input)                         |
-| `year`                | `int NOT NULL`   | 1980 .. current_year + 1                                                           |
-| `make`                | `text NOT NULL`  |                                                                                    |
-| `model`               | `text NOT NULL`  |                                                                                    |
-| `trim`                | `text`           |                                                                                    |
-| `mileage`             | `int NOT NULL`   | 0 .. 999,999                                                                       |
-| `vin`                 | `text`           | Optional 17-char VIN (no I/O/Q)                                                    |
-| `exterior_color`      | `text`           |                                                                                    |
-| `transmission`        | `text`           |                                                                                    |
-| `drivetrain`          | `text`           |                                                                                    |
-| `condition_rating`    | `text`           | e.g. excellent / good / fair / poor                                                |
-| `condition_notes`     | `text`           | Free text, capped at 500 chars, HTML-stripped                                      |
-| `modifications`       | `text`           | Free text, capped at 500 chars, HTML-stripped                                      |
-| `accident_history`    | `text`           | Free text, capped at 500 chars, HTML-stripped                                      |
-| `selling_timeline`    | `text`           | Optional short text                                                                |
-| `status`              | `text NOT NULL`  | `pending` / `stage1_running` / `stage1_complete` / `stage2_running` / `completed` / `failed` |
-| `error_message`       | `text`           | Last failure reason                                                                |
-| `result`              | `jsonb`          | Full AI pipeline payload (stage 1 + stage 2 + meta)                                |
-| `estimated_low`       | `int`            | Denormalized from `result` for sort/filter                                         |
-| `estimated_high`      | `int`            | Denormalized from `result`                                                         |
-| `estimated_mid`       | `int`            | Denormalized from `result`                                                         |
-| `ip_hash`             | `text`           | HMAC-SHA256 of submitter IP using `APPRAISAL_RATE_LIMIT_IP_SALT`                   |
-| `user_agent`          | `text`           |                                                                                    |
-| `turnstile_verified`  | `boolean`        | Whether Cloudflare Turnstile token verified server-side                            |
-| `inquiry_id`          | `int`            | FK-style link to `inquiries.id` after lead routing                                 |
-| `staff_notified`      | `boolean`        | Whether SendGrid notification has been dispatched                                  |
-| `created_at`          | `timestamp`      |                                                                                    |
-| `updated_at`          | `timestamp`      |                                                                                    |
+## Cost computation
 
-Indexes: `status`, `created_at`, `email`.
+The single source of truth is `computeAnthropicCostCents()` in
+`server/appraisal/cost.ts`. It takes a `{ model, inputTokens, outputTokens,
+cacheCreationTokens, cacheReadTokens }` shape and returns an integer number
+of cents using the per-million-token prices in the `PRICING` table.
 
-### `appraisal_rate_limits`
+Defaults are for `claude-opus-4-5`:
 
-Append-only ledger for rolling-window rate limiting by hashed IP / email.
+| Token kind | Price (USD / M tok) |
+| --- | --- |
+| Input | $15.00 |
+| Output | $75.00 |
+| Cache create | $18.75 |
+| Cache read | $1.50 |
 
-| Column       | Type            | Notes                          |
-| ------------ | --------------- | ------------------------------ |
-| `id`         | `serial` (PK)   |                                |
-| `ip_hash`    | `text`          | Salted HMAC of submitter IP    |
-| `email`      | `text`          | Lower-cased contact email      |
-| `created_at` | `timestamp NOT NULL` | Defaults to `NOW()`       |
+Cost is computed in the orchestrator inside a `try / catch`. **A
+cost-side failure must never fail the appraisal** — on error the orchestrator
+persists `null` cents and logs a console error, but the appraisal still
+completes and the customer email still sends.
 
-Indexes: `(ip_hash, created_at)`, `(email, created_at)` for fast windowed counts.
+## Staff surfaces
 
-### `appraisal_audit_log`
+- **List view (`appraisal-list-view.tsx`)** — shows a per-row `Cost`
+  column (`total_cost_cents`) and a sortable Cost header that flips between
+  desc → asc → desc and clears back to `createdAt desc` if another column
+  is sorted later.
+- **Detail view (`appraisal-detail-view.tsx`)** — shows model + cost +
+  tokens for each stage individually, plus the total.
+- **Aggregate card** — at the top of the list view, four buckets:
+  Today / Last 7 days / Last 30 days / All time. Each bucket shows count,
+  total cost, and average per appraisal.
 
-Append-only audit trail of significant lifecycle events
-(`created`, `ai_stage1_ok`, `ai_stage1_failed`, `ai_stage2_ok`,
-`ai_stage2_failed`, `completed`, `email_sent`, `staff_viewed`,
-`staff_updated`, …).
+## Aggregate endpoint
 
-| Column          | Type                 | Notes                                       |
-| --------------- | -------------------- | ------------------------------------------- |
-| `id`            | `serial` (PK)        |                                             |
-| `appraisal_id`  | `int NOT NULL`       | References `appraisals.id`                  |
-| `event`         | `text NOT NULL`      | Short event code                            |
-| `actor`         | `text`               | `system`, `staff:<userId>`, `customer` …    |
-| `details`       | `jsonb`              | Arbitrary structured payload                |
-| `created_at`    | `timestamp NOT NULL` | Defaults to `NOW()`                         |
+`GET /api/admin/appraisals/cost-summary` (staff-gated) returns the four
+buckets in this shape:
 
-### `inquiries.appraisal_id`
-
-A new nullable `appraisal_id INTEGER` column on the existing `inquiries` table.
-When an appraisal completes and a lead is routed, the inquiry row is linked back
-to its originating appraisal via this column.
-
-## Storage Methods (IStorage)
-
-Implemented on `DatabaseStorage` in `server/storage.ts`:
-
-```ts
-createAppraisal(input: InsertAppraisal & {
-  ipHash?: string | null;
-  userAgent?: string | null;
-  turnstileVerified?: boolean;
-}): Promise<Appraisal>;
-
-updateAppraisalWithResult(
-  id: number,
-  update: AppraisalResultUpdate
-): Promise<Appraisal | undefined>;
-
-setAppraisalStatus(
-  id: number,
-  status: AppraisalStatus,
-  errorMessage?: string | null
-): Promise<Appraisal | undefined>;
-
-getAppraisal(id: number): Promise<Appraisal | undefined>;
-
-listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]>;
-
-countRecentAppraisalsByIpOrEmail(
-  query: AppraisalRateLimitQuery   // { ipHash?, email?, windowMs, now? }
-): Promise<{ ipCount: number; emailCount: number }>;
-
-logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog>;
+```jsonc
+{
+  "today":    { "count": 0, "totalCostCents": 0, "avgCostCents": 0 },
+  "last7d":   { "count": 0, "totalCostCents": 0, "avgCostCents": 0 },
+  "last30d":  { "count": 0, "totalCostCents": 0, "avgCostCents": 0 },
+  "allTime":  { "count": 0, "totalCostCents": 0, "avgCostCents": 0 }
+}
 ```
 
-`AppraisalRateLimitQuery.now` is an optional `Date` "clock fake hook" so tests
-can pin the rolling-window boundary without freezing system time.
+The buckets are computed in a single SQL pass via filtered aggregates
+(`COUNT/SUM/AVG ... FILTER (WHERE ...)`). "Today" begins at the current
+UTC midnight; the rolling windows are `now() - N days`. Rows with
+`total_cost_cents IS NULL` are excluded from every bucket so cache-hit /
+pre-#22 rows don't poison the averages.
 
-`createAppraisal` writes both an `appraisals` row **and** a matching
-`appraisal_rate_limits` row inside a **single DB transaction**, so the
-rate-limit ledger and the appraisal record always succeed or fail together.
-Email is normalized to lowercase (trimmed) before insert and at every
-rate-limit read so case variants cannot bypass per-email limits.
+## Cost-reduction levers (disabled by default)
 
-## Validation (Zod, from `shared/schema.ts`)
+Three scaffolded levers live in `server/appraisal/levers/`. Each one is
+gated by a flag in `server/appraisal/cost-levers.config.ts`. **All flags
+default OFF.** Flipping a flag must be done deliberately after an A/B run
+of the cost-monitoring script — the lever files themselves say so at the
+top.
 
-`insertAppraisalSchema` enforces:
+| Lever module | Env flag | Effect when on |
+| --- | --- | --- |
+| `levers/prompt-cache.ts` | `APPRAISAL_LEVER_PROMPT_CACHE=1` | Attaches `cache_control: { type: "ephemeral" }` to the largest Stage 1 system block so re-runs pay the cheap cache-read rate. |
+| `levers/fetch-cap.ts` | `APPRAISAL_LEVER_MAX_FETCHES=<n>` | Caps Stage 1 `web_fetch` tool calls to `n`, bounding fetched-HTML input tokens. Unset = no cap. |
+| `levers/strip-html.ts` | `APPRAISAL_LEVER_STRIP_LISTING_HTML=1` | Pre-strips nav/footer/script/style/comments from listing HTML before it is fed back into Claude. |
 
-- `name`, `make`, `model` — required, HTML stripped, trimmed.
-- `email` — RFC-style email, max 200 chars.
-- `year` — integer, 1980 .. current year + 1.
-- `mileage` — integer, 0 .. 999,999.
-- `vin` — optional; if present, normalized to upper-case and matched against
-  `^[A-HJ-NPR-Z0-9]{17}$` (excludes I, O, Q).
-- `postalCode` — optional; normalized (upper-case, no spaces) and matched against
-  Canadian FSA/LDU regex.
-- `conditionNotes`, `modifications`, `accidentHistory` — optional free text,
-  HTML stripped, max 500 chars each.
-- All other free text — HTML stripped, length-capped.
-
-## Secrets
-
-| Secret                          | Purpose                                                     |
-| ------------------------------- | ----------------------------------------------------------- |
-| `ANTHROPIC_API_KEY`             | Claude API for the two-stage valuation pipeline             |
-| `TURNSTILE_SECRET_KEY`          | Server-side Cloudflare Turnstile verification               |
-| `VITE_TURNSTILE_SITE_KEY`       | Public Turnstile site key (exposed to the client)           |
-| `APPRAISAL_RATE_LIMIT_IP_SALT`  | HMAC salt for hashing submitter IPs before storing them     |
-| `SENDGRID_API_KEY`              | Pre-existing — reused for staff notifications and customer receipts |
-
-## Migration
-
-```bash
-# Idempotent — safe to re-run.
-npx tsx scripts/migrate-appraisal.ts
-```
+Each lever exports a pure helper (`maybeApplyPromptCache`,
+`shouldAllowFetch` / `remainingFetchBudget`, `stripListingHtml`) that is a
+no-op when its flag is off, so the levers can be wired into the pipeline
+without changing default behavior. Unit tests in
+`__tests__/cost.test.ts` cover both the off (no-op) and on (transform)
+cases for each lever.

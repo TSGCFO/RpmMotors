@@ -23,23 +23,22 @@ interface ListResponse {
   offerRequestCount7d: number;
 }
 
+interface CostBucket {
+  count: number;
+  totalCostCents: number;
+  avgCostCents: number;
+}
 interface CostSummary {
-  windowDays: number;
-  totalAppraisals: number;
-  completedAppraisals: number;
-  totalCostMills: number;
-  avgCostMills: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCacheReadTokens: number;
-  totalCacheCreationTokens: number;
+  today: CostBucket;
+  last7d: CostBucket;
+  last30d: CostBucket;
+  allTime: CostBucket;
 }
 
-// 1 mill = 1/1000 USD. Render as e.g. "$0.142" or "$1.42".
-function formatMillsAsUsd(mills: number | null | undefined): string {
-  if (mills == null) return "—";
-  const dollars = mills / 1000;
-  return `$${dollars.toFixed(dollars >= 1 ? 2 : 3)}`;
+// 1 cent = 1/100 USD. Render as e.g. "$2.37" or "—".
+function formatCentsAsUsd(cents: number | null | undefined): string {
+  if (cents == null) return "—";
+  return `$${(cents / 100).toFixed(2)}`;
 }
 
 function getWantsOffer(a: Appraisal): boolean {
@@ -79,6 +78,8 @@ export default function AppraisalListView({ basePath }: Props) {
   const [offerOnly, setOfferOnly] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [sortBy, setSortBy] = useState<"createdAt" | "cost">("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const queryString = new URLSearchParams();
   queryString.set("page", String(page));
@@ -87,18 +88,20 @@ export default function AppraisalListView({ basePath }: Props) {
   if (offerOnly) queryString.set("offerRequestsOnly", "true");
   if (dateFrom) queryString.set("dateFrom", dateFrom);
   if (dateTo) queryString.set("dateTo", dateTo);
+  queryString.set("sortBy", sortBy);
+  queryString.set("sortDir", sortDir);
 
   const url = `/api/admin/appraisals?${queryString.toString()}`;
   const { data: costSummary } = useQuery<CostSummary>({
-    queryKey: ["/api/admin/appraisals/cost-summary", 30],
+    queryKey: ["/api/admin/appraisals/cost-summary"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/appraisals/cost-summary?days=30", { credentials: "include" });
+      const res = await fetch("/api/admin/appraisals/cost-summary", { credentials: "include" });
       if (!res.ok) throw new Error(`Failed (${res.status})`);
       return res.json();
     },
   });
   const { data, isLoading, isError, error } = useQuery<ListResponse>({
-    queryKey: ["/api/admin/appraisals", page, search, offerOnly, dateFrom, dateTo],
+    queryKey: ["/api/admin/appraisals", page, search, offerOnly, dateFrom, dateTo, sortBy, sortDir],
     queryFn: async () => {
       const res = await fetch(url, { credentials: "include" });
       if (!res.ok) {
@@ -134,36 +137,32 @@ export default function AppraisalListView({ basePath }: Props) {
       {costSummary && (
         <Card data-testid="card-cost-summary">
           <CardHeader>
-            <CardTitle className="text-base">
-              AI cost — last {costSummary.windowDays} days
-            </CardTitle>
+            <CardTitle className="text-base">AI cost (Anthropic)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <div className="text-gray-500">Total spend</div>
-                <div className="text-lg font-semibold text-gray-900" data-testid="text-total-cost">
-                  {formatMillsAsUsd(costSummary.totalCostMills)}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {([
+                { key: "today", label: "Today", bucket: costSummary.today },
+                { key: "last7d", label: "Last 7 days", bucket: costSummary.last7d },
+                { key: "last30d", label: "Last 30 days", bucket: costSummary.last30d },
+                { key: "allTime", label: "All time", bucket: costSummary.allTime },
+              ] as const).map(({ key, label, bucket }) => (
+                <div
+                  key={key}
+                  className="rounded border bg-gray-50 p-3"
+                  data-testid={`cost-bucket-${key}`}
+                >
+                  <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
+                  <div className="mt-1 text-lg font-semibold text-gray-900" data-testid={`cost-bucket-${key}-total`}>
+                    {formatCentsAsUsd(bucket.totalCostCents)}
+                  </div>
+                  <div className="mt-1 text-xs text-gray-600">
+                    <span data-testid={`cost-bucket-${key}-count`}>{bucket.count}</span> appraisal{bucket.count === 1 ? "" : "s"}
+                    {" · avg "}
+                    <span data-testid={`cost-bucket-${key}-avg`}>{formatCentsAsUsd(bucket.avgCostCents)}</span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-gray-500">Avg per appraisal</div>
-                <div className="text-lg font-semibold text-gray-900" data-testid="text-avg-cost">
-                  {formatMillsAsUsd(costSummary.avgCostMills)}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500">Appraisals</div>
-                <div className="text-lg font-semibold text-gray-900">
-                  {costSummary.completedAppraisals} / {costSummary.totalAppraisals}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500">Tokens (in / out)</div>
-                <div className="text-lg font-semibold text-gray-900">
-                  {costSummary.totalInputTokens.toLocaleString()} / {costSummary.totalOutputTokens.toLocaleString()}
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -260,7 +259,25 @@ export default function AppraisalListView({ basePath }: Props) {
                     <TableHead>Mileage</TableHead>
                     <TableHead>Condition</TableHead>
                     <TableHead>AI Estimate</TableHead>
-                    <TableHead>Cost</TableHead>
+                    <TableHead>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 font-medium hover:text-gray-900"
+                        data-testid="button-sort-cost"
+                        onClick={() => {
+                          if (sortBy === "cost") {
+                            setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+                          } else {
+                            setSortBy("cost");
+                            setSortDir("desc");
+                          }
+                          setPage(1);
+                        }}
+                      >
+                        Cost
+                        {sortBy === "cost" ? (sortDir === "desc" ? " ↓" : " ↑") : " ↕"}
+                      </button>
+                    </TableHead>
                     <TableHead>Offer</TableHead>
                     <TableHead>Confidence</TableHead>
                     <TableHead>Staff Notes</TableHead>
@@ -288,7 +305,7 @@ export default function AppraisalListView({ basePath }: Props) {
                         <TableCell className="text-sm">{a.conditionRating ?? "—"}</TableCell>
                         <TableCell className="text-sm font-medium">{getEstimateLabel(a)}</TableCell>
                         <TableCell className="text-sm text-gray-600" data-testid={`cell-cost-${a.id}`}>
-                          {formatMillsAsUsd(a.totalCostMills)}
+                          {formatCentsAsUsd(a.totalCostCents)}
                         </TableCell>
                         <TableCell>
                           {wantsOffer ? (

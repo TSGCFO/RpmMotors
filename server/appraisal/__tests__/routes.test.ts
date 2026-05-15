@@ -241,7 +241,8 @@ await test("GET /api/appraisals/:id/status: pending → complete → response sh
     "reasoning", "priceFactors", "internalBreakdown", "result", "stage1", "stage2", "comps",
     "estimatedLow", "estimatedHigh", "email", "ipHash", "userAgent",
     // Cost-tracking fields (Task #22) — must never leak to public status.
-    "totalCostMills", "stage1InputTokens", "stage1OutputTokens", "stage2InputTokens",
+    "totalCostCents", "stage1CostCents", "stage2CostCents",
+    "stage1InputTokens", "stage1OutputTokens", "stage2InputTokens",
     "stage2OutputTokens", "stage1Model", "stage2Model",
   ]) {
     assert.equal(r.body[leak], undefined, `public response leaked field: ${leak}`);

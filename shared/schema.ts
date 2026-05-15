@@ -302,9 +302,12 @@ export const appraisals = pgTable("appraisals", {
   stage2OutputTokens: integer("stage2_output_tokens"),
   stage2CacheCreationTokens: integer("stage2_cache_creation_tokens"),
   stage2CacheReadTokens: integer("stage2_cache_read_tokens"),
-  // Total cost in mills (1/1000 USD). $2.30 → 2300. Null when not computed
-  // (Stage 1 cache hit doesn't pay for Stage 1 tokens; we still record 0).
-  totalCostMills: integer("total_cost_mills"),
+  // Per-stage + total Anthropic cost in USD cents (integer). $2.37 → 237.
+  // Null when cost computation failed (best-effort: never blocks the
+  // appraisal from completing).
+  stage1CostCents: integer("stage1_cost_cents"),
+  stage2CostCents: integer("stage2_cost_cents"),
+  totalCostCents: integer("total_cost_cents"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -354,7 +357,9 @@ export const insertAppraisalSchema = createInsertSchema(appraisals)
     stage2OutputTokens: true,
     stage2CacheCreationTokens: true,
     stage2CacheReadTokens: true,
-    totalCostMills: true,
+    stage1CostCents: true,
+    stage2CostCents: true,
+    totalCostCents: true,
     createdAt: true,
     updatedAt: true,
   })

@@ -17,6 +17,9 @@ const listQuerySchema = z.object({
   search: z.string().max(200).optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
+  // Sort support (Task #22). Default: createdAt desc.
+  sortBy: z.enum(["createdAt", "cost"]).optional(),
+  sortDir: z.enum(["asc", "desc"]).optional(),
 });
 
 const patchSchema = z.object({
@@ -38,11 +41,9 @@ export function registerAdminAppraisalRoutes(app: Express) {
   // GET /api/admin/appraisals/cost-summary — aggregate Anthropic cost (Task #22)
   // NOTE: Registered before the `/:id` route so "cost-summary" isn't parsed as
   // a numeric id.
-  app.get("/api/admin/appraisals/cost-summary", requireStaff, async (req: StaffAuthRequest, res: Response) => {
+  app.get("/api/admin/appraisals/cost-summary", requireStaff, async (_req: StaffAuthRequest, res: Response) => {
     try {
-      const daysRaw = Number(req.query.days);
-      const windowDays = Number.isFinite(daysRaw) && daysRaw > 0 && daysRaw <= 365 ? Math.floor(daysRaw) : 30;
-      const summary = await storage.getAppraisalCostSummary(windowDays);
+      const summary = await storage.getAppraisalCostSummary();
       res.json(summary);
     } catch (err) {
       console.error("Error fetching appraisal cost summary:", err);
@@ -57,7 +58,7 @@ export function registerAdminAppraisalRoutes(app: Express) {
       if (!parsed.success) {
         return res.status(400).json({ message: fromZodError(parsed.error).message });
       }
-      const { page, limit, offerRequestsOnly, search, dateFrom, dateTo } = parsed.data;
+      const { page, limit, offerRequestsOnly, search, dateFrom, dateTo, sortBy, sortDir } = parsed.data;
 
       const result = await storage.listAppraisalsForStaff({
         page,
@@ -66,6 +67,8 @@ export function registerAdminAppraisalRoutes(app: Express) {
         search,
         dateFrom: parseDate(dateFrom),
         dateTo: parseDate(dateTo),
+        sortBy,
+        sortDir,
       });
 
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

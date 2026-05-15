@@ -33,6 +33,9 @@ export interface StaffAppraisalListOptions {
   dateTo?: Date;
   page?: number;
   limit?: number;
+  // Sort support (Task #22). Default: createdAt desc.
+  sortBy?: "createdAt" | "cost";
+  sortDir?: "asc" | "desc";
 }
 
 export interface StaffAppraisalListResult {
@@ -71,19 +74,23 @@ export interface AppraisalResultUpdate {
   stage2OutputTokens?: number | null;
   stage2CacheCreationTokens?: number | null;
   stage2CacheReadTokens?: number | null;
-  totalCostMills?: number | null;
+  stage1CostCents?: number | null;
+  stage2CostCents?: number | null;
+  totalCostCents?: number | null;
+}
+
+/** Single window stats — count of appraisals, total spend, average per appraisal. */
+export interface CostBucket {
+  count: number;
+  totalCostCents: number;
+  avgCostCents: number;
 }
 
 export interface AppraisalCostSummary {
-  windowDays: number;
-  totalAppraisals: number;
-  completedAppraisals: number;
-  totalCostMills: number;
-  avgCostMills: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCacheReadTokens: number;
-  totalCacheCreationTokens: number;
+  today: CostBucket;
+  last7d: CostBucket;
+  last30d: CostBucket;
+  allTime: CostBucket;
 }
 
 export interface AppraisalRateLimitQuery {
@@ -214,7 +221,7 @@ export interface IStorage {
   // Staff admin appraisal methods
   listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult>;
   countOfferRequestsSince(since: Date): Promise<number>;
-  getAppraisalCostSummary(windowDays: number): Promise<AppraisalCostSummary>;
+  getAppraisalCostSummary(): Promise<AppraisalCostSummary>;
   getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]>;
   updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined>;
 }
@@ -958,7 +965,9 @@ export class DatabaseStorage implements IStorage {
     if (update.stage2OutputTokens !== undefined) patch.stage2OutputTokens = update.stage2OutputTokens;
     if (update.stage2CacheCreationTokens !== undefined) patch.stage2CacheCreationTokens = update.stage2CacheCreationTokens;
     if (update.stage2CacheReadTokens !== undefined) patch.stage2CacheReadTokens = update.stage2CacheReadTokens;
-    if (update.totalCostMills !== undefined) patch.totalCostMills = update.totalCostMills;
+    if (update.stage1CostCents !== undefined) patch.stage1CostCents = update.stage1CostCents;
+    if (update.stage2CostCents !== undefined) patch.stage2CostCents = update.stage2CostCents;
+    if (update.totalCostCents !== undefined) patch.totalCostCents = update.totalCostCents;
 
     const [row] = await db
       .update(appraisals)
@@ -1064,7 +1073,19 @@ export class DatabaseStorage implements IStorage {
 
     let q = db.select().from(appraisals).$dynamic();
     if (whereClause) q = q.where(whereClause);
-    q = q.orderBy(desc(appraisals.createdAt)).limit(limit).offset(offset);
+    // Sort: createdAt (default) or cost. For cost, push NULLs to the end so
+    // staff see populated rows first when sorting either direction.
+    const dir = options.sortDir === "asc" ? "asc" : "desc";
+    if (options.sortBy === "cost") {
+      q = q.orderBy(
+        dir === "asc"
+          ? sql`${appraisals.totalCostCents} ASC NULLS LAST`
+          : sql`${appraisals.totalCostCents} DESC NULLS LAST`,
+      );
+    } else {
+      q = q.orderBy(dir === "asc" ? asc(appraisals.createdAt) : desc(appraisals.createdAt));
+    }
+    q = q.limit(limit).offset(offset);
     const data = await q;
 
     return {
@@ -1089,34 +1110,53 @@ export class DatabaseStorage implements IStorage {
     return Number(row?.count ?? 0);
   }
 
-  async getAppraisalCostSummary(windowDays: number): Promise<AppraisalCostSummary> {
-    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
+  async getAppraisalCostSummary(): Promise<AppraisalCostSummary> {
+    // One pass over the table — aggregate per bucket using filtered counts
+    // and sums. This avoids 4 separate round trips. "Today" uses the start
+    // of the current UTC day so the bucket is stable as time advances.
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0,
+    ));
+    const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const bucketSql = (since: Date | null) => {
+      const cond = since
+        ? sql`${appraisals.createdAt} >= ${since} AND ${appraisals.totalCostCents} IS NOT NULL`
+        : sql`${appraisals.totalCostCents} IS NOT NULL`;
+      return {
+        count: sql<number>`count(*) filter (where ${cond})::int`,
+        total: sql<number>`coalesce(sum(${appraisals.totalCostCents}) filter (where ${cond}), 0)::int`,
+        avg: sql<number>`coalesce(round(avg(${appraisals.totalCostCents}) filter (where ${cond})), 0)::int`,
+      };
+    };
+
+    const today = bucketSql(startOfToday);
+    const w7 = bucketSql(last7d);
+    const w30 = bucketSql(last30d);
+    const all = bucketSql(null);
+
     const [row] = await db
       .select({
-        total: sql<number>`count(*)::int`,
-        completed: sql<number>`count(*) filter (where ${appraisals.status} = 'completed')::int`,
-        totalCost: sql<number>`coalesce(sum(${appraisals.totalCostMills}), 0)::int`,
-        avgCost: sql<number>`coalesce(round(avg(${appraisals.totalCostMills})), 0)::int`,
-        // NOTE: coalesce EACH sum individually before adding — otherwise a NULL
-        // stage1 sum (common when Stage 1 was a cache hit) poisons the whole
-        // expression to NULL and the outer coalesce silently returns 0.
-        inputTok: sql<number>`(coalesce(sum(${appraisals.stage1InputTokens}), 0) + coalesce(sum(${appraisals.stage2InputTokens}), 0))::int`,
-        outputTok: sql<number>`(coalesce(sum(${appraisals.stage1OutputTokens}), 0) + coalesce(sum(${appraisals.stage2OutputTokens}), 0))::int`,
-        cacheReadTok: sql<number>`(coalesce(sum(${appraisals.stage1CacheReadTokens}), 0) + coalesce(sum(${appraisals.stage2CacheReadTokens}), 0))::int`,
-        cacheCreateTok: sql<number>`(coalesce(sum(${appraisals.stage1CacheCreationTokens}), 0) + coalesce(sum(${appraisals.stage2CacheCreationTokens}), 0))::int`,
+        todayCount: today.count, todayTotal: today.total, todayAvg: today.avg,
+        d7Count: w7.count, d7Total: w7.total, d7Avg: w7.avg,
+        d30Count: w30.count, d30Total: w30.total, d30Avg: w30.avg,
+        allCount: all.count, allTotal: all.total, allAvg: all.avg,
       })
-      .from(appraisals)
-      .where(gte(appraisals.createdAt, since));
+      .from(appraisals);
+
+    const toBucket = (count: unknown, total: unknown, avg: unknown): CostBucket => ({
+      count: Number(count ?? 0),
+      totalCostCents: Number(total ?? 0),
+      avgCostCents: Number(avg ?? 0),
+    });
+
     return {
-      windowDays,
-      totalAppraisals: Number(row?.total ?? 0),
-      completedAppraisals: Number(row?.completed ?? 0),
-      totalCostMills: Number(row?.totalCost ?? 0),
-      avgCostMills: Number(row?.avgCost ?? 0),
-      totalInputTokens: Number(row?.inputTok ?? 0),
-      totalOutputTokens: Number(row?.outputTok ?? 0),
-      totalCacheReadTokens: Number(row?.cacheReadTok ?? 0),
-      totalCacheCreationTokens: Number(row?.cacheCreateTok ?? 0),
+      today: toBucket(row?.todayCount, row?.todayTotal, row?.todayAvg),
+      last7d: toBucket(row?.d7Count, row?.d7Total, row?.d7Avg),
+      last30d: toBucket(row?.d30Count, row?.d30Total, row?.d30Avg),
+      allTime: toBucket(row?.allCount, row?.allTotal, row?.allAvg),
     };
   }
 

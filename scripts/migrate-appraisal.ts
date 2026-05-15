@@ -118,8 +118,14 @@ async function run() {
       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='appraisals' AND column_name='stage2_cache_read_tokens') THEN
         ALTER TABLE "appraisals" ADD COLUMN "stage2_cache_read_tokens" INTEGER;
       END IF;
-      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='appraisals' AND column_name='total_cost_mills') THEN
-        ALTER TABLE "appraisals" ADD COLUMN "total_cost_mills" INTEGER;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='appraisals' AND column_name='stage1_cost_cents') THEN
+        ALTER TABLE "appraisals" ADD COLUMN "stage1_cost_cents" INTEGER;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='appraisals' AND column_name='stage2_cost_cents') THEN
+        ALTER TABLE "appraisals" ADD COLUMN "stage2_cost_cents" INTEGER;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='appraisals' AND column_name='total_cost_cents') THEN
+        ALTER TABLE "appraisals" ADD COLUMN "total_cost_cents" INTEGER;
       END IF;
     END $$;
   `);
