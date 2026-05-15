@@ -244,6 +244,9 @@ await test("GET /api/appraisals/:id/status: pending → complete → response sh
     "totalCostCents", "stage1CostCents", "stage2CostCents",
     "stage1InputTokens", "stage1OutputTokens", "stage2InputTokens",
     "stage2OutputTokens", "stage1Model", "stage2Model",
+    // Cache token fields (Task #22, populated only when prompt-cache lever is on).
+    "stage1CacheCreationTokens", "stage1CacheReadTokens",
+    "stage2CacheCreationTokens", "stage2CacheReadTokens",
   ]) {
     assert.equal(r.body[leak], undefined, `public response leaked field: ${leak}`);
   }

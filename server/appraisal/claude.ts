@@ -218,10 +218,13 @@ export async function callClaude(
     opts.stage === "stage1" ? buildStage1Tools(webFetchMaxUses) : undefined;
 
   // Lever: prompt-cache. When APPRAISAL_LEVER_PROMPT_CACHE=1, mark the
-  // system prompt with an Anthropic ephemeral cache control block so repeat
-  // appraisals pay the cache-read rate ($1.50/Mtok) instead of full input
-  // rate ($15/Mtok). When off, system is sent as a plain string.
-  const systemParam: MessageCreateParamsNonStreaming["system"] = leverFlags.promptCacheEnabled
+  // Stage 1 system prompt with an Anthropic ephemeral cache control block
+  // so repeat appraisals pay the cache-read rate ($1.50/Mtok) instead of
+  // full input rate ($15/Mtok). Scoped to Stage 1 per spec — the Stage 2
+  // system prompt is small and dynamic per appraisal, so caching there has
+  // negligible upside. When off, system is sent as a plain string.
+  const applyPromptCache = leverFlags.promptCacheEnabled && opts.stage === "stage1";
+  const systemParam: MessageCreateParamsNonStreaming["system"] = applyPromptCache
     ? [
         {
           type: "text",

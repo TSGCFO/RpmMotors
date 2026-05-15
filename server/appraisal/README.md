@@ -102,14 +102,20 @@ actually shape Anthropic billing:
 
 - **`callClaude()` in `server/appraisal/claude.ts`** reads the flags on
   every call.
-  - `APPRAISAL_LEVER_PROMPT_CACHE=1` → the `system` parameter is sent as
-    a `[{ type: "text", text, cache_control: { type: "ephemeral" } }]`
-    array instead of a plain string.
+  - `APPRAISAL_LEVER_PROMPT_CACHE=1` → the **Stage 1** `system` parameter
+    is sent as a `[{ type: "text", text, cache_control: { type: "ephemeral" } }]`
+    array instead of a plain string. Scoped to Stage 1 (the large research
+    prompt); Stage 2's small per-appraisal system prompt stays a plain
+    string even when the flag is on.
   - `APPRAISAL_LEVER_MAX_FETCHES=<n>` → Stage 1's `web_fetch` tool is
     built with `max_uses = min(n, 25)`; unset keeps the default of 25.
 - **`runStage1()` in `server/appraisal/stage1-research.ts`** applies
   `APPRAISAL_LEVER_STRIP_LISTING_HTML=1` to Firecrawl fallback payloads
-  before they are re-injected into Claude's context.
+  before they are re-injected into Claude's context. Anthropic's native
+  `web_fetch` tool runs server-side and its results never re-enter our
+  process, so the fallback path is the only listing-HTML surface the
+  application controls; stripping there covers 100% of the HTML the
+  lever can act on.
 
 When every flag is unset, the request shape is byte-for-byte identical to
 the pre-Task-#22 behavior. Unit tests in `__tests__/cost.test.ts` exercise

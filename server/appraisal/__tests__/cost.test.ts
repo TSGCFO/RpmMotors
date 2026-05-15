@@ -223,7 +223,22 @@ test("callClaude sends system as a plain string when prompt-cache lever is OFF",
   });
 });
 
-test("callClaude marks system with ephemeral cache_control when prompt-cache lever is ON", async () => {
+test("callClaude marks Stage 1 system with ephemeral cache_control when prompt-cache lever is ON", async () => {
+  await withLeverEnv({ APPRAISAL_LEVER_PROMPT_CACHE: "1" }, async () => {
+    const m = makeMockClient(JSON.stringify({ ok: true }));
+    await callClaude({
+      system: "SYS",
+      user: "USR",
+      stage: "stage1",
+      client: m.client,
+    });
+    assert.equal(Array.isArray(m.calls[0].system), true);
+    assert.deepEqual(m.calls[0].system[0].cache_control, { type: "ephemeral" });
+    assert.equal(m.calls[0].system[0].text, "SYS");
+  });
+});
+
+test("callClaude leaves Stage 2 system as plain string even when prompt-cache lever is ON (scoped to Stage 1)", async () => {
   await withLeverEnv({ APPRAISAL_LEVER_PROMPT_CACHE: "1" }, async () => {
     const m = makeMockClient(JSON.stringify({ ok: true }));
     await callClaude({
@@ -232,9 +247,8 @@ test("callClaude marks system with ephemeral cache_control when prompt-cache lev
       stage: "stage2",
       client: m.client,
     });
-    assert.equal(Array.isArray(m.calls[0].system), true);
-    assert.deepEqual(m.calls[0].system[0].cache_control, { type: "ephemeral" });
-    assert.equal(m.calls[0].system[0].text, "SYS");
+    assert.equal(typeof m.calls[0].system, "string");
+    assert.equal(m.calls[0].system, "SYS");
   });
 });
 
