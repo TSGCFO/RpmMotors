@@ -9,7 +9,6 @@ Crawl-delay: 0
 
 # Disallow admin areas (if any are added later)
 Disallow: /admin/
-Disallow: /api/
 
 # Allow important pages
 Allow: /
