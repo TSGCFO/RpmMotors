@@ -71,7 +71,8 @@ export const createBusinessSchema = (data: {
   };
 };
 
-// Shared Offer fields included in a vehicle Offer
+// Shared Offer fields included in a vehicle Offer (schema.org/Offer properties
+// only — the product identifier/SKU lives on the Product/Vehicle entity).
 interface VehicleOffer {
   price: number;
   priceCurrency: string;
@@ -79,7 +80,6 @@ interface VehicleOffer {
   url: string;
   priceValidUntil?: string;
   itemCondition?: string;
-  sku?: string;
 }
 
 /**
@@ -88,9 +88,10 @@ interface VehicleOffer {
  *
  * Returns `undefined` for sold vehicles: their price is intentionally hidden in
  * the UI, so we omit the Offer rather than expose a price Google can't see on
- * the page. Adds the recommended fields (priceValidUntil, itemCondition, sku)
- * that resolve the non-critical "Product snippets" / "Merchant listings"
- * warnings in Search Console.
+ * the page. Availability is derived from the vehicle's status so reserved/pending
+ * cars aren't reported as freely purchasable. Adds the recommended Offer fields
+ * (priceValidUntil, itemCondition) that resolve the non-critical "Product
+ * snippets" / "Merchant listings" warnings in Search Console.
  */
 export const buildVehicleOffer = (vehicle: {
   id: number;
@@ -99,12 +100,21 @@ export const buildVehicleOffer = (vehicle: {
   condition: string;
   vin: string;
 }): VehicleOffer | undefined => {
+  // Sold vehicles hide their price in the UI, so omit the Offer entirely.
   if (vehicle.status === 'sold') return undefined;
 
   const conditionMap: Record<string, string> = {
     'New': 'https://schema.org/NewCondition',
     'Used': 'https://schema.org/UsedCondition',
     'Certified Pre-Owned': 'https://schema.org/UsedCondition',
+  };
+
+  // Reserved/pending vehicles aren't freely purchasable; only 'available' cars
+  // are reported as in stock.
+  const availabilityMap: Record<string, string> = {
+    available: 'https://schema.org/InStock',
+    reserved: 'https://schema.org/OutOfStock',
+    pending: 'https://schema.org/OutOfStock',
   };
 
   // Rolling one-year validity so the price is never reported as stale.
@@ -115,11 +125,10 @@ export const buildVehicleOffer = (vehicle: {
   return {
     price: vehicle.price,
     priceCurrency: 'CAD',
-    availability: 'https://schema.org/InStock',
+    availability: availabilityMap[vehicle.status] ?? 'https://schema.org/InStock',
     url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
     priceValidUntil,
     itemCondition: conditionMap[vehicle.condition] ?? 'https://schema.org/UsedCondition',
-    sku: vehicle.vin,
   };
 };
 
@@ -145,9 +154,12 @@ export const createVehicleSchema = (data: {
   vehicleInteriorColor?: string;
   vehicleExteriorColor?: string;
   image: string;
+  sku?: string;
   offers?: VehicleOffer;
 }) => {
-  const { offers, ...rest } = data;
+  // Pull out the fields that need typed (nested @type) shapes so they aren't
+  // emitted twice via the rest spread.
+  const { offers, mileageFromOdometer, vehicleEngine, ...rest } = data;
   return {
     '@type': 'Vehicle',
     ...rest,
@@ -158,16 +170,16 @@ export const createVehicleSchema = (data: {
         ...offers
       }
     }),
-    ...(data.mileageFromOdometer && {
+    ...(mileageFromOdometer && {
       mileageFromOdometer: {
         '@type': 'QuantitativeValue',
-        ...data.mileageFromOdometer
+        ...mileageFromOdometer
       }
     }),
-    ...(data.vehicleEngine && {
+    ...(vehicleEngine && {
       vehicleEngine: {
         '@type': 'EngineSpecification',
-        ...data.vehicleEngine
+        ...vehicleEngine
       }
     })
   };

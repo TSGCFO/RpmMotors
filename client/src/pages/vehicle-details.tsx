@@ -163,6 +163,7 @@ export default function VehicleDetails() {
           },
           url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
           vehicleIdentificationNumber: vehicle.vin,
+          sku: vehicle.vin,
           mileageFromOdometer: {
             value: vehicle.mileage,
             unitCode: "KMT"
