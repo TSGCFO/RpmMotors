@@ -71,6 +71,67 @@ export const createBusinessSchema = (data: {
   };
 };
 
+// Shared Offer fields included in a vehicle Offer (schema.org/Offer properties
+// only — the product identifier/SKU lives on the Product/Vehicle entity).
+interface VehicleOffer {
+  price: number;
+  priceCurrency: string;
+  availability: string;
+  url: string;
+  priceValidUntil?: string;
+  itemCondition?: string;
+}
+
+/**
+ * Builds a Google-recommended Offer for a vehicle (used by both the inventory
+ * listing and the vehicle detail page so the structured data stays consistent).
+ *
+ * Returns `undefined` for sold vehicles: their price is intentionally hidden in
+ * the UI, so we omit the Offer rather than expose a price Google can't see on
+ * the page. Availability is derived from the vehicle's status so reserved/pending
+ * cars aren't reported as freely purchasable. Adds the recommended Offer fields
+ * (priceValidUntil, itemCondition) that resolve the non-critical "Product
+ * snippets" / "Merchant listings" warnings in Search Console.
+ */
+export const buildVehicleOffer = (vehicle: {
+  id: number;
+  price: number;
+  status: string;
+  condition: string;
+  vin: string;
+}): VehicleOffer | undefined => {
+  // Sold vehicles hide their price in the UI, so omit the Offer entirely.
+  if (vehicle.status === 'sold') return undefined;
+
+  const conditionMap: Record<string, string> = {
+    'New': 'https://schema.org/NewCondition',
+    'Used': 'https://schema.org/UsedCondition',
+    'Certified Pre-Owned': 'https://schema.org/UsedCondition',
+  };
+
+  // Reserved/pending vehicles aren't freely purchasable; only 'available' cars
+  // are reported as in stock.
+  const availabilityMap: Record<string, string> = {
+    available: 'https://schema.org/InStock',
+    reserved: 'https://schema.org/OutOfStock',
+    pending: 'https://schema.org/OutOfStock',
+  };
+
+  // Rolling one-year validity so the price is never reported as stale.
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  return {
+    price: vehicle.price,
+    priceCurrency: 'CAD',
+    availability: availabilityMap[vehicle.status] ?? 'https://schema.org/InStock',
+    url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
+    priceValidUntil,
+    itemCondition: conditionMap[vehicle.condition] ?? 'https://schema.org/UsedCondition',
+  };
+};
+
 // Product schema generator for vehicles
 export const createVehicleSchema = (data: {
   name: string;
@@ -83,6 +144,7 @@ export const createVehicleSchema = (data: {
     fuelType: string;
   };
   url: string;
+  vehicleIdentificationNumber?: string;
   mileageFromOdometer?: {
     value: number;
     unitCode: string;
@@ -92,30 +154,32 @@ export const createVehicleSchema = (data: {
   vehicleInteriorColor?: string;
   vehicleExteriorColor?: string;
   image: string;
-  offers: {
-    price: number;
-    priceCurrency: string;
-    availability: string;
-    url: string;
-  };
+  sku?: string;
+  offers?: VehicleOffer;
 }) => {
+  // Pull out the fields that need typed (nested @type) shapes so they aren't
+  // emitted twice via the rest spread.
+  const { offers, mileageFromOdometer, vehicleEngine, ...rest } = data;
   return {
     '@type': 'Vehicle',
-    ...data,
-    offers: {
-      '@type': 'Offer',
-      ...data.offers
-    },
-    ...(data.mileageFromOdometer && {
-      mileageFromOdometer: {
-        '@type': 'QuantitativeValue',
-        ...data.mileageFromOdometer
+    ...rest,
+    // Only emit an Offer when one is provided (omitted for sold vehicles).
+    ...(offers && {
+      offers: {
+        '@type': 'Offer',
+        ...offers
       }
     }),
-    ...(data.vehicleEngine && {
+    ...(mileageFromOdometer && {
+      mileageFromOdometer: {
+        '@type': 'QuantitativeValue',
+        ...mileageFromOdometer
+      }
+    }),
+    ...(vehicleEngine && {
       vehicleEngine: {
         '@type': 'EngineSpecification',
-        ...data.vehicleEngine
+        ...vehicleEngine
       }
     })
   };

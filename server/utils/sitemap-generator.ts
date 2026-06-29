@@ -27,12 +27,15 @@ export async function generateSitemap(): Promise<string> {
   // Get all vehicles from database
   const allVehicles = await db.select().from(vehicles);
   
-  // Add vehicle URLs
+  // Add vehicle URLs. Use the vehicle's real creation date for lastmod so the
+  // sitemap reports an accurate, stable freshness signal. Emitting the current
+  // timestamp on every request told Google every page "just changed" on each
+  // fetch, which erodes trust in the lastmod signal.
   const vehicleUrls: SitemapUrl[] = allVehicles.map(vehicle => ({
     url: `/inventory/${vehicle.id}`,
     changefreq: 'weekly' as const,
     priority: 0.7,
-    lastmod: new Date().toISOString()
+    lastmod: vehicle.createdAt ? new Date(vehicle.createdAt).toISOString() : undefined
   }));
 
   // Combine all URLs

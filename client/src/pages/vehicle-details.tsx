@@ -10,9 +10,8 @@ import { VehicleGallery } from "@/components/ui/vehicle-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import PageMeta from "@/components/seo/page-meta";
-import StructuredData from "@/components/seo/structured-data";
 import CanonicalUrl from "@/components/seo/canonical-url";
-import JsonLdSchema, { createVehicleSchema, createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
+import JsonLdSchema, { createVehicleSchema, createBreadcrumbSchema, buildVehicleOffer } from "@/components/seo/json-ld-schema";
 import { 
   saveRecentlyViewedVehicle, 
   getRecentlyViewedVehicles,
@@ -138,35 +137,6 @@ export default function VehicleDetails() {
     }
   ];
   
-  // Prepare vehicle structured data
-  const vehicleData = {
-    name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-    description: vehicle.description,
-    brand: vehicle.make,
-    model: vehicle.model,
-    modelDate: vehicle.year.toString(),
-    vehicleEngine: {
-      engineType: "Internal combustion",
-      fuelType: vehicle.fuelType
-    },
-    url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
-    mileageFromOdometer: {
-      value: vehicle.mileage,
-      unitCode: "KMT"
-    },
-    vehicleTransmission: vehicle.transmission,
-    driveWheelConfiguration: vehicle.features && vehicle.features.length > 0 ? vehicle.features[0] : "Standard",
-    vehicleInteriorColor: "Not specified",
-    vehicleExteriorColor: vehicle.color,
-    image: vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : "",
-    offers: {
-      price: vehicle.price,
-      priceCurrency: "CAD",
-      availability: "https://schema.org/InStock",
-      url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`
-    }
-  };
-  
   return (
     <main className="bg-[#F5F5F5] min-h-screen">
       {/* SEO Components */}
@@ -179,11 +149,7 @@ export default function VehicleDetails() {
         canonical={`https://www.rpmautosales.ca/inventory/${vehicle.id}`}
       />
       <CanonicalUrl path={`/inventory/${vehicle.id}`} />
-      <StructuredData
-        type="vehicle"
-        vehicleData={vehicleData}
-      />
-      {/* Enhanced vehicle structured data with JSON-LD */}
+      {/* Vehicle structured data with JSON-LD */}
       <JsonLdSchema
         schema={createVehicleSchema({
           name: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
@@ -196,6 +162,8 @@ export default function VehicleDetails() {
             fuelType: vehicle.fuelType
           },
           url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
+          vehicleIdentificationNumber: vehicle.vin,
+          sku: vehicle.vin,
           mileageFromOdometer: {
             value: vehicle.mileage,
             unitCode: "KMT"
@@ -205,12 +173,7 @@ export default function VehicleDetails() {
           vehicleInteriorColor: "Not specified",
           vehicleExteriorColor: vehicle.color,
           image: vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : "",
-          offers: {
-            price: vehicle.price,
-            priceCurrency: "CAD",
-            availability: "https://schema.org/InStock",
-            url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`
-          }
+          offers: buildVehicleOffer(vehicle)
         })}
       />
       {/* Breadcrumb structured data */}

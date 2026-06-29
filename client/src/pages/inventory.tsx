@@ -9,7 +9,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import RecentlyViewedVehicles from "@/components/ui/recently-viewed-vehicles";
 import PageMeta from "@/components/seo/page-meta";
 import CanonicalUrl from "@/components/seo/canonical-url";
-import JsonLdSchema, { createBreadcrumbSchema } from "@/components/seo/json-ld-schema";
+import JsonLdSchema, { createBreadcrumbSchema, buildVehicleOffer } from "@/components/seo/json-ld-schema";
 import { 
   hasConsentedToCookies,
   getFilterPreferences,
@@ -323,22 +323,22 @@ export default function Inventory() {
             ? `https://www.rpmautosales.ca/inventory?category=${filters.category}` 
             : "https://www.rpmautosales.ca/inventory",
           "numberOfItems": filteredVehicles?.length || 0,
-          "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "item": {
-              "@type": "Product",
-              "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-              "url": `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
-              "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
-              "offers": {
-                "@type": "Offer",
-                "price": vehicle.price,
-                "priceCurrency": "CAD",
-                "availability": "https://schema.org/InStock"
+          "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => {
+            const offer = buildVehicleOffer(vehicle);
+            return {
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "Product",
+                "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+                "url": `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
+                "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
+                "brand": { "@type": "Brand", "name": vehicle.make },
+                "sku": vehicle.vin,
+                ...(offer && { "offers": { "@type": "Offer", ...offer } })
               }
-            }
-          }))
+            };
+          })
         }}
       />
       
