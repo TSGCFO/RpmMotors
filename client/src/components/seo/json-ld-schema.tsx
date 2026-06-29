@@ -71,6 +71,58 @@ export const createBusinessSchema = (data: {
   };
 };
 
+// Shared Offer fields included in a vehicle Offer
+interface VehicleOffer {
+  price: number;
+  priceCurrency: string;
+  availability: string;
+  url: string;
+  priceValidUntil?: string;
+  itemCondition?: string;
+  sku?: string;
+}
+
+/**
+ * Builds a Google-recommended Offer for a vehicle (used by both the inventory
+ * listing and the vehicle detail page so the structured data stays consistent).
+ *
+ * Returns `undefined` for sold vehicles: their price is intentionally hidden in
+ * the UI, so we omit the Offer rather than expose a price Google can't see on
+ * the page. Adds the recommended fields (priceValidUntil, itemCondition, sku)
+ * that resolve the non-critical "Product snippets" / "Merchant listings"
+ * warnings in Search Console.
+ */
+export const buildVehicleOffer = (vehicle: {
+  id: number;
+  price: number;
+  status: string;
+  condition: string;
+  vin: string;
+}): VehicleOffer | undefined => {
+  if (vehicle.status === 'sold') return undefined;
+
+  const conditionMap: Record<string, string> = {
+    'New': 'https://schema.org/NewCondition',
+    'Used': 'https://schema.org/UsedCondition',
+    'Certified Pre-Owned': 'https://schema.org/UsedCondition',
+  };
+
+  // Rolling one-year validity so the price is never reported as stale.
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  return {
+    price: vehicle.price,
+    priceCurrency: 'CAD',
+    availability: 'https://schema.org/InStock',
+    url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
+    priceValidUntil,
+    itemCondition: conditionMap[vehicle.condition] ?? 'https://schema.org/UsedCondition',
+    sku: vehicle.vin,
+  };
+};
+
 // Product schema generator for vehicles
 export const createVehicleSchema = (data: {
   name: string;
@@ -83,6 +135,7 @@ export const createVehicleSchema = (data: {
     fuelType: string;
   };
   url: string;
+  vehicleIdentificationNumber?: string;
   mileageFromOdometer?: {
     value: number;
     unitCode: string;
@@ -92,20 +145,19 @@ export const createVehicleSchema = (data: {
   vehicleInteriorColor?: string;
   vehicleExteriorColor?: string;
   image: string;
-  offers: {
-    price: number;
-    priceCurrency: string;
-    availability: string;
-    url: string;
-  };
+  offers?: VehicleOffer;
 }) => {
+  const { offers, ...rest } = data;
   return {
     '@type': 'Vehicle',
-    ...data,
-    offers: {
-      '@type': 'Offer',
-      ...data.offers
-    },
+    ...rest,
+    // Only emit an Offer when one is provided (omitted for sold vehicles).
+    ...(offers && {
+      offers: {
+        '@type': 'Offer',
+        ...offers
+      }
+    }),
     ...(data.mileageFromOdometer && {
       mileageFromOdometer: {
         '@type': 'QuantitativeValue',
