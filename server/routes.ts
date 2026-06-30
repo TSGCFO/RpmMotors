@@ -5,8 +5,12 @@ import { insertVehicleSchema, insertInquirySchema, insertTestimonialSchema, inse
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { generateSitemap } from './utils/sitemap-generator';
+import { registerAdminAppraisalRoutes } from './routes/admin-appraisals';
+import { registerAppraisalRoutes } from './routes/appraisals';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerAppraisalRoutes(app);
+
   // Authentication endpoint
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
@@ -35,17 +39,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Authentication successful
-      res.json({ 
-        authenticated: true,
-        role: user.role,
+      // Authentication successful — persist identity in the signed session
+      req.session.user = {
+        id: user.id,
         username: user.username,
-        userId: user.id
+        role: user.role ?? "customer",
+      };
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Session save failed" });
+        }
+        res.json({
+          authenticated: true,
+          role: user.role,
+          username: user.username,
+          userId: user.id,
+        });
       });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "An error occurred during login" });
     }
+  });
+
+  // Current session identity — used by the frontend to confirm staff auth
+  app.get("/api/auth/me", (req: Request, res: Response) => {
+    const u = req.session?.user;
+    if (!u) return res.status(401).json({ authenticated: false });
+    res.json({ authenticated: true, username: u.username, role: u.role, userId: u.id });
+  });
+
+  // Logout — destroy the session so the cookie is no longer valid
+  app.post("/api/auth/logout", (req: Request, res: Response) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("rpm.sid");
+      res.json({ ok: true });
+    });
   });
 
   // Health check endpoint for Render.com
@@ -612,6 +646,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch garage registers" });
     }
   });
+
+  // Staff admin appraisal routes
+  registerAdminAppraisalRoutes(app);
 
   // Dynamic sitemap generation
   app.get("/sitemap.xml", async (req, res) => {

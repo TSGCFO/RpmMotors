@@ -173,6 +173,15 @@ export default function Header() {
                     Contact Us
                   </Link>
                 </li>
+                <li className="flex items-center pl-3">
+                  <Link
+                    href="/value-my-car"
+                    className={`inline-block py-2 px-5 rounded font-bold tracking-wide text-white bg-[#E31837] hover:bg-[#c01530] transition-colors ${isActive('/value-my-car') ? 'ring-2 ring-white/40' : ''}`}
+                    data-testid="link-value-my-car-desktop"
+                  >
+                    Value My Car
+                  </Link>
+                </li>
               </ul>
             </nav>
           </div>
@@ -209,6 +218,15 @@ export default function Header() {
                 <li>
                   <Link href="/contact" className={`block py-2 hover:text-[#E31837] transition-colors ${isActive('/contact') ? 'text-[#E31837]' : ''}`}>
                     Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/value-my-car"
+                    className={`block py-2 px-3 -mx-3 rounded text-white bg-[#E31837] hover:bg-[#c01530] transition-colors text-center ${isActive('/value-my-car') ? 'ring-2 ring-white/40' : ''}`}
+                    data-testid="link-value-my-car-mobile"
+                  >
+                    Value My Car
                   </Link>
                 </li>
                 <li className="border-t border-gray-800 pt-4 mt-2">

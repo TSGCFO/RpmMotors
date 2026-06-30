@@ -11,6 +11,7 @@ import Services from "@/pages/services";
 import Gallery from "@/pages/gallery";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
+import ValueMyCar from "@/pages/value-my-car";
 import Sitemap from "@/pages/sitemap";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Terms from "@/pages/terms";
@@ -18,11 +19,15 @@ import AdminDashboard from "@/pages/admin";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminMarketing from "@/pages/admin/marketing";
 import AdminInventory from "@/pages/admin/inventory";
+import AdminAppraisalsPage from "@/pages/admin/appraisals";
+import AdminAppraisalDetailPage from "@/pages/admin/appraisal-detail";
 // Employee portal pages
 import EmployeeDashboard from "@/pages/employee";
 import EmployeeInventory from "@/pages/employee/inventory";
 import EmployeeInquiries from "@/pages/employee/inquiries";
 import { SalesRecords } from "@/pages/employee/sales-records";
+import EmployeeAppraisalsPage from "@/pages/employee/appraisals";
+import EmployeeAppraisalDetailPage from "@/pages/employee/appraisal-detail";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import BackToTop from "@/components/ui/back-to-top";
@@ -64,6 +69,7 @@ function Router() {
         <Route path="/gallery" component={Gallery} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
+        <Route path="/value-my-car" component={ValueMyCar} />
         <Route path="/sitemap" component={Sitemap} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms" component={Terms} />
@@ -73,12 +79,16 @@ function Router() {
         <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
         <Route path="/admin/marketing" component={AdminMarketing} />
+        <Route path="/admin/appraisals" component={AdminAppraisalsPage} />
+        <Route path="/admin/appraisals/:id" component={AdminAppraisalDetailPage} />
         
         {/* Employee portal routes */}
         <Route path="/employee" component={EmployeeDashboard} />
         <Route path="/employee/inventory" component={EmployeeInventory} />
         <Route path="/employee/inquiries" component={EmployeeInquiries} />
         <Route path="/employee/sales-records" component={SalesRecords} />
+        <Route path="/employee/appraisals" component={EmployeeAppraisalsPage} />
+        <Route path="/employee/appraisals/:id" component={EmployeeAppraisalDetailPage} />
         
         <Route component={NotFound} />
       </Switch>

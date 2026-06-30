@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Car, 
   MessageSquare, 
@@ -14,7 +15,8 @@ import {
   LayoutDashboard,
   ClipboardList,
   Image,
-  Wallet
+  Wallet,
+  Calculator
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +48,7 @@ type NavItem = {
   label: string;
   icon: React.ReactNode;
   description?: string;
+  badge?: number;
 };
 
 export function EmployeeLayout({ children }: EmployeeLayoutProps) {
@@ -59,12 +62,32 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Check if already authenticated
-    const isAuth = sessionStorage.getItem('employee_authenticated') === 'true';
-    const storedUsername = sessionStorage.getItem('employee_username') || '';
-    setIsAuthenticated(isAuth);
-    setUsername(storedUsername);
-    setIsAuthenticating(false);
+    // Verify the server-side session rather than trusting a sessionStorage flag.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.authenticated && (data.role === 'admin' || data.role === 'employee')) {
+            setIsAuthenticated(true);
+            setUsername(data.username ?? '');
+          } else {
+            setIsAuthenticated(false);
+          }
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch {
+        if (!cancelled) setIsAuthenticated(false);
+      } finally {
+        if (!cancelled) setIsAuthenticating(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
   
   const handleLogin = async (e: React.FormEvent) => {
@@ -105,7 +128,12 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
     }
   };
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
     sessionStorage.removeItem('employee_authenticated');
     sessionStorage.removeItem('employee_username');
     setIsAuthenticated(false);
@@ -117,10 +145,26 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
     });
   };
   
+  // Badge count: appraisal offer requests in the last 7 days.
+  const { data: appraisalsList } = useQuery<{ offerRequestCount7d?: number }>({
+    queryKey: ['/api/admin/appraisals', 'badge'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/appraisals?limit=1', {
+        credentials: 'include',
+      });
+      if (!res.ok) return { offerRequestCount7d: 0 };
+      return res.json();
+    },
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const offerBadge = appraisalsList?.offerRequestCount7d ?? 0;
+
   const navItems: NavItem[] = [
     { path: '/employee', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, description: 'Overview of dealership performance' },
     { path: '/employee/inventory', label: 'Inventory', icon: <Car className="h-5 w-5" />, description: 'Manage vehicle inventory' },
     { path: '/employee/inquiries', label: 'Inquiries', icon: <MessageSquare className="h-5 w-5" />, description: 'Customer inquiries and messages' },
+    { path: '/employee/appraisals', label: 'Appraisals', icon: <Calculator className="h-5 w-5" />, description: 'AI vehicle appraisal requests', badge: offerBadge },
     { path: '/employee/testimonials', label: 'Testimonials', icon: <FileEdit className="h-5 w-5" />, description: 'Manage customer reviews' },
     { path: '/employee/media', label: 'Media Library', icon: <Image className="h-5 w-5" />, description: 'Manage images and media files' },
     { path: '/employee/sales-records', label: 'Sales Records', icon: <Wallet className="h-5 w-5" />, description: 'View and manage sales records' },
@@ -235,7 +279,15 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
                       }`}
                     >
                       {item.icon}
-                      <span className="ml-3">{item.label}</span>
+                      <span className="ml-3 flex-1">{item.label}</span>
+                      {item.badge && item.badge > 0 ? (
+                        <span
+                          className="ml-2 inline-flex items-center justify-center rounded-full bg-[#E31837] px-2 py-0.5 text-xs font-bold text-white"
+                          data-testid={`nav-badge-${item.path.replace(/\//g, '-')}`}
+                        >
+                          {item.badge}
+                        </span>
+                      ) : null}
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right">
@@ -310,7 +362,12 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.icon}
-                  <span className="ml-3">{item.label}</span>
+                  <span className="ml-3 flex-1">{item.label}</span>
+                  {item.badge && item.badge > 0 ? (
+                    <span className="ml-2 inline-flex items-center justify-center rounded-full bg-[#E31837] px-2 py-0.5 text-xs font-bold text-white">
+                      {item.badge}
+                    </span>
+                  ) : null}
                 </Link>
               ))}
               <div className="pt-4 mt-6 border-t border-gray-200">

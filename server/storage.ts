@@ -4,10 +4,101 @@ import {
   Inquiry, InsertInquiry, inquiries,
   Testimonial, InsertTestimonial, testimonials,
   BlogPost, InsertBlogPost, blogPosts,
-  GarageRegister, InsertGarageRegister, garageRegister
+  GarageRegister, InsertGarageRegister, garageRegister,
+  Appraisal, InsertAppraisal, appraisals,
+  AppraisalAuditLog, InsertAppraisalAuditLog, appraisalAuditLog,
+  appraisalRateLimits
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, or, and, asc, desc, sql } from "drizzle-orm";
+import { eq, like, or, and, asc, desc, sql, gte, type SQL } from "drizzle-orm";
+
+export type AppraisalStatus =
+  | "pending"
+  | "stage1_running"
+  | "stage1_complete"
+  | "stage2_running"
+  | "completed"
+  | "failed";
+
+export interface AppraisalListOptions {
+  status?: AppraisalStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface StaffAppraisalListOptions {
+  offerRequestsOnly?: boolean;
+  search?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  page?: number;
+  limit?: number;
+  // Sort support (Task #22). Default: createdAt desc.
+  sortBy?: "createdAt" | "cost";
+  sortDir?: "asc" | "desc";
+}
+
+export interface StaffAppraisalListResult {
+  data: Appraisal[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface StaffAppraisalUpdate {
+  staffNotes?: string | null;
+  quotedPriceCad?: number | null;
+}
+
+export interface AppraisalResultUpdate {
+  status: AppraisalStatus;
+  result?: Record<string, unknown> | null;
+  estimatedLow?: number | null;
+  estimatedHigh?: number | null;
+  estimatedMid?: number | null;
+  errorMessage?: string | null;
+  inquiryId?: number | null;
+  staffNotified?: boolean;
+  emailSentAt?: Date | null;
+  emailError?: string | null;
+  leadInquiryError?: string | null;
+  // ---- Cost tracking (Task #22) ----
+  stage1Model?: string | null;
+  stage1InputTokens?: number | null;
+  stage1OutputTokens?: number | null;
+  stage1CacheCreationTokens?: number | null;
+  stage1CacheReadTokens?: number | null;
+  stage2Model?: string | null;
+  stage2InputTokens?: number | null;
+  stage2OutputTokens?: number | null;
+  stage2CacheCreationTokens?: number | null;
+  stage2CacheReadTokens?: number | null;
+  stage1CostCents?: number | null;
+  stage2CostCents?: number | null;
+  totalCostCents?: number | null;
+}
+
+/** Single window stats — count of appraisals, total spend, average per appraisal. */
+export interface CostBucket {
+  count: number;
+  totalCostCents: number;
+  avgCostCents: number;
+}
+
+export interface AppraisalCostSummary {
+  today: CostBucket;
+  last7d: CostBucket;
+  last30d: CostBucket;
+  allTime: CostBucket;
+}
+
+export interface AppraisalRateLimitQuery {
+  ipHash?: string | null;
+  email?: string | null;
+  windowMs: number;
+  now?: Date; // clock fake hook
+}
 
 // Define interfaces for filtering, pagination, and sorting
 export interface VehicleFilters {
@@ -114,6 +205,25 @@ export interface IStorage {
   createGarageRegister(register: InsertGarageRegister): Promise<GarageRegister>;
   getGarageRegisterByVehicleId(vehicleId: number): Promise<GarageRegister | undefined>;
   getGarageRegisters(): Promise<GarageRegister[]>;
+
+  // Appraisal methods
+  createAppraisal(input: InsertAppraisal & {
+    ipHash?: string | null;
+    userAgent?: string | null;
+    turnstileVerified?: boolean;
+  }): Promise<Appraisal>;
+  updateAppraisalWithResult(id: number, update: AppraisalResultUpdate): Promise<Appraisal | undefined>;
+  setAppraisalStatus(id: number, status: AppraisalStatus, errorMessage?: string | null): Promise<Appraisal | undefined>;
+  getAppraisal(id: number): Promise<Appraisal | undefined>;
+  listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]>;
+  countRecentAppraisalsByIpOrEmail(query: AppraisalRateLimitQuery): Promise<{ ipCount: number; emailCount: number }>;
+  logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog>;
+  // Staff admin appraisal methods
+  listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult>;
+  countOfferRequestsSince(since: Date): Promise<number>;
+  getAppraisalCostSummary(): Promise<AppraisalCostSummary>;
+  getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]>;
+  updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -797,6 +907,299 @@ export class DatabaseStorage implements IStorage {
       .from(garageRegister)
       .orderBy(desc(garageRegister.createdAt));
     return registers;
+  }
+
+  // ----- Appraisal methods -----
+  async createAppraisal(input: InsertAppraisal & {
+    ipHash?: string | null;
+    userAgent?: string | null;
+    turnstileVerified?: boolean;
+  }): Promise<Appraisal> {
+    const { ipHash, userAgent, turnstileVerified, ...rest } = input;
+    const normalizedEmail = rest.email.trim().toLowerCase();
+
+    const insertValue: typeof appraisals.$inferInsert = {
+      ...rest,
+      email: normalizedEmail,
+      ipHash: ipHash ?? null,
+      userAgent: userAgent ?? null,
+      turnstileVerified: !!turnstileVerified,
+      status: "pending",
+    };
+
+    const rateLimitRow: typeof appraisalRateLimits.$inferInsert = {
+      ipHash: ipHash ?? null,
+      email: normalizedEmail,
+    };
+
+    // Atomic: appraisal + rate-limit ledger entry must succeed or fail together.
+    return await db.transaction(async (tx) => {
+      const [row] = await tx.insert(appraisals).values(insertValue).returning();
+      await tx.insert(appraisalRateLimits).values(rateLimitRow);
+      return row;
+    });
+  }
+
+  async updateAppraisalWithResult(id: number, update: AppraisalResultUpdate): Promise<Appraisal | undefined> {
+    const patch: Partial<typeof appraisals.$inferInsert> = {
+      status: update.status,
+      updatedAt: new Date(),
+    };
+    if (update.result !== undefined) patch.result = update.result;
+    if (update.estimatedLow !== undefined) patch.estimatedLow = update.estimatedLow;
+    if (update.estimatedHigh !== undefined) patch.estimatedHigh = update.estimatedHigh;
+    if (update.estimatedMid !== undefined) patch.estimatedMid = update.estimatedMid;
+    if (update.errorMessage !== undefined) patch.errorMessage = update.errorMessage;
+    if (update.inquiryId !== undefined) patch.inquiryId = update.inquiryId;
+    if (update.staffNotified !== undefined) patch.staffNotified = update.staffNotified;
+    if (update.emailSentAt !== undefined) patch.emailSentAt = update.emailSentAt;
+    if (update.emailError !== undefined) patch.emailError = update.emailError;
+    if (update.leadInquiryError !== undefined) patch.leadInquiryError = update.leadInquiryError;
+    if (update.stage1Model !== undefined) patch.stage1Model = update.stage1Model;
+    if (update.stage1InputTokens !== undefined) patch.stage1InputTokens = update.stage1InputTokens;
+    if (update.stage1OutputTokens !== undefined) patch.stage1OutputTokens = update.stage1OutputTokens;
+    if (update.stage1CacheCreationTokens !== undefined) patch.stage1CacheCreationTokens = update.stage1CacheCreationTokens;
+    if (update.stage1CacheReadTokens !== undefined) patch.stage1CacheReadTokens = update.stage1CacheReadTokens;
+    if (update.stage2Model !== undefined) patch.stage2Model = update.stage2Model;
+    if (update.stage2InputTokens !== undefined) patch.stage2InputTokens = update.stage2InputTokens;
+    if (update.stage2OutputTokens !== undefined) patch.stage2OutputTokens = update.stage2OutputTokens;
+    if (update.stage2CacheCreationTokens !== undefined) patch.stage2CacheCreationTokens = update.stage2CacheCreationTokens;
+    if (update.stage2CacheReadTokens !== undefined) patch.stage2CacheReadTokens = update.stage2CacheReadTokens;
+    if (update.stage1CostCents !== undefined) patch.stage1CostCents = update.stage1CostCents;
+    if (update.stage2CostCents !== undefined) patch.stage2CostCents = update.stage2CostCents;
+    if (update.totalCostCents !== undefined) patch.totalCostCents = update.totalCostCents;
+
+    const [row] = await db
+      .update(appraisals)
+      .set(patch)
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async setAppraisalStatus(id: number, status: AppraisalStatus, errorMessage?: string | null): Promise<Appraisal | undefined> {
+    const patch: Partial<typeof appraisals.$inferInsert> = {
+      status,
+      errorMessage: errorMessage ?? null,
+      updatedAt: new Date(),
+    };
+    const [row] = await db
+      .update(appraisals)
+      .set(patch)
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async getAppraisal(id: number): Promise<Appraisal | undefined> {
+    const [row] = await db.select().from(appraisals).where(eq(appraisals.id, id));
+    return row || undefined;
+  }
+
+  async listAppraisals(options?: AppraisalListOptions): Promise<Appraisal[]> {
+    let q = db.select().from(appraisals).$dynamic();
+    if (options?.status) {
+      q = q.where(eq(appraisals.status, options.status));
+    }
+    q = q.orderBy(desc(appraisals.createdAt));
+    if (options?.limit !== undefined) q = q.limit(options.limit);
+    if (options?.offset !== undefined) q = q.offset(options.offset);
+    return await q;
+  }
+
+  async countRecentAppraisalsByIpOrEmail(query: AppraisalRateLimitQuery): Promise<{ ipCount: number; emailCount: number }> {
+    const now = query.now ?? new Date();
+    const cutoff = new Date(now.getTime() - query.windowMs);
+
+    let ipCount = 0;
+    let emailCount = 0;
+
+    if (query.ipHash) {
+      const [r] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(appraisalRateLimits)
+        .where(and(eq(appraisalRateLimits.ipHash, query.ipHash), gte(appraisalRateLimits.createdAt, cutoff)));
+      ipCount = Number(r?.count ?? 0);
+    }
+
+    if (query.email) {
+      const normalizedEmail = query.email.trim().toLowerCase();
+      const [r] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(appraisalRateLimits)
+        .where(and(eq(appraisalRateLimits.email, normalizedEmail), gte(appraisalRateLimits.createdAt, cutoff)));
+      emailCount = Number(r?.count ?? 0);
+    }
+
+    return { ipCount, emailCount };
+  }
+
+  async listAppraisalsForStaff(options: StaffAppraisalListOptions): Promise<StaffAppraisalListResult> {
+    const page = Math.max(1, options.page ?? 1);
+    const limit = Math.min(200, Math.max(1, options.limit ?? 25));
+    const offset = (page - 1) * limit;
+
+    const conditions: SQL[] = [];
+    if (options.offerRequestsOnly) {
+      // wantsOffer is true OR an inquiry was auto-created
+      conditions.push(
+        sql`((${appraisals.result}->>'wantsOffer')::boolean IS TRUE OR ${appraisals.inquiryId} IS NOT NULL)`,
+      );
+    }
+    if (options.dateFrom) {
+      conditions.push(sql`${appraisals.createdAt} >= ${options.dateFrom}`);
+    }
+    if (options.dateTo) {
+      conditions.push(sql`${appraisals.createdAt} <= ${options.dateTo}`);
+    }
+    if (options.search && options.search.trim()) {
+      const pat = `%${options.search.trim().toLowerCase()}%`;
+      conditions.push(
+        sql`(LOWER(${appraisals.name}) LIKE ${pat}
+          OR LOWER(${appraisals.email}) LIKE ${pat}
+          OR LOWER(${appraisals.make}) LIKE ${pat}
+          OR LOWER(${appraisals.model}) LIKE ${pat})`,
+      );
+    }
+
+    const whereClause: SQL | undefined = conditions.length ? and(...conditions) : undefined;
+
+    const countQuery = db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(appraisals)
+      .$dynamic();
+    const [countRow] = await (whereClause ? countQuery.where(whereClause) : countQuery);
+    const total = Number(countRow?.count ?? 0);
+
+    let q = db.select().from(appraisals).$dynamic();
+    if (whereClause) q = q.where(whereClause);
+    // Sort: createdAt (default) or cost. For cost, push NULLs to the end so
+    // staff see populated rows first when sorting either direction.
+    const dir = options.sortDir === "asc" ? "asc" : "desc";
+    if (options.sortBy === "cost") {
+      q = q.orderBy(
+        dir === "asc"
+          ? sql`${appraisals.totalCostCents} ASC NULLS LAST`
+          : sql`${appraisals.totalCostCents} DESC NULLS LAST`,
+      );
+    } else {
+      q = q.orderBy(dir === "asc" ? asc(appraisals.createdAt) : desc(appraisals.createdAt));
+    }
+    q = q.limit(limit).offset(offset);
+    const data = await q;
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
+  }
+
+  async countOfferRequestsSince(since: Date): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(appraisals)
+      .where(
+        and(
+          gte(appraisals.createdAt, since),
+          sql`((${appraisals.result}->>'wantsOffer')::boolean IS TRUE OR ${appraisals.inquiryId} IS NOT NULL)`,
+        ),
+      );
+    return Number(row?.count ?? 0);
+  }
+
+  async getAppraisalCostSummary(): Promise<AppraisalCostSummary> {
+    // One pass over the table — aggregate per bucket using filtered counts
+    // and sums. This avoids 4 separate round trips. "Today" uses the start
+    // of the current UTC day so the bucket is stable as time advances.
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0,
+    ));
+    const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const bucketSql = (since: Date | null) => {
+      const cond = since
+        ? sql`${appraisals.createdAt} >= ${since} AND ${appraisals.totalCostCents} IS NOT NULL`
+        : sql`${appraisals.totalCostCents} IS NOT NULL`;
+      return {
+        count: sql<number>`count(*) filter (where ${cond})::int`,
+        total: sql<number>`coalesce(sum(${appraisals.totalCostCents}) filter (where ${cond}), 0)::int`,
+        avg: sql<number>`coalesce(round(avg(${appraisals.totalCostCents}) filter (where ${cond})), 0)::int`,
+      };
+    };
+
+    const today = bucketSql(startOfToday);
+    const w7 = bucketSql(last7d);
+    const w30 = bucketSql(last30d);
+    const all = bucketSql(null);
+
+    const [row] = await db
+      .select({
+        todayCount: today.count, todayTotal: today.total, todayAvg: today.avg,
+        d7Count: w7.count, d7Total: w7.total, d7Avg: w7.avg,
+        d30Count: w30.count, d30Total: w30.total, d30Avg: w30.avg,
+        allCount: all.count, allTotal: all.total, allAvg: all.avg,
+      })
+      .from(appraisals);
+
+    const toBucket = (count: unknown, total: unknown, avg: unknown): CostBucket => ({
+      count: Number(count ?? 0),
+      totalCostCents: Number(total ?? 0),
+      avgCostCents: Number(avg ?? 0),
+    });
+
+    return {
+      today: toBucket(row?.todayCount, row?.todayTotal, row?.todayAvg),
+      last7d: toBucket(row?.d7Count, row?.d7Total, row?.d7Avg),
+      last30d: toBucket(row?.d30Count, row?.d30Total, row?.d30Avg),
+      allTime: toBucket(row?.allCount, row?.allTotal, row?.allAvg),
+    };
+  }
+
+  async getAppraisalAuditLog(appraisalId: number): Promise<AppraisalAuditLog[]> {
+    return await db
+      .select()
+      .from(appraisalAuditLog)
+      .where(eq(appraisalAuditLog.appraisalId, appraisalId))
+      .orderBy(desc(appraisalAuditLog.createdAt));
+  }
+
+  async updateAppraisalStaffFields(id: number, update: StaffAppraisalUpdate): Promise<Appraisal | undefined> {
+    // Persist staff-editable fields inside the existing result jsonb under
+    // result.staff. This keeps the schema unchanged (Task A scope) while
+    // letting the detail view reliably surface staffNotes / quotedPriceCad.
+    const current = await this.getAppraisal(id);
+    if (!current) return undefined;
+
+    const existingResult = (current.result ?? {}) as Record<string, unknown>;
+    const existingStaff = ((existingResult.staff as Record<string, unknown>) ?? {});
+    const nextStaff: Record<string, unknown> = { ...existingStaff };
+    if (update.staffNotes !== undefined) nextStaff.staffNotes = update.staffNotes;
+    if (update.quotedPriceCad !== undefined) nextStaff.quotedPriceCad = update.quotedPriceCad;
+
+    const nextResult = { ...existingResult, staff: nextStaff };
+
+    const [row] = await db
+      .update(appraisals)
+      .set({ result: nextResult, updatedAt: new Date() })
+      .where(eq(appraisals.id, id))
+      .returning();
+    return row || undefined;
+  }
+
+  async logAppraisalAudit(entry: InsertAppraisalAuditLog): Promise<AppraisalAuditLog> {
+    const insertValue: typeof appraisalAuditLog.$inferInsert = {
+      appraisalId: entry.appraisalId,
+      event: entry.event,
+      actor: entry.actor ?? null,
+      details: (entry.details ?? null) as Record<string, unknown> | null,
+    };
+    const [row] = await db.insert(appraisalAuditLog).values(insertValue).returning();
+    return row;
   }
 }
 
