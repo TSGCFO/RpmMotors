@@ -83,38 +83,26 @@ interface VehicleOffer {
 }
 
 /**
- * Builds a Google-recommended Offer for a vehicle (used by both the inventory
- * listing and the vehicle detail page so the structured data stays consistent).
+ * Builds the Offer for a vehicle, used by both the inventory listing and the
+ * vehicle detail page so the structured data stays consistent.
  *
- * Returns `undefined` for sold vehicles: their price is intentionally hidden in
- * the UI, so we omit the Offer rather than expose a price Google can't see on
- * the page. Availability is derived from the vehicle's status so reserved/pending
- * cars aren't reported as freely purchasable. Adds the recommended Offer fields
- * (priceValidUntil, itemCondition) that resolve the non-critical "Product
- * snippets" / "Merchant listings" warnings in Search Console.
+ * This matches the site's ORIGINAL behavior: an Offer (with price) is always
+ * returned and availability is always InStock. Google requires every Product to
+ * carry an Offer/review/rating, so the Offer must always be present. The only
+ * additions over the original are the recommended fields (priceValidUntil,
+ * itemCondition) that resolve the non-critical "Product snippets" /
+ * "Merchant listings" warnings in Search Console. Availability and the
+ * sold-vehicle handling are intentionally left exactly as they were.
  */
 export const buildVehicleOffer = (vehicle: {
   id: number;
   price: number;
-  status: string;
   condition: string;
-  vin: string;
-}): VehicleOffer | undefined => {
-  // Sold vehicles hide their price in the UI, so omit the Offer entirely.
-  if (vehicle.status === 'sold') return undefined;
-
+}): VehicleOffer => {
   const conditionMap: Record<string, string> = {
     'New': 'https://schema.org/NewCondition',
     'Used': 'https://schema.org/UsedCondition',
     'Certified Pre-Owned': 'https://schema.org/UsedCondition',
-  };
-
-  // Reserved/pending vehicles aren't freely purchasable; only 'available' cars
-  // are reported as in stock.
-  const availabilityMap: Record<string, string> = {
-    available: 'https://schema.org/InStock',
-    reserved: 'https://schema.org/OutOfStock',
-    pending: 'https://schema.org/OutOfStock',
   };
 
   // Rolling one-year validity so the price is never reported as stale.
@@ -125,7 +113,7 @@ export const buildVehicleOffer = (vehicle: {
   return {
     price: vehicle.price,
     priceCurrency: 'CAD',
-    availability: availabilityMap[vehicle.status] ?? 'https://schema.org/InStock',
+    availability: 'https://schema.org/InStock',
     url: `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
     priceValidUntil,
     itemCondition: conditionMap[vehicle.condition] ?? 'https://schema.org/UsedCondition',

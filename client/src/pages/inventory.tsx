@@ -323,22 +323,19 @@ export default function Inventory() {
             ? `https://www.rpmautosales.ca/inventory?category=${filters.category}` 
             : "https://www.rpmautosales.ca/inventory",
           "numberOfItems": filteredVehicles?.length || 0,
-          "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => {
-            const offer = buildVehicleOffer(vehicle);
-            return {
-              "@type": "ListItem",
-              "position": index + 1,
-              "item": {
-                "@type": "Product",
-                "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
-                "url": `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
-                "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
-                "brand": { "@type": "Brand", "name": vehicle.make },
-                "sku": vehicle.vin,
-                ...(offer && { "offers": { "@type": "Offer", ...offer } })
-              }
-            };
-          })
+          "itemListElement": filteredVehicles?.slice(0, 10).map((vehicle, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Product",
+              "name": `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+              "url": `https://www.rpmautosales.ca/inventory/${vehicle.id}`,
+              "image": vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : '',
+              "brand": { "@type": "Brand", "name": vehicle.make },
+              "sku": vehicle.vin,
+              "offers": { "@type": "Offer", ...buildVehicleOffer(vehicle) }
+            }
+          }))
         }}
       />
       
